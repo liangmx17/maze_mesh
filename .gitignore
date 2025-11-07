@@ -1,0 +1,69 @@
+# MAZE Project .gitignore
+
+# Build artifacts and temporary files
+sim/build/
+sim/run/temp/
+sim/run/logs/
+sim/wave/**/*.vcd
+sim/wave/**/*.fsdb
+sim/wave/**/*.vpd
+sim/wave/**/*.fst
+workspace/scratch/
+
+# Verilator generated files
+**/obj_dir/
+**/*.mk
+**/*.d
+**/*.o
+**/__pycache__/
+
+# IDE and editor files
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+*.tmp
+
+# Report files (keep structure, ignore content)
+reports/**/*.html
+reports/**/*.xml
+reports/**/*.txt
+reports/**/*.log
+reports/**/*.rpt
+!reports/**/.gitkeep
+
+# Backup files
+workspace/backup/*
+!workspace/backup/.gitkeep
+
+# Temporary development files
+*.bak
+*.orig
+*.rej
+
+# Python compiled files
+testbench/python/__pycache__/
+*.pyc
+*.pyo
+
+# C++ compiled files
+testbench/cpp/*.o
+testbench/cpp/*.exe
+testbench/cpp/a.out
+
+# Simulation database files
+*.db
+*.pm
+*.pvl
+*.wlf
+
+# Documentation build artifacts
+docs/**/*.aux
+docs/**/*.log
+docs/**/*.out
+docs/**/*.toc
+docs/**/*.pdf
+
+# Keep directory structure files
+!**/.gitkeep

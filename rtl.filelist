@@ -1,0 +1,20 @@
+// MAZE Network RTL File List
+// This file contains all RTL source files needed for compilation
+// Use with: verilator -f rtl.filelist
+
+// Global definitions and parameters
++incdir+rtl/include
+rtl/include/global_defines/top_define.v
+
+// Interface definitions
+rtl/include/interfaces/interface_a.sv
+rtl/include/interfaces/interface_b.sv
+rtl/include/interfaces/interface_c.sv
+
+// Library modules
+rtl/lib/irs/irs.v
+
+// Core RTL modules
+rtl/src/node/node.v
+rtl/src/topo/topo.v
+rtl/src/system/MAZE_TOP.v
