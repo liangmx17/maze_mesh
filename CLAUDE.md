@@ -18,125 +18,35 @@ The MAZE network implements a **64-node (8×8 grid) mesh topology** with the fol
 - **Pipeline Architecture**: 4-stage pipeline for packet processing
 - **Data Path Width**: 23-bit packets (2 type + 1 QoS + 6 source + 6 target + 8 data)
 - **QoS Support**: 2-level priority system (QoS=0: low, QoS=1: high)
-- **Fault Tolerance**: Single node failure support with clock gating
+- **Fault Tolerance**: Single node failure support with clock gating in MAZE_TOP
 
 ### Core Components
 
 #### 1. MAZE_TOP Module
-- **Purpose**: Top-level module instantiating the entire 64-node network
-- **Key Features**:
-  - Parameterized 64 node instantiation with coordinate configuration
-  - Clock gating for failed nodes (controlled by `pg_en` and `pg_node`)
-  - Interface management between external world and internal network
-- **Coordinates**: Each node configured with `HP` (horizontal position 0-7) and `VP` (vertical position 0-7)
+Top-level module that instantiates the entire 64-node network. See `Provided_Code/MAZE_TOP.v` for reference implementation.
 
 #### 2. Node Module
-- **Purpose**: Individual network node with 4-stage pipeline processing
-- **Interfaces**:
-  - **A Interface**: Input interface for external packets (pkt_in.mst)
-  - **B Interface**: Output interface for external packets (pkt_out.mst)
-  - **C Interface**: Connection interface for topology (pkt_con_if)
-
-##### 4-Stage Pipeline Architecture
-
-**Stage 0: Input Preprocessing & Intermediate Node Calculation**
-- **Function**: Processes incoming A-interface packets
-- **Key Operations**:
-  - Detects unicast packets (type = 00)
-  - Calculates two possible intermediate nodes: `[src_y, tgt_x]` and `[tgt_y, src_x]`
-  - Performs fault detection and avoidance
-  - Implements congestion-based intermediate node selection
-- **Output**: Determined intermediate node and output port encoding
-
-**Stage 1: QoS Arbitration & XY Routing**
-- **Function**: Simplified directional arbitration with QoS prioritization
-- **Key Operations**:
-  - **X-Direction Arbiter**: Only participates if packet aims to Y-direction targets
-    - Accepts inputs from A-port (when target x ≠ source x) and Y-direction C-interface inputs
-    - Implements QoS-based arbitration (high QoS absolute priority)
-  - **Y-Direction Arbiter**: Only participates if packet aims to X-direction targets
-    - Accepts inputs from A-port (when target y ≠ source y) and X-direction C-interface inputs
-    - Implements QoS-based arbitration (high QoS absolute priority)
-  - Simplifies router structure by reducing cross-direction interference
-- **Output**: Winner coordinates and direction identification (X or Y)
-
-**Stage 2: Output Selection**
-- **Function**: Output port selection and buffering
-- **Key Operations**:
-  - Maps winner coordinates to specific output ports
-  - Output buffer management with backpressure support
-- **Output**: Buffer-ready packets with port encoding
-
-**Stage 3: Output Buffering**
-- **Function**: Final output buffering and topology interface
-- **Key Operations**:
-  - Register outputs (including ready signals)
-  - Connection to topology module (C-interface)
-- **Output**: Buffered packets to topology network
+Individual network node with 4-stage pipeline processing. See `Provided_Code/node.v` for reference implementation.
 
 #### 3. Topo Module
-- **Purpose**: Manages network connectivity between nodes
-- **Key Features**:
-  - Implements 8×8 mesh connectivity rules
-  - Each node connects to 7 X-direction and 7 Y-direction neighbors
-  - Pure connectivity logic with no routing decisions
-- **IRS Integration**: Uses IRS (Insertion Ring Buffer) modules for inter-node connections
+Manages network connectivity between nodes. See `Provided_Code/topo.v` for reference implementation.
 
-#### 4. IRS (Insertion Ring Buffer) Modules
-- **Purpose**: Provide buffering for node-to-node connections
-- **Key Features**:
-  - Configurable depth based on Manhattan distance: `IRS_DEEP = manhattan_distance - 1`
-  - Multiple IRS types: IRS_N (general), IRS_HALF (simple buffering), IRS_LP (low power)
-  - Payload width: 19 bits (matching packet format)
-- **Integration**: Used between connected nodes in topology
+#### 4. IRS Modules
+Insertion Ring Buffer modules for node-to-node connections. See `Provided_Code/irs.v` for reference implementation.
 
 ### Interface Definitions
 
 #### A Interface (pkt_in)
-```systemverilog
-interface pkt_in();
-    wire pkt_in_vld;      // Valid signal
-    wire pkt_in_qos;      // QoS level (0/1)
-    wire [1:0] pkt_in_type;  // Packet type
-    wire [5:0] pkt_in_src;   // Source node ID
-    wire [5:0] pkt_in_tgt;   // Target node ID
-    wire [7:0] pkt_in_data;  // Data payload
-    wire pkt_in_rdy;      // Ready signal
-endinterface
-```
+See `Provided_Code/interface_a.sv` for interface definition.
 
 #### B Interface (pkt_out)
-```systemverilog
-interface pkt_out();
-    wire pkt_out_vld;     // Valid signal
-    wire pkt_out_qos;     // QoS level (0/1)
-    wire [1:0] pkt_out_type; // Packet type
-    wire [5:0] pkt_out_src;  // Source node ID
-    wire [5:0] pkt_out_tgt;  // Target node ID
-    wire [7:0] pkt_out_data; // Data payload
-    wire pkt_out_rdy;     // Ready signal
-endinterface
-```
+See `Provided_Code/interface_b.sv` for interface definition.
 
 #### C Interface (pkt_con_if)
-```systemverilog
-interface pkt_con_if();
-    // X-direction connections (7 ports)
-    wire [6:0] x_vld, x_rdy;
-    wire [6:0] x_qos;
-    wire [1:0] x_type [6:0];
-    wire [5:0] x_src [6:0];
-    wire [5:0] x_tgt [6:0];
-    wire [7:0] x_data [6:0];
-    // Y-direction connections (7 ports)
-    wire [6:0] y_vld, y_rdy;
-    wire [6:0] y_qos;
-    wire [1:0] y_type [6:0];
-    wire [5:0] y_src [6:0];
-    wire [5:0] y_tgt [6:0];
-    wire [7:0] y_data [6:0];
-endinterface
-```
+See `Provided_Code/interface_c.sv` for interface definition.
+
+#### Global Parameters
+See `Provided_Code/top_define.v` for global parameter definitions.
 
 ### Packet Format and Routing
 
@@ -155,7 +65,7 @@ endinterface
 
 **Unicast Routing (Two-Hop Strategy)**:
 - Source → Intermediate Node → Destination
-- Intermediate nodes: `[src_y, tgt_x]` and `[tgt_y, src_x]`
+- Intermediate nodes: `[src_y, tgt_x]` or `[tgt_y, src_x]`
 - Selection criteria: fault avoidance, then congestion avoidance
 
 **Multicast/Broadcast**:
