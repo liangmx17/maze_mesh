@@ -32,7 +32,9 @@
       "Bash(xargs:*)",
       "Bash(./build_maze.sh:*)",
       "Bash(/home/liangmx/maze/rtl/src/node/node.v)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": [],
     "ask": []
