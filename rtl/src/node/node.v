@@ -166,20 +166,22 @@ wire [5:0]  a_x_src, a_y_src;
 wire [5:0]  a_x_tgt, a_y_tgt;
 wire [7:0]  a_x_data, a_y_data;
 
-// Decode A-interface buffer output for X/Y routing
+// Decode A-interface buffer output for X/Y routing (CONSISTENT 23-bit format)
+// [22:21] = pkt_type (2 bits), [20] = pkt_qos (1 bit), [19:14] = pkt_src (6 bits)
+// [13:8] = pkt_tgt (6 bits), [7:0] = pkt_data (8 bits)
 assign a_x_vld = a_buffered_vld && select_x_buffer;
-assign a_x_qos = a_buffered_pkt[21];
-assign a_x_type = a_buffered_pkt[22:21];
-assign a_x_src = a_buffered_pkt[20:15];
-assign a_x_tgt = a_buffered_pkt[14:9];
-assign a_x_data = a_buffered_pkt[7:0];
+assign a_x_qos = a_buffered_pkt[20];        // pkt_qos
+assign a_x_type = a_buffered_pkt[22:21];    // pkt_type
+assign a_x_src = a_buffered_pkt[19:14];     // pkt_src
+assign a_x_tgt = a_buffered_pkt[13:8];      // pkt_tgt
+assign a_x_data = a_buffered_pkt[7:0];      // pkt_data
 
 assign a_y_vld = a_buffered_vld && select_y_buffer;
-assign a_y_qos = a_buffered_pkt[21];
-assign a_y_type = a_buffered_pkt[22:21];
-assign a_y_src = a_buffered_pkt[20:15];
-assign a_y_tgt = a_buffered_pkt[14:9];
-assign a_y_data = a_buffered_pkt[7:0];
+assign a_y_qos = a_buffered_pkt[20];        // pkt_qos
+assign a_y_type = a_buffered_pkt[22:21];    // pkt_type
+assign a_y_src = a_buffered_pkt[19:14];     // pkt_src
+assign a_y_tgt = a_buffered_pkt[13:8];      // pkt_tgt
+assign a_y_data = a_buffered_pkt[7:0];      // pkt_data
 
 // C-interface input buffers (14 input buffers: 7 X + 7 Y)
 // X-direction input buffers
@@ -208,7 +210,7 @@ wire [6:0]  c_y_buffered_rdy;
 genvar i;
 generate
     for (i = 0; i < 7; i++) begin : gen_c_inputs
-        // X-direction inputs
+        // X-direction inputs (from other nodes)
         assign c_x_in_vld[i] = pkt_con.x_vld[i];
         assign c_x_in_qos[i] = pkt_con.x_qos[i];
         assign c_x_in_type[i] = pkt_con.x_type[i];
@@ -217,7 +219,7 @@ generate
         assign c_x_in_data[i] = pkt_con.x_data[i];
         assign pkt_con.x_rdy[i] = c_x_in_rdy[i];
 
-        // Y-direction inputs
+        // Y-direction inputs (from other nodes)
         assign c_y_in_vld[i] = pkt_con.y_vld[i];
         assign c_y_in_qos[i] = pkt_con.y_qos[i];
         assign c_y_in_type[i] = pkt_con.y_type[i];
@@ -301,11 +303,28 @@ generate
     end
 endgenerate
 
-// Generate requests for B-port arbiter
-assign b_req_total[0] = a_buffered_vld;  // A-interface input
-assign b_req_total[7:1] = c_y_buffered_vld;  // 7 Y-direction inputs
-assign b_req_total[14:8] = c_x_buffered_vld; // 7 X-direction inputs
-assign b_req_total[15] = 1'b0;  // Spare
+// Generate requests for B-port arbiter - ALL 16 INPUT SOURCES
+assign b_req_total[0] = a_buffered_vld;           // A-interface input
+
+// Y-direction inputs (7 inputs: indices 1-7)
+assign b_req_total[1] = c_y_buffered_vld[0];     // Y-input 0
+assign b_req_total[2] = c_y_buffered_vld[1];     // Y-input 1
+assign b_req_total[3] = c_y_buffered_vld[2];     // Y-input 2
+assign b_req_total[4] = c_y_buffered_vld[3];     // Y-input 3
+assign b_req_total[5] = c_y_buffered_vld[4];     // Y-input 4
+assign b_req_total[6] = c_y_buffered_vld[5];     // Y-input 5
+assign b_req_total[7] = c_y_buffered_vld[6];     // Y-input 6
+
+// X-direction inputs (7 inputs: indices 8-14)
+assign b_req_total[8] = c_x_buffered_vld[0];     // X-input 0
+assign b_req_total[9] = c_x_buffered_vld[1];     // X-input 1
+assign b_req_total[10] = c_x_buffered_vld[2];    // X-input 2
+assign b_req_total[11] = c_x_buffered_vld[3];    // X-input 3
+assign b_req_total[12] = c_x_buffered_vld[4];    // X-input 4
+assign b_req_total[13] = c_x_buffered_vld[5];    // X-input 5
+assign b_req_total[14] = c_x_buffered_vld[6];    // X-input 6
+
+assign b_req_total[15] = 1'b0;                   // Spare/unused
 
 // X-Direction Arbitration Logic
 generate
@@ -322,8 +341,7 @@ generate
         assign arb_vld_inputs[7:1] = c_y_buffered_vld;
 
         // 8-input arbiter: 0=A-buffer, 1-7=Y-inputs
-        // QoS Priority Logic
-        integer j;
+        // QoS Priority Logic - Synthesizable Priority Encoder
         reg [2:0] winner;
         reg found_winner;
 
@@ -331,23 +349,47 @@ generate
             winner = 3'b000;
             found_winner = 1'b0;
 
-            // High QoS priority search
-            for (j = 0; j < 8; j = j + 1) begin
-                if (arb_vld_inputs[j] && arb_qos_inputs[j] && !found_winner) begin
-                    winner = j[2:0];
-                    found_winner = 1'b1;
+            // High QoS priority logic (highest priority first)
+            case (1'b1)
+                arb_vld_inputs[7] & arb_qos_inputs[7]: begin
+                    winner = 3'b111; found_winner = 1'b1;
                 end
-            end
-
-            // Low QoS search if no high QoS found
-            if (!found_winner) begin
-                for (j = 0; j < 8; j = j + 1) begin
-                    if (arb_vld_inputs[j] && !arb_qos_inputs[j]) begin
-                        winner = j[2:0];
-                        found_winner = 1'b1;
-                    end
+                arb_vld_inputs[6] & arb_qos_inputs[6]: begin
+                    winner = 3'b110; found_winner = 1'b1;
                 end
-            end
+                arb_vld_inputs[5] & arb_qos_inputs[5]: begin
+                    winner = 3'b101; found_winner = 1'b1;
+                end
+                arb_vld_inputs[4] & arb_qos_inputs[4]: begin
+                    winner = 3'b100; found_winner = 1'b1;
+                end
+                arb_vld_inputs[3] & arb_qos_inputs[3]: begin
+                    winner = 3'b011; found_winner = 1'b1;
+                end
+                arb_vld_inputs[2] & arb_qos_inputs[2]: begin
+                    winner = 3'b010; found_winner = 1'b1;
+                end
+                arb_vld_inputs[1] & arb_qos_inputs[1]: begin
+                    winner = 3'b001; found_winner = 1'b1;
+                end
+                arb_vld_inputs[0] & arb_qos_inputs[0]: begin
+                    winner = 3'b000; found_winner = 1'b1;
+                end
+                default: begin
+                    // Low QoS search if no high QoS found
+                    case (1'b1)
+                        arb_vld_inputs[7]: winner = 3'b111;
+                        arb_vld_inputs[6]: winner = 3'b110;
+                        arb_vld_inputs[5]: winner = 3'b101;
+                        arb_vld_inputs[4]: winner = 3'b100;
+                        arb_vld_inputs[3]: winner = 3'b011;
+                        arb_vld_inputs[2]: winner = 3'b010;
+                        arb_vld_inputs[1]: winner = 3'b001;
+                        arb_vld_inputs[0]: winner = 3'b000;
+                        default: winner = 3'b000;
+                    endcase
+                end
+            endcase
         end
 
         assign x_winner_addr[i] = winner;
@@ -370,7 +412,7 @@ generate
         assign arb_vld_inputs[7:1] = c_x_buffered_vld;
 
         // 8-input arbiter: 0=A-buffer, 1-7=X-inputs
-        integer j;
+        // QoS Priority Logic - Synthesizable Priority Encoder
         reg [2:0] winner;
         reg found_winner;
 
@@ -378,23 +420,47 @@ generate
             winner = 3'b000;
             found_winner = 1'b0;
 
-            // High QoS priority search
-            for (j = 0; j < 8; j = j + 1) begin
-                if (arb_vld_inputs[j] && arb_qos_inputs[j] && !found_winner) begin
-                    winner = j[2:0];
-                    found_winner = 1'b1;
+            // High QoS priority logic (highest priority first)
+            case (1'b1)
+                arb_vld_inputs[7] & arb_qos_inputs[7]: begin
+                    winner = 3'b111; found_winner = 1'b1;
                 end
-            end
-
-            // Low QoS search if no high QoS found
-            if (!found_winner) begin
-                for (j = 0; j < 8; j = j + 1) begin
-                    if (arb_vld_inputs[j] && !arb_qos_inputs[j]) begin
-                        winner = j[2:0];
-                        found_winner = 1'b1;
-                    end
+                arb_vld_inputs[6] & arb_qos_inputs[6]: begin
+                    winner = 3'b110; found_winner = 1'b1;
                 end
-            end
+                arb_vld_inputs[5] & arb_qos_inputs[5]: begin
+                    winner = 3'b101; found_winner = 1'b1;
+                end
+                arb_vld_inputs[4] & arb_qos_inputs[4]: begin
+                    winner = 3'b100; found_winner = 1'b1;
+                end
+                arb_vld_inputs[3] & arb_qos_inputs[3]: begin
+                    winner = 3'b011; found_winner = 1'b1;
+                end
+                arb_vld_inputs[2] & arb_qos_inputs[2]: begin
+                    winner = 3'b010; found_winner = 1'b1;
+                end
+                arb_vld_inputs[1] & arb_qos_inputs[1]: begin
+                    winner = 3'b001; found_winner = 1'b1;
+                end
+                arb_vld_inputs[0] & arb_qos_inputs[0]: begin
+                    winner = 3'b000; found_winner = 1'b1;
+                end
+                default: begin
+                    // Low QoS search if no high QoS found
+                    case (1'b1)
+                        arb_vld_inputs[7]: winner = 3'b111;
+                        arb_vld_inputs[6]: winner = 3'b110;
+                        arb_vld_inputs[5]: winner = 3'b101;
+                        arb_vld_inputs[4]: winner = 3'b100;
+                        arb_vld_inputs[3]: winner = 3'b011;
+                        arb_vld_inputs[2]: winner = 3'b010;
+                        arb_vld_inputs[1]: winner = 3'b001;
+                        arb_vld_inputs[0]: winner = 3'b000;
+                        default: winner = 3'b000;
+                    endcase
+                end
+            endcase
         end
 
         assign y_winner_addr[i] = winner;
@@ -405,14 +471,30 @@ endgenerate
 // B-Port Arbitration (16-input arbiter)
 wire [15:0] b_qos_inputs;
 
-// Connect QoS inputs for B-port arbiter
-assign b_qos_inputs[0] = a_buffered_pkt[21];  // A-interface QoS
-assign b_qos_inputs[7:1] = c_y_in_qos;        // Y-direction QoS
-assign b_qos_inputs[14:8] = c_x_in_qos;       // X-direction QoS
-assign b_qos_inputs[15] = 1'b0;              // Spare
+// Connect QoS inputs for B-port arbiter - ALL 16 INPUT SOURCES
+assign b_qos_inputs[0] = a_buffered_pkt[20];     // A-interface QoS
 
-// B-port arbiter winner selection logic
-integer k;
+// Y-direction QoS inputs (7 inputs: indices 1-7)
+assign b_qos_inputs[1] = c_y_buffered_data[0][20]; // Y-input 0 QoS
+assign b_qos_inputs[2] = c_y_buffered_data[1][20]; // Y-input 1 QoS
+assign b_qos_inputs[3] = c_y_buffered_data[2][20]; // Y-input 2 QoS
+assign b_qos_inputs[4] = c_y_buffered_data[3][20]; // Y-input 3 QoS
+assign b_qos_inputs[5] = c_y_buffered_data[4][20]; // Y-input 4 QoS
+assign b_qos_inputs[6] = c_y_buffered_data[5][20]; // Y-input 5 QoS
+assign b_qos_inputs[7] = c_y_buffered_data[6][20]; // Y-input 6 QoS
+
+// X-direction QoS inputs (7 inputs: indices 8-14)
+assign b_qos_inputs[8] = c_x_buffered_data[0][20]; // X-input 0 QoS
+assign b_qos_inputs[9] = c_x_buffered_data[1][20]; // X-input 1 QoS
+assign b_qos_inputs[10] = c_x_buffered_data[2][20]; // X-input 2 QoS
+assign b_qos_inputs[11] = c_x_buffered_data[3][20]; // X-input 3 QoS
+assign b_qos_inputs[12] = c_x_buffered_data[4][20]; // X-input 4 QoS
+assign b_qos_inputs[13] = c_x_buffered_data[5][20]; // X-input 5 QoS
+assign b_qos_inputs[14] = c_x_buffered_data[6][20]; // X-input 6 QoS
+
+assign b_qos_inputs[15] = 1'b0;                    // Spare/unused
+
+// B-port arbiter winner selection logic - Synthesizable Priority Encoder
 reg [3:0] b_winner;
 reg b_found_winner;
 
@@ -420,23 +502,79 @@ always_comb begin
     b_winner = 4'b0000;
     b_found_winner = 1'b0;
 
-    // High QoS priority search
-    for (k = 0; k < 16; k = k + 1) begin
-        if (b_req_total[k] && b_qos_inputs[k] && !b_found_winner) begin
-            b_winner = k[3:0];
-            b_found_winner = 1'b1;
+    // High QoS priority logic (highest priority first)
+    case (1'b1)
+        b_req_total[15] & b_qos_inputs[15]: begin
+            b_winner = 4'b1111; b_found_winner = 1'b1;
         end
-    end
-
-    // Low QoS search if no high QoS found
-    if (!b_found_winner) begin
-        for (k = 0; k < 16; k = k + 1) begin
-            if (b_req_total[k] && !b_qos_inputs[k]) begin
-                b_winner = k[3:0];
-                b_found_winner = 1'b1;
-            end
+        b_req_total[14] & b_qos_inputs[14]: begin
+            b_winner = 4'b1110; b_found_winner = 1'b1;
         end
-    end
+        b_req_total[13] & b_qos_inputs[13]: begin
+            b_winner = 4'b1101; b_found_winner = 1'b1;
+        end
+        b_req_total[12] & b_qos_inputs[12]: begin
+            b_winner = 4'b1100; b_found_winner = 1'b1;
+        end
+        b_req_total[11] & b_qos_inputs[11]: begin
+            b_winner = 4'b1011; b_found_winner = 1'b1;
+        end
+        b_req_total[10] & b_qos_inputs[10]: begin
+            b_winner = 4'b1010; b_found_winner = 1'b1;
+        end
+        b_req_total[9] & b_qos_inputs[9]: begin
+            b_winner = 4'b1001; b_found_winner = 1'b1;
+        end
+        b_req_total[8] & b_qos_inputs[8]: begin
+            b_winner = 4'b1000; b_found_winner = 1'b1;
+        end
+        b_req_total[7] & b_qos_inputs[7]: begin
+            b_winner = 4'b0111; b_found_winner = 1'b1;
+        end
+        b_req_total[6] & b_qos_inputs[6]: begin
+            b_winner = 4'b0110; b_found_winner = 1'b1;
+        end
+        b_req_total[5] & b_qos_inputs[5]: begin
+            b_winner = 4'b0101; b_found_winner = 1'b1;
+        end
+        b_req_total[4] & b_qos_inputs[4]: begin
+            b_winner = 4'b0100; b_found_winner = 1'b1;
+        end
+        b_req_total[3] & b_qos_inputs[3]: begin
+            b_winner = 4'b0011; b_found_winner = 1'b1;
+        end
+        b_req_total[2] & b_qos_inputs[2]: begin
+            b_winner = 4'b0010; b_found_winner = 1'b1;
+        end
+        b_req_total[1] & b_qos_inputs[1]: begin
+            b_winner = 4'b0001; b_found_winner = 1'b1;
+        end
+        b_req_total[0] & b_qos_inputs[0]: begin
+            b_winner = 4'b0000; b_found_winner = 1'b1;
+        end
+        default: begin
+            // Low QoS search if no high QoS found
+            case (1'b1)
+                b_req_total[15]: b_winner = 4'b1111;
+                b_req_total[14]: b_winner = 4'b1110;
+                b_req_total[13]: b_winner = 4'b1101;
+                b_req_total[12]: b_winner = 4'b1100;
+                b_req_total[11]: b_winner = 4'b1011;
+                b_req_total[10]: b_winner = 4'b1010;
+                b_req_total[9]: b_winner = 4'b1001;
+                b_req_total[8]: b_winner = 4'b1000;
+                b_req_total[7]: b_winner = 4'b0111;
+                b_req_total[6]: b_winner = 4'b0110;
+                b_req_total[5]: b_winner = 4'b0101;
+                b_req_total[4]: b_winner = 4'b0100;
+                b_req_total[3]: b_winner = 4'b0011;
+                b_req_total[2]: b_winner = 4'b0010;
+                b_req_total[1]: b_winner = 4'b0001;
+                b_req_total[0]: b_winner = 4'b0000;
+                default: b_winner = 4'b0000;
+            endcase
+        end
+    endcase
 end
 
 assign b_winner_addr = b_winner;
@@ -645,12 +783,12 @@ generate
             .dout_rdy(x_buffered_rdy[i])
         );
 
-        // Decode buffered data
-        assign x_buffered_type[i] = x_buffered_data[i][22:21];
-        assign x_buffered_qos[i] = x_buffered_data[i][20];
-        assign x_buffered_src[i] = x_buffered_data[i][19:14];
-        assign x_buffered_tgt[i] = x_buffered_data[i][13:8];
-        assign x_buffered_payload[i] = x_buffered_data[i][7:0];
+        // Decode buffered data (CONSISTENT 23-bit format)
+        assign x_buffered_type[i] = x_buffered_data[i][22:21];    // pkt_type
+        assign x_buffered_qos[i] = x_buffered_data[i][20];        // pkt_qos
+        assign x_buffered_src[i] = x_buffered_data[i][19:14];     // pkt_src
+        assign x_buffered_tgt[i] = x_buffered_data[i][13:8];      // pkt_tgt
+        assign x_buffered_payload[i] = x_buffered_data[i][7:0];   // pkt_data
     end
 endgenerate
 
@@ -672,12 +810,12 @@ generate
             .dout_rdy(y_buffered_rdy[i])
         );
 
-        // Decode buffered data
-        assign y_buffered_type[i] = y_buffered_data[i][22:21];
-        assign y_buffered_qos[i] = y_buffered_data[i][20];
-        assign y_buffered_src[i] = y_buffered_data[i][19:14];
-        assign y_buffered_tgt[i] = y_buffered_data[i][13:8];
-        assign y_buffered_payload[i] = y_buffered_data[i][7:0];
+        // Decode buffered data (CONSISTENT 23-bit format)
+        assign y_buffered_type[i] = y_buffered_data[i][22:21];    // pkt_type
+        assign y_buffered_qos[i] = y_buffered_data[i][20];        // pkt_qos
+        assign y_buffered_src[i] = y_buffered_data[i][19:14];     // pkt_src
+        assign y_buffered_tgt[i] = y_buffered_data[i][13:8];      // pkt_tgt
+        assign y_buffered_payload[i] = y_buffered_data[i][7:0];   // pkt_data
     end
 endgenerate
 
@@ -697,12 +835,12 @@ irs_lp #(
     .dout_rdy(b_buffered_rdy)
 );
 
-// Decode B-port buffered data
-assign b_buffered_type = b_buffered_data[22:21];
-assign b_buffered_qos = b_buffered_data[20];
-assign b_buffered_src = b_buffered_data[19:14];
-assign b_buffered_tgt = b_buffered_data[13:8];
-assign b_buffered_payload = b_buffered_data[7:0];
+// Decode B-port buffered data (CONSISTENT 23-bit format)
+assign b_buffered_type = b_buffered_data[22:21];    // pkt_type
+assign b_buffered_qos = b_buffered_data[20];        // pkt_qos
+assign b_buffered_src = b_buffered_data[19:14];     // pkt_src
+assign b_buffered_tgt = b_buffered_data[13:8];      // pkt_tgt
+assign b_buffered_payload = b_buffered_data[7:0];   // pkt_data
 
 // ====================================================================
 // Interface Output Connections
