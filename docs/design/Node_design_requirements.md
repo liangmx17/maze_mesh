@@ -35,12 +35,13 @@ keep same interface and port with reference file
   - 7 X-Direction arbiters (one per X output port)
   - 7 Y-Direction arbiters (one per Y output port)
   - 1 B-Port arbiter (for external output)
+  - use @maze/Provided_Code/arbiter_with_qos.v
 - **Arbitration Logic**:
   - X-Direction: Accepts from A-port (X-buffer) and Y-direction inputs
   - Y-Direction: Accepts from A-port (Y-buffer) and X-direction inputs
   - B-Port: Accepts from all 16 input sources
 - **QoS Priority**: High QoS (1) has absolute priority over Low QoS (0)
-- **Output**: Winner coordinates (3-bit for X/Y, 4-bit for B-port)
+- **Output**: Winner one hot coordinates (8-bit for X/Y, 16-bit for B-port)
 
 #### Stage 2: Output Selection
 - **Purpose**: Map winner coordinates to specific output ports
@@ -175,6 +176,18 @@ Bits    Field           Description
   1. Avoid failed nodes (check pg_node)
   2. Select based on congestion/availability
   3. Default to Option 1 if both available
+
+#### C-Interface Routing (8x8 Torus Topology)
+- **Topology**: 8x8 torus mesh with wraparound connections
+- **Node Coordinates**: [VP, HP] where VP,HP ∈ [0,7]
+- **Connection Mapping** for node [VP, HP]:
+  - **C-X[i]** connects to node `[VP, (HP + i + 1) mod 8]` - X-direction neighbors
+  - **C-Y[i]** connects to node `[(VP + i + 1) mod 8, HP]` - Y-direction neighbors
+- **Routing Logic**:
+  - **C-X[i] Arbiter**: Accepts C-Y[y] requests where `packet_dst_x == (HP + i + 1) mod 8`
+  - **C-Y[i] Arbiter**: Accepts C-X[x] requests where `packet_dst_y == (VP + i + 1) mod 8`
+  - **A-Y Input**: Always participates in X-direction arbitration
+  - **A-X Input**: Always participates in Y-direction arbitration
 
 #### Multicast Routing
 - **X-Multicast**: Target all nodes with same X coordinate

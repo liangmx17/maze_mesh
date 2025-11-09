@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" modified="2024-01-01T00:00:00.000Z" agent="Claude Code" etag="maze-architecture" version="22.1.16" type="device">
+  <diagram name="MAZE Architecture" id="maze-64-node-arch">
+    <mxGraphModel dx="1426" dy="794" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="MAZE 64-Node Network-on-Chip Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=24;fontStyle=1;fontColor=#2C3E50;" vertex="1" parent="1">
+          <mxGeometry x="400" y="30" width="600" height="40" as="geometry" />
+        </mxCell>
+
+        <mxCell id="subtitle" value="8×8 Mesh Topology with 4-Stage Pipeline Processing" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontColor=#7F8C8D;" vertex="1" parent="1">
+          <mxGeometry x="450" y="60" width="500" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Global Control Block -->
+        <mxCell id="global-control-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#95A5A6;strokeColor=#7F8C8D;" vertex="1" parent="1">
+          <mxGeometry x="50" y="100" width="200" height="120" as="geometry" />
+        </mxCell>
+
+        <mxCell id="global-control-title" value="Global Control" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=white;" vertex="1" parent="1">
+          <mxGeometry x="50" y="110" width="200" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="clk-signal" value="• clk (System Clock)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=white;" vertex="1" parent="1">
+          <mxGeometry x="60" y="145" width="180" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="rst-signal" value="• rst_n (Reset)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=white;" vertex="1" parent="1">
+          <mxGeometry x="60" y="165" width="180" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pg-en-signal" value="• pg_en (Fault Enable)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=white;" vertex="1" parent="1">
+          <mxGeometry x="60" y="185" width="180" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="pg-node-signal" value="• pg_node [5:0]" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=white;" vertex="1" parent="1">
+          <mxGeometry x="60" y="205" width="180" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- Node Grid Label -->
+        <mxCell id="grid-label" value="64-Node Array (8×8 Grid)" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#2C3E50;" vertex="1" parent="1">
+          <mxGeometry x="350" y="120" width="300" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Node (0,0) -->
+        <mxCell id="node-0-0" value="Node[0,0]&lt;br&gt;4-Stage Pipeline&lt;br&gt;HP=0, VP=0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90E2;strokeColor=#2E5C8A;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="200" y="300" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- A Interface for Node(0,0) -->
+        <mxCell id="node-0-0-a" value="A" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F39C12;strokeColor=#D68910;fontColor=#2C3E50;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="275" width="20" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- B Interface for Node(0,0) -->
+        <mxCell id="node-0-0-b" value="B" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F39C12;strokeColor=#D68910;fontColor=#2C3E50;fontSize=12;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="380" width="20" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- Node (1,0) -->
+        <mxCell id="node-1-0" value="Node[1,0]&lt;br&gt;HP=1, VP=0" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90E2;strokeColor=#2E5C8A;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="320" y="300" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Node (0,1) -->
+        <mxCell id="node-0-1" value="Node[0,1]&lt;br&gt;HP=0, VP=1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#4A90E2;strokeColor=#2E5C8A;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="200" y="400" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- Fault Node -->
+        <mxCell id="node-fault" value="Node[F]&lt;br&gt;FAULT&lt;br&gt;Gated Clock" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E74C3C;strokeColor=#C0392B;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="440" y="300" width="100" height="80" as="geometry" />
+        </mxCell>
+
+        <!-- More nodes indicator -->
+        <mxCell id="more-nodes" value="56 More Nodes" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=2;fontColor=#7F8C8D;" vertex="1" parent="1">
+          <mxGeometry x="600" y="400" width="150" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Node Detail Section -->
+        <mxCell id="detail-label" value="Node Internal Architecture" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#2C3E50;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="200" width="250" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Node Detail Background -->
+        <mxCell id="node-detail-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=white;strokeColor=#2C3E50;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="850" y="240" width="450" height="400" as="geometry" />
+        </mxCell>
+
+        <!-- Stage 0 -->
+        <mxCell id="stage-0-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F6F3;strokeColor=#16A085;" vertex="1" parent="1">
+          <mxGeometry x="870" y="260" width="410" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="stage-0-title" value="Stage 0: Input Preprocessing" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#16A085;" vertex="1" parent="1">
+          <mxGeometry x="870" y="265" width="410" height="25" as="geometry" />
+        </mxCell>
+
+        <mxCell id="a-interface" value="A Interface" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F39C12;strokeColor=#D68910;fontColor=#2C3E50;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="880" y="300" width="70" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fault-detect" value="Fault Detect" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27AE60;strokeColor=#1E8449;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="970" y="300" width="80" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="route-calc" value="Route Calc" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27AE60;strokeColor=#1E8449;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1070" y="300" width="80" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="irs-input" value="IRS" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27AE60;strokeColor=#1E8449;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1170" y="300" width="40" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Stage 1 -->
+        <mxCell id="stage-1-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FEF5E7;strokeColor=#F39C12;" vertex="1" parent="1">
+          <mxGeometry x="870" y="350" width="410" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="stage-1-title" value="Stage 1: QoS Arbitration" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#F39C12;" vertex="1" parent="1">
+          <mxGeometry x="870" y="355" width="410" height="25" as="geometry" />
+        </mxCell>
+
+        <mxCell id="x-arbiters" value="X-Arbiters&lt;br&gt;(7 arbiters)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E74C3C;strokeColor=#C0392B;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="880" y="380" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="y-arbiters" value="Y-Arbiters&lt;br&gt;(7 arbiters)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E74C3C;strokeColor=#C0392B;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="380" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="b-arbiter" value="B-Arbiter" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E74C3C;strokeColor=#C0392B;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="380" width="80" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Stage 2 -->
+        <mxCell id="stage-2-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FADBD8;strokeColor=#E74C3C;" vertex="1" parent="1">
+          <mxGeometry x="870" y="440" width="410" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="stage-2-title" value="Stage 2: Output Selection" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#E74C3C;" vertex="1" parent="1">
+          <mxGeometry x="870" y="445" width="410" height="25" as="geometry" />
+        </mxCell>
+
+        <mxCell id="x-output-mux" value="X-Output MUX&lt;br&gt;(7× multiplexers)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3498DB;strokeColor=#2980B9;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="880" y="470" width="150" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="y-output-mux" value="Y-Output MUX&lt;br&gt;(7× multiplexers)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3498DB;strokeColor=#2980B9;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1050" y="470" width="150" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Stage 3 -->
+        <mxCell id="stage-3-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDEDED;strokeColor=#95A5A6;" vertex="1" parent="1">
+          <mxGeometry x="870" y="530" width="410" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="stage-3-title" value="Stage 3: Output Buffering" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#95A5A6;" vertex="1" parent="1">
+          <mxGeometry x="870" y="535" width="410" height="25" as="geometry" />
+        </mxCell>
+
+        <mxCell id="irs-output" value="IRS Output" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27AE60;strokeColor=#1E8449;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="880" y="560" width="80" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="b-output" value="B Interface" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F39C12;strokeColor=#D68910;fontColor=#2C3E50;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="980" y="560" width="80" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="c-output" value="C Interface&lt;br&gt;(Topology)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9B59B6;strokeColor=#7D3C98;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1080" y="560" width="100" height="30" as="geometry" />
+        </mxCell>
+
+        <!-- Clock Gate -->
+        <mxCell id="clock-gate" value="Clock&lt;br&gt;Gate" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#95A5A6;strokeColor=#7F8C8D;fontColor=white;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="260" width="60" height="40" as="geometry" />
+        </mxCell>
+
+        <!-- Topology Module -->
+        <mxCell id="topology-bg" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F4ECF7;strokeColor=#8E44AD;" vertex="1" parent="1">
+          <mxGeometry x="50" y="680" width="1300" height="140" as="geometry" />
+        </mxCell>
+
+        <mxCell id="topology-title" value="Topo Module - Network Connectivity" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=16;fontStyle=1;fontColor=#8E44AD;" vertex="1" parent="1">
+          <mxGeometry x="50" y="690" width="1300" height="30" as="geometry" />
+        </mxCell>
+
+        <mxCell id="x-connections" value="X-Direction Connections&lt;br&gt;Same X, Different Y&lt;br&gt;7 connections per node" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9B59B6;strokeColor=#7D3C98;fontColor=white;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="100" y="740" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="y-connections" value="Y-Direction Connections&lt;br&gt;Same Y, Different X&lt;br&gt;7 connections per node" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#9B59B6;strokeColor=#7D3C98;fontColor=white;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="350" y="740" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="irs-modules" value="IRS Modules&lt;br&gt;Manhattan Distance&lt;br&gt;Dynamic Buffer Depth" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#27AE60;strokeColor=#1E8449;fontColor=white;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="600" y="740" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fault-tolerance" value="Fault Tolerance&lt;br&gt;Route Avoidance&lt;br&gt;Clock Gating" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E74C3C;strokeColor=#C0392B;fontColor=white;fontSize=11;" vertex="1" parent="1">
+          <mxGeometry x="850" y="740" width="200" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Connections between nodes -->
+        <mxCell id="conn-0-1" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#34495E;strokeWidth=2;" edge="1" parent="1" source="node-0-0" target="node-1-0">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="300" y="340" as="sourcePoint" />
+            <mxPoint x="350" y="290" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <mxCell id="conn-0-2" value="" style="endArrow=classic;html=1;rounded=0;strokeColor=#34495E;strokeWidth=2;" edge="1" parent="1" source="node-0-0" target="node-0-1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="250" y="380" as="sourcePoint" />
+            <mxPoint x="250" y="400" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+
+        <!-- Performance Metrics -->
+        <mxCell id="perf-title" value="Performance Characteristics:" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;fontColor=#2C3E50;" vertex="1" parent="1">
+          <mxGeometry x="50" y="840" width="300" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="perf-1" value="• Network Latency: 4 clock cycles (pipeline) + 2 hops (unicast)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#34495E;" vertex="1" parent="1">
+          <mxGeometry x="50" y="860" width="600" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="perf-2" value="• Packet Format: 23-bit (2 type + 1 QoS + 6 src + 6 tgt + 8 data)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#34495E;" vertex="1" parent="1">
+          <mxGeometry x="50" y="880" width="600" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="perf-3" value="• QoS Levels: 2 (High Priority Absolute Priority)" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#34495E;" vertex="1" parent="1">
+          <mxGeometry x="700" y="860" width="600" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="perf-4" value="• Fault Tolerance: Single node failure with clock gating" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=12;fontColor=#34495E;" vertex="1" parent="1">
+          <mxGeometry x="700" y="880" width="600" height="20" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

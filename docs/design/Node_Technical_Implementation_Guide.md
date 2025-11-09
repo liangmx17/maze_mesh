@@ -88,26 +88,38 @@ wire        select_y_buffer;
 
 #### Pseudo-Code Implementation
 ```systemverilog
-// Stage 0 Logic Implementation
+// Stage 0 Logic Implementation - operates on A input buffer output
 always_comb begin
     // Default values
     route_to_x_first = 1'b1;
     selected_intermediate = intermediate_node_1;
 
-    // Only process unicast packets
-    if (a_pkt_vld && a_pkt_type == 2'b00) begin
+    // Extract packet fields from A input buffer output
+    wire [1:0]  buffered_pkt_type = a_buffered_pkt[22:21];
+    wire [5:0]  buffered_pkt_tgt = a_buffered_pkt[13:8];
+    wire [2:0]  buffered_tgt_x = buffered_pkt_tgt[2:0];
+    wire [2:0]  buffered_tgt_y = buffered_pkt_tgt[5:3];
+
+    // Only process unicast packets from A input buffer
+    if (a_buffered_vld && buffered_pkt_type == 2'b00) begin
+        // Recalculate intermediate nodes with correct target from buffered packet
+        wire [5:0] buffered_intermediate_1 = {src_y, buffered_tgt_x};  // [src_y, tgt_x]
+        wire [5:0] buffered_intermediate_2 = {buffered_tgt_y, src_x};  // [tgt_y, src_x]
+
+        // Fault detection with buffered target
+        wire buffered_node1_failed = (pg_en && (pg_node == buffered_intermediate_1));
+        wire buffered_node2_failed = (pg_en && (pg_node == buffered_intermediate_2));
+
         // Fault-aware intermediate node selection
-        if (!node1_failed) begin
-            selected_intermediate = intermediate_node_1;
-            // Determine initial direction based on source vs intermediate
-            route_to_x_first = (src_x != selected_intermediate[2:0]);
-        end else if (!node2_failed) begin
-            selected_intermediate = intermediate_node_2;
-            route_to_x_first = (src_x != selected_intermediate[2:0]);
+        if (!buffered_node1_failed) begin
+            selected_intermediate = buffered_intermediate_1;
+            route_to_x_first = (src_x != buffered_intermediate_1[2:0]);
+        end else if (!buffered_node2_failed) begin
+            selected_intermediate = buffered_intermediate_2;
+            route_to_x_first = (src_x != buffered_intermediate_2[2:0]);
         end else begin
-            // Both intermediate nodes failed, use direct routing
-            selected_intermediate = tgt_coord;
-            route_to_x_first = (src_x != tgt_x);
+            selected_intermediate = buffered_pkt_tgt;
+            route_to_x_first = (src_x != buffered_tgt_x);
         end
     end
 
@@ -117,9 +129,10 @@ always_comb begin
 end
 
 // A-interface input buffer IRS
-irs_lp #(
-    .DEEP(4),
-    .WIDTH(23)
+irs_n #(
+    .DEEP(1),
+    .WIDTH(23),
+    .RO_EN(1)
 ) u_a_input_buffer (
     .clk(clk),
     .rst_n(rst_n),
@@ -130,17 +143,61 @@ irs_lp #(
     .dout_vld(a_buffered_vld),
     .dout_rdy(a_buffered_rdy)
 );
+
+// A-X and A-Y route buffers (both IRS_N with depth=1, RO_EN=1)
+irs_n #(
+    .DEEP(1),
+    .WIDTH(23),
+    .RO_EN(1)
+) u_a_x_buffer (
+    .clk(clk),
+    .rst_n(rst_n),
+    .din(a_buffered_pkt),
+    .din_vld(a_buffered_vld && select_x_buffer),
+    .din_rdy(a_x_buffered_rdy),
+    .dout(a_x_buffered_data),
+    .dout_vld(a_x_buffered_vld),
+    .dout_rdy(a_x_buffered_rdy)
+);
+
+irs_n #(
+    .DEEP(1),
+    .WIDTH(23),
+    .RO_EN(1)
+) u_a_y_buffer (
+    .clk(clk),
+    .rst_n(rst_n),
+    .din(a_buffered_pkt),
+    .din_vld(a_buffered_vld && select_y_buffer),
+    .din_rdy(a_y_buffered_rdy),
+    .dout(a_y_buffered_data),
+    .dout_vld(a_y_buffered_vld),
+    .dout_rdy(a_y_buffered_rdy)
+);
 ```
 
 ### Stage 1: QoS Arbitration & XY Routing
 
 #### Purpose
-Implement simplified directional arbitration with QoS prioritization for multiple input sources.
+Implement destination-aware directional arbitration with QoS prioritization for multiple input sources in 8x8 torus topology.
 
 #### Arbitration Architecture
-- **7 X-Direction Arbiters**: One for each X output port
-- **7 Y-Direction Arbiters**: One for each Y output port
+- **7 X-Direction Arbiters**: One for each X output port (torus X-direction routing)
+- **7 Y-Direction Arbiters**: One for each Y output port (torus Y-direction routing)
 - **1 B-Port Arbiter**: For external output selection
+
+#### Torus Topology Routing
+For node at coordinates [VP, HP]:
+
+**Connection Mapping:**
+- **C-X[i] Output** connects to node `[VP, (HP + i + 1) mod 8]`
+- **C-Y[i] Output** connects to node `[(VP + i + 1) mod 8, HP]`
+
+**Routing Logic:**
+- **C-X[i] Arbiter**: Accepts requests from C-Y[y] when `packet_dst_x == (HP + i + 1) mod 8`
+- **C-Y[i] Arbiter**: Accepts requests from C-X[x] when `packet_dst_y == (VP + i + 1) mod 8`
+- **A-Y Input**: Always participates in X-direction arbitration (local delivery support)
+- **A-X Input**: Always participates in Y-direction arbitration (local delivery support)
 
 #### Signal Specifications
 ```systemverilog
@@ -516,16 +573,7 @@ irs_lp #(
 ## Clock Gating and Power Management
 
 ### Power Gating Implementation
-```systemverilog
-// Clock gating for failed nodes
-wire node_active = !(pg_en && (pg_node == {VP, HP}));
-
-// Clock gating cell
-assign gated_clk = node_active ? clk : 1'b0;
-
-// Apply gated clock to all sequential logic
-// All flip-flops use gated_clk instead of clk
-```
+clock gating implemented in MAZE_TOP, not in node.v
 
 ### Reset Management
 ```systemverilog
