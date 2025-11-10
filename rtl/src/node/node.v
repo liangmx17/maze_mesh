@@ -21,12 +21,12 @@
 // ====================================================================
 
 // Include global definitions and interfaces
-`include "../../include/global_defines/top_define.v"
-`include "../../include/interfaces/interface_a.sv"
-`include "../../include/interfaces/interface_b.sv"
-`include "../../include/interfaces/interface_c.sv"
-`include "../../../Provided_Code/irs.v"
-`include "../../../Provided_Code/arbiter_with_qos.v"
+`include "/home/liangmx/maze/rtl/include/global_defines/top_define.v"
+`include "/home/liangmx/maze/rtl/include/interfaces/interface_a.sv"
+`include "/home/liangmx/maze/rtl/include/interfaces/interface_b.sv"
+`include "/home/liangmx/maze/rtl/include/interfaces/interface_c.sv"
+`include "/home/liangmx/maze/rtl/lib/irs/irs.v"
+`include "/home/liangmx/maze/Provided_Code/arbiter_with_qos.v"
 
 module node #(
     parameter HP = 3'b000,    // Horizontal Position (0-7)
@@ -111,12 +111,24 @@ wire [2:0]  src_x = HP;
 wire [2:0]  src_y = VP;
 
 // Direction decision signals
-wire        route_to_x_first;  // 1: X-first, 0: Y-first
-wire [5:0]  selected_intermediate;
+reg         route_to_x_first;  // 1: X-first, 0: Y-first
+reg [5:0]   selected_intermediate;
 
 // Output buffer selection signals - fix multiple driver conflicts
-wire        select_x_buffer;
-wire        select_y_buffer;
+reg         select_x_buffer;
+reg         select_y_buffer;
+
+// Extract packet fields from A input buffer output - moved outside always_comb
+wire [1:0]  buffered_pkt_type = a_buffered_pkt[22:21];
+wire [5:0]  buffered_pkt_tgt = a_buffered_pkt[13:8];
+wire [5:0]  buffered_pkt_src = a_buffered_pkt[19:14];  // Fix undefined variable
+wire [2:0]  buffered_tgt_x = buffered_pkt_tgt[2:0];
+wire [2:0]  buffered_tgt_y = buffered_pkt_tgt[5:3];
+
+// Local delivery and intermediate node signals - moved outside always_comb
+wire        is_local_delivery = (buffered_pkt_src == buffered_pkt_tgt);
+wire [5:0]  buffered_intermediate_1 = {src_y, buffered_tgt_x};  // [src_y, tgt_x]
+wire [5:0]  buffered_intermediate_2 = {buffered_tgt_y, src_x};  // [tgt_y, src_x]
 
 // Stage 0 Logic Implementation - Fault-Aware Two-Hop Routing
 // Note: This logic operates on A input buffer output signals
@@ -125,18 +137,9 @@ always_comb begin
     route_to_x_first = 1'b1;
     selected_intermediate = src_coord;  // Default to source coordinate
 
-    // Extract packet fields from A input buffer output
-    wire [1:0]  buffered_pkt_type = a_buffered_pkt[22:21];
-    wire [5:0]  buffered_pkt_tgt = a_buffered_pkt[13:8];
-    wire [5:0]  buffered_pkt_src = a_buffered_pkt[19:14];  // Fix undefined variable
-    wire [2:0]  buffered_tgt_x = buffered_pkt_tgt[2:0];
-    wire [2:0]  buffered_tgt_y = buffered_pkt_tgt[5:3];
-
     // Only process unicast packets (type = 2'b00) from A input buffer
     if (a_buffered_vld && buffered_pkt_type == 2'b00) begin
         // Check for local delivery (source = target) - route to A-Y buffer
-        wire is_local_delivery = (buffered_pkt_src == buffered_pkt_tgt);
-
         if (is_local_delivery) begin
             // Local delivery: route to A-Y buffer (will exit through B port)
             select_x_buffer = 1'b0;
@@ -145,10 +148,6 @@ always_comb begin
             route_to_x_first = 1'b0;  // Not applicable for local delivery
         end else begin
             // Network routing: need intermediate node
-
-            // Recalculate intermediate nodes with correct target from buffered packet
-            wire [5:0] buffered_intermediate_1 = {src_y, buffered_tgt_x};  // [src_y, tgt_x]
-            wire [5:0] buffered_intermediate_2 = {buffered_tgt_y, src_x};  // [tgt_y, src_x]
 
             // Simplified fault detection: at most 1 fault node
             // If intermediate node 1 is the fault, use node 2. Otherwise, use node 1.
@@ -227,7 +226,7 @@ IRS_N #(
 // Local delivery uses A-Y buffer, no direct B path
 // ====================================================================
 
-genvar i;
+genvar i, j, k;
 
 // C-Interface Input Buffers - X Direction (7 buffers)
 wire [6:0]  c_x_in_vld, c_x_in_rdy;
@@ -255,22 +254,22 @@ wire [6:0]  c_y_buffered_rdy;
 generate
     for (i = 0; i < NUM_X_PORTS; i++) begin : gen_c_input_buffers
         // X-direction inputs (from topology)
-        assign c_x_in_vld[i] = pkt_con.x_vld[i];
-        assign c_x_in_qos[i] = pkt_con.x_qos[i];
-        assign c_x_in_type[i] = pkt_con.x_type[i];
-        assign c_x_in_src[i] = pkt_con.x_src[i];
-        assign c_x_in_tgt[i] = pkt_con.x_tgt[i];
-        assign c_x_in_data[i] = pkt_con.x_data[i];
-        assign pkt_con.x_rdy[i] = c_x_in_rdy[i];
+        assign c_x_in_vld[i] = pkt_con.xi_vld[i];
+        assign c_x_in_qos[i] = pkt_con.xi_qos[i];
+        assign c_x_in_type[i] = pkt_con.xi_type[i];
+        assign c_x_in_src[i] = pkt_con.xi_src[i];
+        assign c_x_in_tgt[i] = pkt_con.xi_tgt[i];
+        assign c_x_in_data[i] = pkt_con.xi_data[i];
+        assign pkt_con.xi_rdy[i] = c_x_in_rdy[i];
 
         // Y-direction inputs (from topology)
-        assign c_y_in_vld[i] = pkt_con.y_vld[i];
-        assign c_y_in_qos[i] = pkt_con.y_qos[i];
-        assign c_y_in_type[i] = pkt_con.y_type[i];
-        assign c_y_in_src[i] = pkt_con.y_src[i];
-        assign c_y_in_tgt[i] = pkt_con.y_tgt[i];
-        assign c_y_in_data[i] = pkt_con.y_data[i];
-        assign pkt_con.y_rdy[i] = c_y_in_rdy[i];
+        assign c_y_in_vld[i] = pkt_con.yi_vld[i];
+        assign c_y_in_qos[i] = pkt_con.yi_qos[i];
+        assign c_y_in_type[i] = pkt_con.yi_type[i];
+        assign c_y_in_src[i] = pkt_con.yi_src[i];
+        assign c_y_in_tgt[i] = pkt_con.yi_tgt[i];
+        assign c_y_in_data[i] = pkt_con.yi_data[i];
+        assign pkt_con.yi_rdy[i] = c_y_in_rdy[i];
 
         // X-direction input buffer IRS_N
         IRS_N #(
@@ -327,20 +326,20 @@ assign all_input_vld[0] = a_x_buffered_vld;
 assign all_input_rdy[0] = a_x_buffered_rdy;
 assign all_input_qos[0] = a_x_buffered_data[20];     // QoS field
 
-assign all_input_data[1:7] = c_y_buffered_data;      // C-Y inputs (7 buffers)
-assign all_input_vld[1:7] = c_y_buffered_vld;
-assign all_input_rdy[1:7] = c_y_buffered_rdy;
-assign all_input_qos[1:7] = c_y_in_qos;
+assign all_input_data[7:1] = c_y_buffered_data;      // C-Y inputs (7 buffers)
+assign all_input_vld[7:1] = c_y_buffered_vld;
+assign all_input_rdy[7:1] = c_y_buffered_rdy;
+assign all_input_qos[7:1] = c_y_in_qos;
 
 assign all_input_data[8] = a_y_buffered_data;        // A-Y input
 assign all_input_vld[8] = a_y_buffered_vld;
 assign all_input_rdy[8] = a_y_buffered_rdy;
 assign all_input_qos[8] = a_y_buffered_data[20];     // QoS field
 
-assign all_input_data[9:15] = c_x_buffered_data;     // C-X inputs (7 buffers)
-assign all_input_vld[9:15] = c_x_buffered_vld;
-assign all_input_rdy[9:15] = c_x_buffered_rdy;
-assign all_input_qos[9:15] = c_x_in_qos;
+assign all_input_data[15:9] = c_x_buffered_data;     // C-X inputs (7 buffers)
+assign all_input_vld[15:9] = c_x_buffered_vld;
+assign all_input_rdy[15:9] = c_x_buffered_rdy;
+assign all_input_qos[15:9] = c_x_in_qos;
 
 // ====================================================================
 // Stage 1&2: Combined Arbitration and Output Selection
@@ -349,21 +348,25 @@ assign all_input_qos[9:15] = c_x_in_qos;
 // ====================================================================
 
 // Output data for each direction
-wire [22:0] x_output_data [6:0];       // X-direction output data
-wire [22:0] y_output_data [6:0];       // Y-direction output data
-wire [22:0] b_output_data;             // B-port output data
+reg [22:0]  x_output_data [6:0];       // X-direction output data
+reg [22:0]  y_output_data [6:0];       // Y-direction output data
+reg [22:0]  b_output_data;             // B-port output data
 
 // Backpressure signals from actual output buffers
 wire [6:0]  x_output_buffer_rdy;       // From X output buffers
 wire [6:0]  y_output_buffer_rdy;       // From Y output buffers
 wire        b_output_buffer_rdy;       // From B output buffer
 
+// Grant signal arrays for access outside generate blocks
+reg [7:0]   x_grant_reg [6:0];         // X-direction grant registers
+reg         x_grant_valid [6:0];       // X-direction grant valid signals
+reg [7:0]   y_grant_reg [6:0];         // Y-direction grant registers
+reg         y_grant_valid [6:0];       // Y-direction grant valid signals
+
 // X-Direction Output Selection (7 outputs)
 generate
     for (i = 0; i < NUM_X_PORTS; i++) begin : gen_x_output_sel
-        wire [7:0] x_grant;
-        reg [7:0] x_grant_reg;             // Registered grant signal
-        reg x_grant_valid;                  // Registered grant valid
+        wire [7:0] x_grant;                // Local grant signal
 
         // C-X Output Port i: Accepts C-Y[y] requests where dst_x[y] == (HP + i + 1) mod 8, plus A-Y request
         // Request logic: req[y][x] = dst_x[y] == (HP + x + 1) mod 8
@@ -378,17 +381,14 @@ generate
         assign x_qos_inputs[0] = all_input_qos[8];
 
         // C-Y inputs (index 1:7 correspond to C-Y[0:6])
-        genvar j;
-        generate
-            for (j = 0; j < NUM_Y_PORTS; j++) begin : gen_x_req_logic
-                // Extract destination X coordinate from C-Y[j] packet
-                wire [2:0] cy_dst_x = c_y_buffered_data[j][13:8] & 3'b111;  // tgt[2:0] from C-Y[j]
+        for (j = 0; j < NUM_Y_PORTS; j++) begin : gen_x_req_logic
+            // Extract destination X coordinate from C-Y[j] packet
+            wire [2:0] cy_dst_x = c_y_buffered_data[j][13:8] & 3'b111;  // tgt[2:0] from C-Y[j]
 
-                // Request only if destination X matches target coordinate
-                assign x_req_inputs[j+1] = all_input_vld[j+1] && (cy_dst_x == target_x_coord);
-                assign x_qos_inputs[j+1] = all_input_qos[j+1];
-            end
-        endgenerate
+            // Request only if destination X matches target coordinate
+            assign x_req_inputs[j+1] = all_input_vld[j+1] && (cy_dst_x == target_x_coord);
+            assign x_qos_inputs[j+1] = all_input_qos[j+1];
+        end
 
         // Use provided QoS arbiter for this output port
         arbiter_with_qos #(
@@ -402,26 +402,26 @@ generate
         // Register grant signal
         always_ff @(posedge clk or negedge rst_n) begin
             if (!rst_n) begin
-                x_grant_reg <= 8'b0;
-                x_grant_valid <= 1'b0;
+                x_grant_reg[i] <= 8'b0;
+                x_grant_valid[i] <= 1'b0;
             end else begin
-                x_grant_reg <= x_grant;
-                x_grant_valid <= |x_grant;
+                x_grant_reg[i] <= x_grant;
+                x_grant_valid[i] <= |x_grant;
             end
         end
 
         // Select data using registered grant vector (priority encoder)
         always_comb begin
-            if (x_grant_valid && x_output_buffer_rdy[i]) begin
+            if (x_grant_valid[i] && x_output_buffer_rdy[i]) begin
                 case (1'b1)
-                    x_grant_reg[7]: x_output_data[i] = c_y_buffered_data[6];  // C-Y[6]
-                    x_grant_reg[6]: x_output_data[i] = c_y_buffered_data[5];  // C-Y[5]
-                    x_grant_reg[5]: x_output_data[i] = c_y_buffered_data[4];  // C-Y[4]
-                    x_grant_reg[4]: x_output_data[i] = c_y_buffered_data[3];  // C-Y[3]
-                    x_grant_reg[3]: x_output_data[i] = c_y_buffered_data[2];  // C-Y[2]
-                    x_grant_reg[2]: x_output_data[i] = c_y_buffered_data[1];  // C-Y[1]
-                    x_grant_reg[1]: x_output_data[i] = c_y_buffered_data[0];  // C-Y[0]
-                    x_grant_reg[0]: x_output_data[i] = a_x_buffered_data;      // A-X
+                    x_grant_reg[i][7]: x_output_data[i] = c_y_buffered_data[6];  // C-Y[6]
+                    x_grant_reg[i][6]: x_output_data[i] = c_y_buffered_data[5];  // C-Y[5]
+                    x_grant_reg[i][5]: x_output_data[i] = c_y_buffered_data[4];  // C-Y[4]
+                    x_grant_reg[i][4]: x_output_data[i] = c_y_buffered_data[3];  // C-Y[3]
+                    x_grant_reg[i][3]: x_output_data[i] = c_y_buffered_data[2];  // C-Y[2]
+                    x_grant_reg[i][2]: x_output_data[i] = c_y_buffered_data[1];  // C-Y[1]
+                    x_grant_reg[i][1]: x_output_data[i] = c_y_buffered_data[0];  // C-Y[0]
+                    x_grant_reg[i][0]: x_output_data[i] = a_x_buffered_data;      // A-X
                     default: x_output_data[i] = 23'b0;
                 endcase
             end else begin
@@ -436,9 +436,7 @@ endgenerate
 // Y-Direction Output Selection (7 outputs)
 generate
     for (i = 0; i < NUM_Y_PORTS; i++) begin : gen_y_output_sel
-        wire [7:0] y_grant;
-        reg [7:0] y_grant_reg;             // Registered grant signal
-        reg y_grant_valid;                  // Registered grant valid
+        wire [7:0] y_grant;                // Local grant signal
 
         // C-Y Output Port i: Accepts C-X[x] requests where dst_y[x] == (VP + i + 1) mod 8, plus A-X request
         // Request logic: req[x][y] = dst_y[x] == (VP + y + 1) mod 8
@@ -453,17 +451,14 @@ generate
         assign y_qos_inputs[0] = all_input_qos[0];
 
         // C-X inputs (index 1:7 correspond to C-X[0:6])
-        genvar k;
-        generate
-            for (k = 0; k < NUM_X_PORTS; k++) begin : gen_y_req_logic
-                // Extract destination Y coordinate from C-X[k] packet
-                wire [2:0] cx_dst_y = (c_x_buffered_data[k][13:8] >> 3) & 3'b111;  // tgt[5:3] from C-X[k]
+        for (k = 0; k < NUM_X_PORTS; k++) begin : gen_y_req_logic
+            // Extract destination Y coordinate from C-X[k] packet
+            wire [2:0] cx_dst_y = (c_x_buffered_data[k][13:8] >> 3) & 3'b111;  // tgt[5:3] from C-X[k]
 
-                // Request only if destination Y matches target coordinate
-                assign y_req_inputs[k+1] = all_input_vld[k+9] && (cx_dst_y == target_y_coord);
-                assign y_qos_inputs[k+1] = all_input_qos[k+9];
-            end
-        endgenerate
+            // Request only if destination Y matches target coordinate
+            assign y_req_inputs[k+1] = all_input_vld[k+9] && (cx_dst_y == target_y_coord);
+            assign y_qos_inputs[k+1] = all_input_qos[k+9];
+        end
 
         // Use provided QoS arbiter for this output port
         arbiter_with_qos #(
@@ -477,26 +472,26 @@ generate
         // Register grant signal
         always_ff @(posedge clk or negedge rst_n) begin
             if (!rst_n) begin
-                y_grant_reg <= 8'b0;
-                y_grant_valid <= 1'b0;
+                y_grant_reg[i] <= 8'b0;
+                y_grant_valid[i] <= 1'b0;
             end else begin
-                y_grant_reg <= y_grant;
-                y_grant_valid <= |y_grant;
+                y_grant_reg[i] <= y_grant;
+                y_grant_valid[i] <= |y_grant;
             end
         end
 
         // Select data using registered grant vector (priority encoder)
         always_comb begin
-            if (y_grant_valid && y_output_buffer_rdy[i]) begin
+            if (y_grant_valid[i] && y_output_buffer_rdy[i]) begin
                 case (1'b1)
-                    y_grant_reg[7]: y_output_data[i] = c_x_buffered_data[6];  // C-X[6]
-                    y_grant_reg[6]: y_output_data[i] = c_x_buffered_data[5];  // C-X[5]
-                    y_grant_reg[5]: y_output_data[i] = c_x_buffered_data[4];  // C-X[4]
-                    y_grant_reg[4]: y_output_data[i] = c_x_buffered_data[3];  // C-X[3]
-                    y_grant_reg[3]: y_output_data[i] = c_x_buffered_data[2];  // C-X[2]
-                    y_grant_reg[2]: y_output_data[i] = c_x_buffered_data[1];  // C-X[1]
-                    y_grant_reg[1]: y_output_data[i] = c_x_buffered_data[0];  // C-X[0]
-                    y_grant_reg[0]: y_output_data[i] = a_y_buffered_data;      // A-Y
+                    y_grant_reg[i][7]: y_output_data[i] = c_x_buffered_data[6];  // C-X[6]
+                    y_grant_reg[i][6]: y_output_data[i] = c_x_buffered_data[5];  // C-X[5]
+                    y_grant_reg[i][5]: y_output_data[i] = c_x_buffered_data[4];  // C-X[4]
+                    y_grant_reg[i][4]: y_output_data[i] = c_x_buffered_data[3];  // C-X[3]
+                    y_grant_reg[i][3]: y_output_data[i] = c_x_buffered_data[2];  // C-X[2]
+                    y_grant_reg[i][2]: y_output_data[i] = c_x_buffered_data[1];  // C-X[1]
+                    y_grant_reg[i][1]: y_output_data[i] = c_x_buffered_data[0];  // C-X[0]
+                    y_grant_reg[i][0]: y_output_data[i] = a_y_buffered_data;      // A-Y
                     default: y_output_data[i] = 23'b0;
                 endcase
             end else begin
@@ -567,20 +562,36 @@ end
 // ====================================================================
 
 // Connect input buffer ready signals based on arbitration results
-assign a_x_buffered_rdy = (|x_grant_reg) && x_output_buffer_rdy[0];  // A-X goes to X arbitration
-assign a_y_buffered_rdy = (|y_grant_reg) && y_output_buffer_rdy[0];  // A-Y goes to Y arbitration
+// Check if any X or Y arbiter has a valid grant
+reg any_x_grant_valid;
+reg any_y_grant_valid;
+
+always_comb begin
+    any_x_grant_valid = 1'b0;
+    for (int idx = 0; idx < 7; idx++) begin
+        any_x_grant_valid = any_x_grant_valid || x_grant_valid[idx];
+    end
+
+    any_y_grant_valid = 1'b0;
+    for (int idx = 0; idx < 7; idx++) begin
+        any_y_grant_valid = any_y_grant_valid || y_grant_valid[idx];
+    end
+end
+
+// Note: a_x_buffered_rdy and a_y_buffered_rdy are driven by IRS modules
+// No additional assignment needed to avoid multiple driver conflicts
 
 // C-X input buffers ready signals - connect to Y arbitration results
 generate
     for (i = 0; i < NUM_X_PORTS; i++) begin : gen_cx_rdy_assignment
-        assign c_x_in_rdy[i] = (|y_grant_reg) && y_output_buffer_rdy[i];
+        assign c_x_in_rdy[i] = y_grant_valid[i] && y_output_buffer_rdy[i];
     end
 endgenerate
 
 // C-Y input buffers ready signals - connect to X arbitration results
 generate
     for (i = 0; i < NUM_Y_PORTS; i++) begin : gen_cy_rdy_assignment
-        assign c_y_in_rdy[i] = (|x_grant_reg) && x_output_buffer_rdy[i];
+        assign c_y_in_rdy[i] = x_grant_valid[i] && x_output_buffer_rdy[i];
     end
 endgenerate
 
@@ -614,7 +625,7 @@ generate
         ) u_x_output_buffer (
             .clk(clk),
             .rst_n(rst_n),
-            .valid_i(x_grant_valid),                           // Use registered grant valid
+            .valid_i(x_grant_valid[i]),                        // Use registered grant valid for this port
             .ready_i(1'b1),                                     // Always ready - break combinatorial loop
             .valid_o(x_buffered_vld[i]),
             .ready_o(x_buffered_rdy[i]),
@@ -636,7 +647,7 @@ generate
         ) u_y_output_buffer (
             .clk(clk),
             .rst_n(rst_n),
-            .valid_i(y_grant_valid),                            // Use registered grant valid
+            .valid_i(y_grant_valid[i]),                         // Use registered grant valid for this port
             .ready_i(1'b1),                                     // Always ready - break combinatorial loop
             .valid_o(y_buffered_vld[i]),
             .ready_o(y_buffered_rdy[i]),
@@ -679,13 +690,13 @@ assign b_output_buffer_rdy = b_buffered_rdy;      // B port backpressure
 generate
     for (i = 0; i < NUM_X_PORTS; i++) begin : gen_c_x_outputs
         // Decode 23-bit packet format: [22:21]=type, [20]=qos, [19:14]=src, [13:8]=tgt, [7:0]=data
-        assign pkt_con.x_vld[i] = x_buffered_vld[i];
-        assign pkt_con.x_qos[i] = x_buffered_data[i][20];
-        assign pkt_con.x_type[i] = x_buffered_data[i][22:21];
-        assign pkt_con.x_src[i] = x_buffered_data[i][19:14];
-        assign pkt_con.x_tgt[i] = x_buffered_data[i][13:8];
-        assign pkt_con.x_data[i] = x_buffered_data[i][7:0];
-        assign x_buffered_rdy[i] = pkt_con.x_rdy[i];
+        assign pkt_con.xo_vld[i] = x_buffered_vld[i];
+        assign pkt_con.xo_qos[i] = x_buffered_data[i][20];
+        assign pkt_con.xo_type[i] = x_buffered_data[i][22:21];
+        assign pkt_con.xo_src[i] = x_buffered_data[i][19:14];
+        assign pkt_con.xo_tgt[i] = x_buffered_data[i][13:8];
+        assign pkt_con.xo_data[i] = x_buffered_data[i][7:0];
+        assign x_buffered_rdy[i] = pkt_con.xo_rdy[i];
     end
 endgenerate
 
@@ -693,13 +704,13 @@ endgenerate
 generate
     for (i = 0; i < NUM_Y_PORTS; i++) begin : gen_c_y_outputs
         // Decode 23-bit packet format: [22:21]=type, [20]=qos, [19:14]=src, [13:8]=tgt, [7:0]=data
-        assign pkt_con.y_vld[i] = y_buffered_vld[i];
-        assign pkt_con.y_qos[i] = y_buffered_data[i][20];
-        assign pkt_con.y_type[i] = y_buffered_data[i][22:21];
-        assign pkt_con.y_src[i] = y_buffered_data[i][19:14];
-        assign pkt_con.y_tgt[i] = y_buffered_data[i][13:8];
-        assign pkt_con.y_data[i] = y_buffered_data[i][7:0];
-        assign y_buffered_rdy[i] = pkt_con.y_rdy[i];
+        assign pkt_con.yo_vld[i] = y_buffered_vld[i];
+        assign pkt_con.yo_qos[i] = y_buffered_data[i][20];
+        assign pkt_con.yo_type[i] = y_buffered_data[i][22:21];
+        assign pkt_con.yo_src[i] = y_buffered_data[i][19:14];
+        assign pkt_con.yo_tgt[i] = y_buffered_data[i][13:8];
+        assign pkt_con.yo_data[i] = y_buffered_data[i][7:0];
+        assign y_buffered_rdy[i] = pkt_con.yo_rdy[i];
     end
 endgenerate
 
