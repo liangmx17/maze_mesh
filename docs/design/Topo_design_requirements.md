@@ -6,11 +6,11 @@ The Topo module implements the network topology management for the MAZE 8×8 mes
 
 ## Functional Requirements
 
-### 1. Mesh Topology Implementation
+### 1. Torus Topology Implementation
 - **Network Size**: 8×8 grid (64 nodes total)
 - **Connectivity Pattern**: Each node connects to 7 neighbors in X-direction and 7 neighbors in Y-direction
-- **Connection Rules**: Implement Manhattan distance-based connectivity
-- **Topology Type**: 2D mesh with wraparound (toroidal topology optional)
+- **Connection Rules**: Implement toroidal topology with modulo 8 arithmetic
+- **Topology Type**: 2D torus (wraparound on both X and Y axes)
 
 ### 2. C Interface Management
 - **Input Splitting**: Split each node's C interface into 28 separate connections
@@ -20,10 +20,10 @@ The Topo module implements the network topology management for the MAZE 8×8 mes
 - **Signal Routing**: Proper routing of all C interface signals
 
 ### 3. IRS Buffer Integration
-- **Buffer Placement**: IRS buffers between all connected node pairs
-- **Depth Configuration**: Buffer depth based on Manhattan distance
-- **Buffer Types**: Support for IRS_N, IRS_HALF, and IRS_LP variants
-- **Flow Control**: Proper ready/valid handshaking through buffers
+- **Buffer Placement**: IRS_N buffers directly between node pairs (hard-wired connections)
+- **Depth Configuration**: Buffer depth based on Manhattan distance (depth = distance-1, minimum 0)
+- **Buffer Types**: Only IRS_N with TYPE_RO_EN=1 (no IRS_HALF or IRS_LP)
+- **Flow Control**: Ready/valid handshaking through buffers, no intermediate topology routing
 
 ### 4. Connectivity Logic
 - **Node Identification**: Proper source and destination node identification
@@ -35,20 +35,31 @@ The Topo module implements the network topology management for the MAZE 8×8 mes
 
 ### Clock and Reset
 ```systemverilog
-input               clk;            // System clock
-input               rst_n;          // Active-low reset
+input               clk;            // System clock (shared across all nodes)
+input               rst_n;          // Active-low reset (shared across all nodes)
 ```
 
 ### Node Interfaces
 ```systemverilog
-// 64 Node C Interfaces
-pkt_con_if.slv      node_if[63:0];  // Connections from 64 nodes
+// 64 Node C Interfaces using slave modports
+// Topo uses slave modports to connect to node master modports
+pkt_con_if.slv      node_if[63:0];  // Connections to/from 64 nodes
+
+// Interface signal structure (from interface_c.sv):
+// X-direction inputs: xi_vld[6:0], xi_rdy[6:0], xi_qos[6:0], xi_type[6:0], xi_src[6:0], xi_tgt[6:0], xi_data[6:0]
+// Y-direction inputs: yi_vld[6:0], yi_rdy[6:0], yi_qos[6:0], yi_type[6:0], yi_src[6:0], yi_tgt[6:0], yi_data[6:0]
+// X-direction outputs: xo_vld[6:0], xo_rdy[6:0], xo_qos[6:0], xo_type[6:0], xo_src[6:0], xo_tgt[6:0], xo_data[6:0]
+// Y-direction outputs: yo_vld[6:0], yo_rdy[6:0], yo_qos[6:0], yo_type[6:0], yo_src[6:0], yo_tgt[6:0], yo_data[6:0]
 ```
 
-### Internal Structure
+### Torus Connection Architecture
+- **Network Topology**: 8×8 torus with wraparound on both axes
 - **Total Connections**: 64 nodes × 14 directional ports = 896 individual connections
 - **X-Direction**: 448 X-direction connections (224 input, 224 output)
 - **Y-Direction**: 448 Y-direction connections (224 input, 224 output)
+- **Total IRS Buffers**: 896 IRS_N buffers (448 X + 448 Y) with variable depths
+- **Connection Pattern**: Hard-wired connections using torus modulo arithmetic
+- **Signal Flow**: Node[outputs] → IRS_N → Node[inputs] (no intermediate routing)
 
 ## Topology Architecture
 
@@ -58,94 +69,220 @@ pkt_con_if.slv      node_if[63:0];  // Connections from 64 nodes
 - **Node ID**: Y * 8 + X (0-63)
 - **Coordinate Mapping**: Used for connectivity determination
 
-### 2. Connection Patterns
+### 2. Torus Topology Connection Pattern
 
-#### X-Direction Connections
-For each node at position (x, y):
-- **Positive X Direction**: Connect to nodes (x+1, y), (x+2, y), ..., (x+7, y)
-- **Modulo Arithmetic**: Wrap around for x > 7 (if toroidal topology)
-- **Distance Calculation**: Manhattan distance = |Δx|
+#### Torus Connection Rules
+For each node at position [VP, HP] (where VP=Y coordinate, HP=X coordinate):
 
-#### Y-Direction Connections
-For each node at position (x, y):
-- **Positive Y Direction**: Connect to nodes (x, y+1), (x, y+2), ..., (x, y+7)
-- **Modulo Arithmetic**: Wrap around for y > 7 (if toroidal topology)
-- **Distance Calculation**: Manhattan distance = |Δy|
+**X-Direction Connections:**
+- **C-X[i] Output** connects to node `[VP, (HP + i + 1) mod 8]`
+- **C-X[i] Input** comes from node `[VP, (HP - i - 1 + 8) mod 8]`
+- **Direction**: All X connections follow increasing X coordinate direction
+- **Wraparound**: Uses modulo 8 arithmetic for toroidal connections
 
-### 3. IRS Buffer Configuration
+**Y-Direction Connections:**
+- **C-Y[i] Output** connects to node `[(VP + i + 1) mod 8, HP]`
+- **C-Y[i] Input** comes from node `[(VP - i - 1 + 8) mod 8, HP]`
+- **Direction**: All Y connections follow increasing Y coordinate direction
+- **Wraparound**: Uses modulo 8 arithmetic for toroidal connections
+
+#### Connection Implementation Examples
+For node at coordinates [3, 4] (VP=3, HP=4):
+
+**X-Direction Outputs:**
+- C-X[0] → node [3, (4+1) mod 8] = [3, 5]
+- C-X[1] → node [3, (4+2) mod 8] = [3, 6]
+- C-X[6] → node [3, (4+7) mod 8] = [3, 3]
+
+**Y-Direction Outputs:**
+- C-Y[0] → node [(3+1) mod 8, 4] = [4, 4]
+- C-Y[1] → node [(3+2) mod 8, 4] = [5, 4]
+- C-Y[6] → node [(3+7) mod 8, 4] = [2, 4]
+
+### 3. Key Connection Features
+
+#### Bidirectional Communication
+- **Separate Paths**: Each direction has dedicated input and output channels
+- **Full Duplex**: Simultaneous transmission and reception in all directions
+- **Independent Flow Control**: Ready/valid handshaking per direction
+
+#### QoS Support in Connections
+- **QoS Preservation**: QoS signals travel with packets across all connections
+- **Arbitration Integration**: QoS signals participate in destination arbitration
+- **Priority Maintenance**: High QoS packets maintain priority through topology
+
+#### Backpressure and Flow Control
+- **Ready/Valid Protocol**: Standard ready/valid handshaking between nodes
+- **Buffer Management**: IRS modules provide buffering for flow control
+- **Deadlock Prevention**: Proper credit-based flow control implementation
+
+#### IRS Buffer Configuration
 ```systemverilog
-// IRS depth calculation
+// IRS depth calculation based on Manhattan distance in torus topology
 function automatic int calculate_irs_depth(int src_x, int src_y, int dst_x, int dst_y);
-    int manhattan_dist = abs(dst_x - src_x) + abs(dst_y - src_y);
-    return (manhattan_dist > 1) ? (manhattan_dist - 1) : 0;
+    int manhattan_dist;
+    int dx = (dst_x - src_x + 8) % 8;  // Torus wraparound
+    int dy = (dst_y - src_y + 8) % 8;  // Torus wraparound
+
+    // Use minimal path in torus (can go either direction)
+    if (dx > 4) dx = 8 - dx;  // Use shorter wraparound path
+    if (dy > 4) dy = 8 - dy;  // Use shorter wraparound path
+
+    manhattan_dist = dx + dy;
+    return (manhattan_dist > 1) ? (manhattan_dist - 1) : 0;  // Depth = distance-1
 endfunction
+
+// IRS buffer instantiation with depth based on Manhattan distance
+IRS_N #(
+    .PYLD_W(23),      // 23-bit packet width
+    .IRS_DEEP(calculate_irs_depth(src_x, src_y, dst_x, dst_y)),  // Dynamic depth
+    .TYPE_NO_READY(0),
+    .TYPE_HALF(0),
+    .TYPE_RO_EN(1)    // Read-only enable mode
+) u_connection_buffer (
+    .clk(clk),
+    .rst_n(rst_n),
+    .valid_i(node_if[src_node].xo_vld[port]),     // From source node output
+    .ready_o(node_if[src_node].xo_rdy[port]),     // To source node output
+    .valid_o(node_if[dst_node].xi_vld[port]),     // To destination node input
+    .ready_i(node_if[dst_node].xi_rdy[port]),     // From destination node input
+    .payload_i({node_if[src_node].xo_type[port],   // 23-bit packet from source
+                node_if[src_node].xo_qos[port],
+                node_if[src_node].xo_src[port],
+                node_if[src_node].xo_tgt[port],
+                node_if[src_node].xo_data[port]}),
+    .payload_o({node_if[dst_node].xi_type[port],   // 23-bit packet to destination
+                node_if[dst_node].xi_qos[port],
+                node_if[dst_node].xi_src[port],
+                node_if[dst_node].xi_tgt[port],
+                node_if[dst_node].xi_data[port]})
+);
 ```
+
+#### Signal Structure Preservation
+- **Packet Format**: 23-bit packet format maintained across all connections
+  - Bits [22:21]: Packet type (00=unicast, 01=X-multicast, 10=Y-multicast, 11=broadcast)
+  - Bits [20]: QoS level (0=low, 1=high)
+  - Bits [19:14]: Source address (6 bits)
+  - Bits [13:8]: Target address (6 bits)
+  - Bits [7:0]: Data payload (8 bits)
+- **Signal Integrity**: All signals maintain integrity through topology
+- **Timing**: Registered interfaces provide timing isolation
 
 ## Internal Implementation
 
-### 1. Connection Matrix
+### 1. Hard-Wired Torus Connection Matrix Implementation
 ```systemverilog
-// X-direction connection matrix
+// Hard-wired torus topology connections for X-direction
+// No intermediate routing logic - direct IRS connections between nodes
 for (genvar src_y = 0; src_y < 8; src_y++) begin
     for (genvar src_x = 0; src_x < 8; src_x++) begin
-        for (genvar offset = 1; offset <= 7; offset++) begin
-            int dst_x = (src_x + offset) % 8;
-            int dst_node = dst_y * 8 + dst_x;
-            int src_node = src_y * 8 + src_x;
+        for (genvar offset = 0; offset < 7; offset++) begin
+            // Calculate target node using torus modulo arithmetic
+            int dst_x = (src_x + offset + 1) % 8;
+            int dst_node = src_y * 8 + dst_x;  // Same row, different column
+            int src_node = src_y * 8 + src_x;  // Source node
 
-            // X-direction connection from src to dst
-            assign node_if[dst_node].x_vld_in[offset-1] = x_irs_buffer[src_node][offset-1].data_vld;
-            // ... other signal connections
+            // Instantiate IRS_N buffer for this specific connection
+            IRS_N #(
+                .PYLD_W(23),
+                .IRS_DEEP(calculate_irs_depth(src_x, src_y, dst_x, src_y)),  // Manhattan-based depth
+                .TYPE_NO_READY(0),
+                .TYPE_HALF(0),
+                .TYPE_RO_EN(1)
+            ) x_irs_buffer (
+                .clk(clk),
+                .rst_n(rst_n),
+                .valid_i(node_if[src_node].xo_vld[offset]),      // From source node X output
+                .ready_o(node_if[src_node].xo_rdy[offset]),      // To source node X output
+                .valid_o(node_if[dst_node].xi_vld[offset]),      // Direct to destination node X input
+                .ready_i(node_if[dst_node].xi_rdy[offset]),      // From destination node X input
+                .payload_i({node_if[src_node].xo_type[offset],    // 23-bit packet from source
+                            node_if[src_node].xo_qos[offset],
+                            node_if[src_node].xo_src[offset],
+                            node_if[src_node].xo_tgt[offset],
+                            node_if[src_node].xo_data[offset]}),
+                .payload_o({node_if[dst_node].xi_type[offset],    // 23-bit packet to destination
+                            node_if[dst_node].xi_qos[offset],
+                            node_if[dst_node].xi_src[offset],
+                            node_if[dst_node].xi_tgt[offset],
+                            node_if[dst_node].xi_data[offset]})
+            );
         end
     end
 end
-```
 
-### 2. IRS Buffer Instantiation
-```systemverilog
-// IRS buffers for X-direction connections
-for (genvar node = 0; node < 64; node++) begin
-    for (genvar port = 0; port < 7; port++) begin
-        irs_n #(
-            .DEPTH(calculate_irs_depth(node_x, node_y, target_x, target_y)),
-            .DATA_W(23)
-        ) x_irs_buffer (
-            .clk(clk),
-            .rst_n(rst_n),
-            .data_in(node_input_data),
-            .data_out(node_output_data),
-            .valid_in(node_input_valid),
-            .valid_out(node_output_valid),
-            .ready_in(node_input_ready),
-            .ready_out(node_output_ready)
-        );
-    end
-end
-```
+// Hard-wired torus topology connections for Y-direction
+// No intermediate routing logic - direct IRS connections between nodes
+for (genvar src_y = 0; src_y < 8; src_y++) begin
+    for (genvar src_x = 0; src_x < 8; src_x++) begin
+        for (genvar offset = 0; offset < 7; offset++) begin
+            // Calculate target node using torus modulo arithmetic
+            int dst_y = (src_y + offset + 1) % 8;
+            int dst_node = dst_y * 8 + src_x;  // Same column, different row
+            int src_node = src_y * 8 + src_x;  // Source node
 
-### 3. Signal Routing Logic
-```systemverilog
-// Route X-direction outputs to appropriate inputs
-always_comb begin
-    for (int dst_node = 0; dst_node < 64; dst_node++) begin
-        for (int input_port = 0; input_port < 7; input_port++) begin
-            // Find which source node connects to this input port
-            automatic int src_node = find_x_source_node(dst_node, input_port);
-            automatic int src_port = find_x_source_port(dst_node, input_port);
-
-            // Connect signals through IRS buffer
-            node_if[dst_node].x_vld[input_port] = x_irs[src_node][src_port].valid_out;
-            node_if[dst_node].x_qos[input_port] = x_irs[src_node][src_port].qos_out;
-            node_if[dst_node].x_type[input_port] = x_irs[src_node][src_port].type_out;
-            node_if[dst_node].x_src[input_port] = x_irs[src_node][src_port].src_out;
-            node_if[dst_node].x_tgt[input_port] = x_irs[src_node][src_port].tgt_out;
-            node_if[dst_node].x_data[input_port] = x_irs[src_node][src_port].data_out;
-
-            x_irs[src_node][src_port].ready_in = node_if[dst_node].x_rdy[input_port];
+            // Instantiate IRS_N buffer for this specific connection
+            IRS_N #(
+                .PYLD_W(23),
+                .IRS_DEEP(calculate_irs_depth(src_x, src_y, src_x, dst_y)),  // Manhattan-based depth
+                .TYPE_NO_READY(0),
+                .TYPE_HALF(0),
+                .TYPE_RO_EN(1)
+            ) y_irs_buffer (
+                .clk(clk),
+                .rst_n(rst_n),
+                .valid_i(node_if[src_node].yo_vld[offset]),      // From source node Y output
+                .ready_o(node_if[src_node].yo_rdy[offset]),      // To source node Y output
+                .valid_o(node_if[dst_node].yi_vld[offset]),      // Direct to destination node Y input
+                .ready_i(node_if[dst_node].yi_rdy[offset]),      // From destination node Y input
+                .payload_i({node_if[src_node].yo_type[offset],    // 23-bit packet from source
+                            node_if[src_node].yo_qos[offset],
+                            node_if[src_node].yo_src[offset],
+                            node_if[src_node].yo_tgt[offset],
+                            node_if[src_node].yo_data[offset]}),
+                .payload_o({node_if[dst_node].yi_type[offset],    // 23-bit packet to destination
+                            node_if[dst_node].yi_qos[offset],
+                            node_if[dst_node].yi_src[offset],
+                            node_if[dst_node].yi_tgt[offset],
+                            node_if[dst_node].yi_data[offset]})
+            );
         end
     end
 end
+
+// Total: 896 IRS_N buffers (448 X-direction + 448 Y-direction)
+// Each buffer depth varies based on Manhattan distance between connected nodes
+// No additional routing logic required - connections are hard-wired
 ```
+
+### 2. Implementation Notes
+
+#### IRS Buffer Depth Calculation Examples
+For an 8×8 torus topology, Manhattan distances determine IRS buffer depths:
+
+**X-Direction Examples (same row):**
+- Node[3,4] → Node[3,5]: Distance = 1 → IRS depth = 0
+- Node[3,4] → Node[3,6]: Distance = 2 → IRS depth = 1
+- Node[3,4] → Node[3,3]: Distance = 1 (wraparound) → IRS depth = 0
+
+**Y-Direction Examples (same column):**
+- Node[3,4] → Node[4,4]: Distance = 1 → IRS depth = 0
+- Node[3,4] → Node[5,4]: Distance = 2 → IRS depth = 1
+- Node[3,4] → Node[2,4]: Distance = 1 (wraparound) → IRS depth = 0
+
+**Total IRS Buffer Depth**: Variable across all connections
+- Depth 0 buffers: Direct neighbor connections
+- Depth 1-3 buffers: Multi-hop connections
+- Total depth varies based on torus geometry
+
+#### Key Implementation Characteristics
+- **No Topology Routing Logic**: All connections are hard-wired IRS buffers
+- **Direct Signal Paths**: Node output → IRS Buffer → Node input (no intermediate stages)
+- **Clock Distribution**: Single clock domain, no clock gating in Topo
+- **Power Management**: No power management in Topo (handled in MAZE_TOP)
+- **Signal Naming**: Uses interface_c.slv modport signals (xi_*, yi_*, xo_*, yo_*)
+- **Resource Usage**: 896 individual IRS_N buffers (no optimization)
 
 ## Performance Requirements
 
@@ -188,10 +325,14 @@ end
 - **IRS Buffer Behavior**: Buffer overflow/underflow testing
 
 ### 4. Topology-specific Tests
-- **Mesh Connectivity**: Verify 8×8 mesh structure
-- **Neighbor Connections**: Each node connects to correct neighbors
-- **Distance Calculation**: Verify Manhattan distance calculations
-- **Wraparound Logic**: Test toroidal topology if implemented
+- **Torus Connectivity**: Verify 8×8 torus structure with correct wraparound
+- **Neighbor Connections**: Each node connects to correct 7 X and 7 Y neighbors
+- **Modulo Arithmetic**: Verify modulo 8 calculations for wraparound connections
+- **Bidirectional Communication**: Test both directions of all connections
+- **QoS Preservation**: Verify QoS signals maintain priority through topology
+- **Backpressure Handling**: Test ready/valid handshaking across all connections
+- **IRS Buffer Behavior**: Verify 896 IRS buffers operate correctly
+- **Complete Connection Matrix**: Verify all 896 connections properly implemented
 
 ## Design Constraints
 
@@ -202,10 +343,12 @@ end
 - **Timing**: Critical path optimization
 
 ### 2. Logical Constraints
-- **Connection Rules**: Strict adherence to mesh topology rules
-- **Signal Naming**: Consistent signal naming conventions
-- **Parameterization**: Support for different network sizes
-- **Scalability**: Design should scale to larger networks
+- **Torus Connection Rules**: Strict adherence to torus topology with modulo 8 arithmetic
+- **Signal Naming**: Consistent signal naming conventions (xi_/yi_/xo_/yo_)
+- **Parameterization**: Support for different network sizes (currently fixed at 8×8)
+- **Scalability**: Design should scale to larger N×N torus networks
+- **Bidirectional Separation**: Clear separation of input/output directions
+- **QoS Signal Integrity**: QoS signals must be preserved across all connections
 
 ### 3. Implementation Constraints
 - **Technology Independence**: Portable across different technologies
