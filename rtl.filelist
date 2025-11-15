@@ -14,6 +14,10 @@ rtl/include/interfaces/interface_c.sv
 // Library modules
 rtl/lib/irs/irs.v
 
+// Node component modules
+rtl/src/node/node_components/arbiter.v
+rtl/src/node/node_components/router_unit.v
+
 // Core RTL modules
 rtl/src/node/node.v
 rtl/src/topo/topo.v

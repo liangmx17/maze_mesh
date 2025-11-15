@@ -2,67 +2,79 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## MAZE Network Architecture Documentation
+## MAZE网络架构文档
 
-## Overview
+## 概述
 
-This document provides a comprehensive analysis of the MAZE 64-node network system implementation. The MAZE network is a high-performance on-chip interconnect that supports unicast, multicast, and broadcast communications with QoS prioritization and fault tolerance capabilities.
+本文档提供MAZE 64节点网络系统实现的全面分析。MAZE网络是一个高性能的片上互连系统，支持单播、多播和广播通信，具有QoS优先级和容错能力。
 
-## System Architecture
+## 系统架构
 
-### High-Level Architecture
+### 高级架构
 
-The MAZE network implements a **64-node (8×8 grid) mesh topology** with the following key characteristics:
+MAZE网络实现了**64节点(8×8网格)网格拓扑**，具有以下关键特性：
 
-- **Network Topology**: 8×8 grid where each node connects to 4 neighbors in North, West, South, East directions
-- **Non-Pipeline Architecture**: Direct routing with per-input processing and output arbitration
-- **Data Path Width**: 23-bit packets (2 type + 1 QoS + 6 source + 6 target + 8 data)
-- **QoS Support**: 2-level priority system (QoS=0: low, QoS=1: high)
-- **Fault Tolerance**: Single node failure support with clock gating in MAZE_TOP
-- **Routing Algorithm**: Fault-aware XY routing with dynamic direction selection based on node position relative to failed nodes
+- **网络拓扑**: 8×8网格，每个节点连接北、西、南、东四个邻居
+- **非流水线架构**: 直接路由，每个输入独立处理和输出仲裁
+- **数据通路宽度**: 23位数据包(2位类型 + 1位QoS + 6位源地址 + 6位目标地址 + 8位数据)
+- **QoS支持**: 2级优先级系统(QoS=0: 低优先级, QoS=1: 高优先级)
+- **容错能力**: 单节点故障支持，在MAZE_TOP中实现时钟门控
+- **路由算法**: 故障感知XY路由，基于节点与故障节点的相对位置动态选择方向
 
-### Core Components
+### 核心组件
 
-#### 1. MAZE_TOP Module
-Top-level module that instantiates the entire 64-node network. See `Provided_Code/MAZE_TOP.v` for reference implementation.
+#### 1. MAZE_TOP模块
+顶层模块，实例化整个64节点网络。参考实现见 `Provided_Code/MAZE_TOP.v`。
 
-#### 2. Node Module
-Individual network node with direct routing architecture. Each node processes 5 inputs (4 NWSE directions + 1 A port) through individual routing units, generates 5-bit one-hot request signals for arbiters, and outputs through 5 ports (4 NWSE directions + 1 B port). Uses IRS_N buffers at both input and output ports. See `Provided_Code/node.v` for reference implementation.
+#### 2. 节点模块
+具有直接路由架构的单个网络节点。每个节点处理5个输入端口：1个A端口 + 1个C接口(包含4个NWSE方向输入)。每个节点输出5个端口：1个B端口 + 1个C接口(包含4个NWSE方向输出)。**关键说明：每个节点只例化一个C接口，该接口内部包含4个输入端口和4个输出端口**。在输入和输出端口都使用IRS_N缓冲器。
 
-#### 3. Topo Module
-Manages network connectivity between nodes. See `Provided_Code/topo.v` for reference implementation.
+**当前实现状态**: ✅ 已完成
+- 非流水线直接路由架构已实现
+- 5个独立路由单元已实现 (router_unit.v)
+- 5个QoS仲裁器已实现 (arbiter.v)
+- IRS_N缓冲器已集成，提供寄存器功能，无需额外打拍
+- 故障感知XY路由算法已实现
+- 位置: `rtl/src/node/node.v`
 
-#### 4. IRS Modules
-Insertion Ring Buffer modules for node-to-node connections. See `Provided_Code/irs.v` for reference implementation.
+#### 3. 拓扑模块
+管理节点间的网络连接。通过IRS_N模块连接64个节点形成8×8网格拓扑，处理边缘节点的tie-off和悬空端口。详细设计见 `docs/design/topo_architecture.md`，参考实现见 `Provided_Code/topo.v`。
 
-### Interface Definitions
+#### 4. IRS模块
+节点间连接的插入环形缓冲器模块。参考实现见 `Provided_Code/irs.v`。
 
-#### A Interface (pkt_in)
-See `Provided_Code/interface_a.sv` for interface definition.
+### 接口定义
 
-#### B Interface (pkt_out)
-See `Provided_Code/interface_b.sv` for interface definition.
+#### A接口(pkt_in)
+接口定义见 `Provided_Code/interface_a.sv`。
 
-#### C Interface (pkt_con_if)
-See `Provided_Code/interface_c.sv` for interface definition.
+#### B接口(pkt_out)
+接口定义见 `Provided_Code/interface_b.sv`。
 
-#### Global Parameters
-See `Provided_Code/top_define.v` for global parameter definitions.
+#### C接口(pkt_con_if)
+**重要说明**: 每个节点只例化**一个C接口**，该C接口内部包含：
+- **4个输入端口**: C口_N (北方输入), C口_W (西方输入), C口_S (南方输入), C口_E (东方输入)
+- **4个输出端口**: C口_N (北方输出), C口_W (西方输出), C口_S (南方输出), C口_E (东方输出)
 
-### Packet Format and Routing
+接口定义见 `Provided_Code/interface_c.sv`。
 
-#### Packet Structure
+#### 全局参数
+全局参数定义见 `Provided_Code/top_define.v`。
+
+### 数据包格式和路由
+
+#### 数据包结构
 ```
-[1:0] pkt_type    // 00=Unicast, 01=X-Multicast, 10=Y-Multicast, 11=Broadcast
-[0]   pkt_qos     // 0=Low Priority, 1=High Priority
-[5:3] src_y       // Source node Y coordinate
-[2:0] src_x       // Source node X coordinate
-[5:3] tgt_y       // Target node Y coordinate
-[2:0] tgt_x       // Target node X coordinate
-[7:0] pkt_data    // Data payload
+[1:0] pkt_type    // 00=单播, 01=X多播, 10=Y多播, 11=广播
+[0]   pkt_qos     // 0=低优先级, 1=高优先级
+[5:3] src_y       // 源节点Y坐标
+[2:0] src_x       // 源节点X坐标
+[5:3] tgt_y       // 目标节点Y坐标
+[2:0] tgt_x       // 目标节点X坐标
+[7:0] pkt_data    // 数据载荷
 ```
 
-#### Routing Algorithm
+#### 路由算法
 
 **故障感知XY路由算法** (详见 路由策略.md):
 
@@ -87,56 +99,73 @@ See `Provided_Code/top_define.v` for global parameter definitions.
 - 路由算法根据与故障节点的相对位置动态调整
 - 支持东、西、南、北四个主要方向及八个故障区域的位置感知
 
-**Multicast/Broadcast**:
-- X-Multicast: 所有相同X坐标的节点
-- Y-Multicast: 所有相同Y坐标的节点
-- Broadcast: 所有64个节点
+**多播/广播**:
+- X多播: 所有相同X坐标的节点
+- Y多播: 所有相同Y坐标的节点
+- 广播: 所有64个节点
 - 多播/广播时故障节点自动排除
 
-## Build and Compilation Commands
+## 构建和编译命令
 
-### Verilator Compilation
+### 构建脚本
 
-For Verilator-based verification and simulation:
+使用提供的构建脚本进行编译：
 
 ```bash
-# Build the MAZE_TOP module
+# 构建MAZE_TOP模块（默认）
+./scripts/build/build_maze.sh
+
+# 构建特定模块
+./scripts/build/build_maze.sh node      # 构建单个节点
+./scripts/build/build_maze.sh topo      # 构建拓扑模块
+
+# 指定波形格式
+./scripts/build/build_maze.sh MAZE_TOP fst    # FST格式
+./scripts/build/build_maze.sh MAZE_TOP vcd    # VCD格式
+```
+
+### 手动Verilator编译
+
+```bash
+# 构建MAZE_TOP模块
 verilator --top-module MAZE_TOP \
   --cc -f rtl.filelist \
   -Wno-fatal \
   --CFLAGS "-std=c++11" \
-  --Mdir obj_dir
+  --Mdir obj_dir \
+  --trace --trace-fst --trace-structs
 
-# Make the simulation executable
+# 编译生成可执行文件
 cd obj_dir
 make -f VMAZE_TOP.mk
 ```
 
-### Simulation Commands
+### 仿真命令
 
 ```bash
-# Run simulation with basic test
+# 运行基本仿真
 ./VMAZE_TOP
 
-# Run with specific test cases
-./VMAZE_TOP +TEST_CASE=unicast_4node
-./VMAZE_TOP +TEST_CASE=qos_priority
-./VMAZE_TOP +TEST_CASE=fault_tolerance
+# 运行带波形的仿真
+./VMAZE_TOP +trace
+
+# 详细输出
+./VMAZE_TOP +verbose
 ```
 
-### Compilation Parameters
+### 编译参数
 
-- **Global Parameters** (top_define.v):
-  - `QOS_W = 1`: QoS width
-  - `ID_W = 6`: Node ID width (supports 64 nodes)
-  - `TGTID_W = 6`: Target ID width
-  - `SRCID_W = 6`: Source ID width
-  - `TYPE_W = 2`: Packet type width
-  - `FLIT_W = 8`: Data width
+- **全局参数** (top_define.v):
+  - `QOS_W = 1`: QoS位宽
+  - `ID_W = 6`: 节点ID位宽 (支持64个节点)
+  - `TGTID_W = 6`: 目标ID位宽
+  - `SRCID_W = 6`: 源ID位宽
+  - `TYPE_W = 2`: 数据包类型位宽
+  - `FLIT_W = 8`: 数据位宽
 
-## Key Component Relationships
+## 核心组件关系
 
-### Data Flow Architecture
+### 数据流架构
 
 ```
                                       C接口(NWSE) ← 拓扑网络(IRS_N) ← C接口(NWSE)
@@ -179,7 +208,7 @@ make -f VMAZE_TOP.mk
 
 ```
 
-### Control Flow
+### 控制流
 
 1. **输入缓存阶段 (IRS_N)**:
    - A接口和4个C接口(NWSE)的数据包进入各自的IRS_N缓存
@@ -211,7 +240,7 @@ make -f VMAZE_TOP.mk
    - NWSE输出端口连接到相邻节点的对应输入端口
    - 通过IRS_N实现节点间的可靠数据传输
 
-### Fault Tolerance Mechanism
+### 容错机制
 
 - **时钟门控**: 故障节点接收不到时钟信号，实现功耗隔离
 - **静态配置**: 故障信息 (`pg_en`, `pg_node`) 预先配置到所有节点
@@ -220,66 +249,70 @@ make -f VMAZE_TOP.mk
 - **多播处理**: 多播和广播时故障节点自动从目标列表中排除
 - **容错区域**: 支持9种故障相对位置，包括正常状态和8个方向的故障区域
 
-## Development Workflow Information
+## 开发工作流信息
 
-### Module Development Hierarchy
+### 模块开发层次
 
-1. **Foundation Layer**:
-   - Interface definitions (A, B, C interfaces)
-   - Global parameter definitions
-   - IRS module library
+1. **基础层**:
+   - 接口定义 (A, B, C接口)
+   - 全局参数定义
+   - IRS模块库
 
-2. **Core Logic Layer**:
-   - Node module (4-stage pipeline)
-   - Topo module (connectivity logic)
-   - IRS integration
+2. **核心逻辑层**:
+   - 节点模块 (非流水线直接路由，已实现)
+   - 拓扑模块 (连接逻辑，部分实现)
+   - IRS集成 (已完成)
 
-3. **System Integration Layer**:
-   - MAZE_TOP module (64-node instantiation)
-   - Clock gating and fault handling
-   - Interface aggregation
+3. **系统集成层**:
+   - MAZE_TOP模块 (64节点实例化)
+   - 时钟门控和故障处理
+   - 接口聚合
 
-### Verification Strategy
+### 验证策略
 
-#### Current Testing Status
-- ✅ **Interface Definitions**: Complete A/B/C interface implementations
-- ✅ **Node Architecture**: Non-pipeline direct routing framework implemented
-- ✅ **IRS_N Integration**: Input/output buffer modules integrated
-- ✅ **Fault Tolerance**: Clock gating and REGISTER signal calculation implemented
-- ⚠️ **Independent Routing Units**: 5 separate routing units need implementation
-- ⚠️ **Arbiter Implementation**: 5 output arbiters need QoS logic completion
-- ⚠️ **NWSE Topology**: 4-direction mesh connections need completion
+#### 当前实现状态
+- ✅ **接口定义**: 完整的A/B/C接口实现
+- ✅ **节点架构**: 非流水线直接路由架构已完全实现
+- ✅ **IRS_N集成**: 输入输出缓冲器模块已集成，提供寄存器功能
+- ✅ **独立路由单元**: 5个独立路由单元已实现 (router_unit.v)
+- ✅ **QoS仲裁器**: 5个输出仲裁器已实现 (arbiter.v)
+- ✅ **容错能力**: 故障感知路由和REGISTER信号计算已实现
+- ⚠️ **拓扑模块**: 4方向网格连接需要完善
+- ⚠️ **顶层模块**: 64节点实例化和时钟门控需要完成
 
-#### Recommended Test Development
+#### 推荐测试开发
 
-1. **Unit Testing**:
+1. **单元测试**:
    ```bash
-   # Individual node testing
+   # 单个节点测试
    verilator --top-module node --cc node.v interface_*.sv top_define.v -CFLAGS "-std=c++11"
    ```
 
-2. **Integration Testing**:
+2. **集成测试**:
    ```bash
-   # Small network testing (4x4 grid)
+   # 小型网络测试 (4x4网格)
    verilator --top-module MAZE_TOP --cc MAZE_TOP.v node.v topo.v irs.v interface_*.sv top_define.v -CFLAGS "-std=c++11"
    ```
 
-3. **System Testing**:
+3. **系统测试**:
    ```bash
-   # Full 64-node network
-   verilator --top-module MAZE_TOP --cc maze_impl/* -CFLAGS "-std=c++11"
+   # 完整64节点网络
+   verilator --top-module MAZE_TOP --cc rtl/src/* -CFLAGS "-std=c++11"
    ```
 
-### Known Implementation Challenges
+### 已完成实现
+1. ✅ **独立路由单元**: 5个并行路由单元已实现，包含故障感知路由算法
+2. ✅ **QoS仲裁器**: 5个输出仲裁器已实现，支持高QoS绝对优先权
+3. ✅ **故障感知路由**: 完整的故障相对位置计算和路径选择逻辑
+4. ✅ **IRS_N集成**: 输入输出缓冲和寄存器功能已实现，无需额外打拍
 
-1. **四方向网格连接**: NWSE四个方向的接口数组连接复杂性
-2. **独立路由单元实现**: 5个并行路由单元的资源开销和时序优化
-3. **多仲裁器协同**: 5个输出仲裁器的QoS优先级一致性和死锁避免
-4. **故障感知路由**: 复杂的故障相对位置计算和路径选择逻辑
-5. **时序同步**: 时钟门控、故障信息传播和数据包路由的时序协调
-6. **验证复杂度**: 64节点四方向网格的状态空间爆炸问题
+### 待完成挑战
+1. **拓扑连接**: NWSE四个方向的C接口网格连接实现
+2. **顶层集成**: 64节点实例化和故障节点的时钟门控
+3. **测试验证**: 创建完整的测试基础设施和验证用例
+4. **性能优化**: 网络吞吐量和延迟特性的优化
 
-### Critical Design Decisions
+### 关键设计决策
 
 1. **非流水线架构**: 简化节点内部设计，通过并行路由和仲裁提高吞吐量
 2. **四方向网格**: NWSE四个方向连接，简化拓扑复杂度，便于故障容错
@@ -289,95 +322,93 @@ make -f VMAZE_TOP.mk
 6. **IRS_N缓冲**: 输入输出端口的统一缓冲机制，简化时序设计
 7. **参数化设计**: 支持不同规模网络的可扩展性
 
-## File Architecture System
+## 文件架构系统
 
-The MAZE project uses a structured file architecture to support systematic development and verification. See `README_FILE_STRUCTURE.md` for detailed documentation.
+MAZE项目使用结构化的文件架构来支持系统化的开发和验证。
 
-### 🔒 Immutable Files (DO NOT MODIFY)
+### 🔒 不可变文件 (请勿修改)
 
-**Location**: `Provided_Code/`
-- All original reference files are preserved here
-- Never modify these files directly
-- Use as reference when working with modifiable RTL
+**位置**: `Provided_Code/`
+- 所有原始参考文件都保存在这里
+- 请勿直接修改这些文件
+- 在处理可修改RTL时用作参考
 
-### ✅ Modifiable RTL Code
+### ✅ 可修改RTL代码
 
-**Location**: `rtl/`
-- **Interfaces**: `rtl/include/interfaces/` - A/B/C interface definitions
-- **Global Defines**: `rtl/include/global_defines/` - Project-wide parameters
-- **Source Code**: `rtl/src/` - Core RTL implementations organized by module
-- **Libraries**: `rtl/lib/irs/` - IRS and other third-party IP
+**位置**: `rtl/`
+- **接口**: `rtl/include/interfaces/` - A/B/C接口定义
+- **全局定义**: `rtl/include/global_defines/` - 项目全局参数
+- **源代码**: `rtl/src/` - 按模块组织的核心RTL实现
+- **库文件**: `rtl/lib/irs/` - IRS和其他第三方IP
 
-### ✅ Test Environment
+### ✅ 测试环境
 
-**Location**: `testbench/`
-- **Unit Tests**: `testbench/src/unit_tests/` - Individual module testing
-- **Integration Tests**: `testbench/src/integration_tests/` - Multi-module testing
-- **System Tests**: `testbench/src/system_tests/` - Full network verification
-- **C++ Tests**: `testbench/cpp/` - Verilator-based C++ testbenches
+**位置**: `testbench/`
+- **单元测试**: `testbench/src/unit_tests/` - 单个模块测试
+- **集成测试**: `testbench/src/integration_tests/` - 多模块测试
+- **系统测试**: `testbench/src/system_tests/` - 完整网络验证
+- **C++测试**: `testbench/cpp/` - 基于Verilator的C++测试台
 
-### 🗂️ Temporary Files
+### 🗂️ 临时文件
 
-**Location**: `sim/`
-- **Build Artifacts**: `sim/build/obj_dir/` - Verilator generated files
-- **Runtime Files**: `sim/run/temp/` - Temporary simulation data
-- **Waveform Files**: `sim/wave/` - Organized by format (vcd, fsdb, vpd, fst)
+**位置**: `sim/`
+- **构建产物**: `sim/build/obj_dir/` - Verilator生成的文件
+- **运行时文件**: `sim/run/temp/` - 临时仿真数据
+- **波形文件**: `sim/wave/` - 按格式组织 (vcd, fsdb, vpd, fst)
 
-### 📄 Reports and Documentation
+### 📄 报告和文档
 
-**Location**: `reports/` and `docs/`
-- **Simulation Reports**: `reports/simulation/` - Test results and analysis
-- **Coverage Reports**: `reports/coverage/` - Code coverage analysis
-- **Design Docs**: `docs/design/` - Design specifications
-- **Verification Docs**: `docs/verification/` - Verification plans and results
+**位置**: `reports/` 和 `docs/`
+- **仿真报告**: `reports/simulation/` - 测试结果和分析
+- **覆盖率报告**: `reports/coverage/` - 代码覆盖率分析
+- **设计文档**: `docs/design/` - 设计规范，包括topo架构文档
+- **验证文档**: `docs/verification/` - 验证计划和结果
 
-### Current Working Directory Structure
+### 当前工作目录结构
 
 ```
 maze/
-├── rtl/                        # ✅ Main RTL development
+├── rtl/                        # ✅ 主要RTL开发
 │   ├── include/
-│   │   ├── interfaces/         # A/B/C interface definitions
-│   │   └── global_defines/     # Global parameters
+│   │   ├── interfaces/         # A/B/C接口定义
+│   │   └── global_defines/     # 全局参数
 │   ├── src/
-│   │   ├── node/node.v         # Node module (4-stage pipeline)
-│   │   ├── topo/topo.v         # Topology module
-│   │   └── system/MAZE_TOP.v   # Top-level 64-node module
-│   └── lib/irs/irs.v          # IRS library
-├── testbench/                  # ✅ Test environment
-├── sim/                       # 🗂️ Simulation files and waveforms
-├── reports/                   # 📄 Analysis and coverage reports
-├── docs/                      # 📚 Project documentation
-├── scripts/                   # 🔧 Build and utility scripts
-├── workspace/                 # 🗂️ Development workspace
-├── Provided_Code/             # 🔒 Original reference files
-├── maze_impl/                 # Legacy implementation (preserved)
-├── MAZE_题目.md              # Original requirements
-├── README_FILE_STRUCTURE.md   # File architecture guide
-└── CLAUDE.md                  # This documentation
+│   │   ├── node/node.v         # 节点模块 (4级流水线)
+│   │   ├── topo/topo.v         # 拓扑模块
+│   │   └── system/MAZE_TOP.v   # 顶层64节点模块
+│   └── lib/irs/irs.v          # IRS库
+├── testbench/                  # ✅ 测试环境
+├── sim/                       # 🗂️ 仿真文件和波形
+├── reports/                   # 📄 分析和覆盖率报告
+├── docs/                      # 📚 项目文档
+├── scripts/                   # 🔧 构建和工具脚本
+├── workspace/                 # 🗂️ 开发工作区
+├── Provided_Code/             # 🔒 原始参考文件
+├── MAZE_题目.md              # 原始需求
+└── CLAUDE.md                  # 本文档
 ```
 
-### Development Workflow Commands
+### 开发工作流命令
 
 ```bash
-# RTL Development (work in rtl/src/)
+# RTL开发 (在rtl/src/中工作)
 cd rtl/src/system/
-# Edit MAZE_TOP.v or other RTL files
+# 编辑MAZE_TOP.v或其他RTL文件
 
-# Verification (create tests in testbench/)
+# 验证 (在testbench/中创建测试)
 cd testbench/src/unit_tests/
-# Create testbenches here
+# 在这里创建测试台
 
-# Build and Simulation
+# 构建和仿真
 cd sim/build/
 verilator --top-module MAZE_TOP -cc -f ../../rtl.filelist \
   -I../../rtl/include
 
-# Waveform Analysis
-ls ../sim/wave/vcd/  # Check generated waveforms
+# 波形分析
+ls ../sim/wave/vcd/  # 检查生成的波形文件
 ```
 
-## Performance Characteristics
+## 性能特征
 
 - **网络延迟**: 1-2时钟周期 (直接路由) + 路径跳数，无流水线延迟
 - **吞吐量**: 每个时钟周期每个节点可处理最多5个输入数据包 (并行路由)
@@ -387,105 +418,105 @@ ls ../sim/wave/vcd/  # Check generated waveforms
 - **缓冲能力**: IRS_N提供输入输出缓冲，支持流量控制
 - **资源效率**: 相比流水线架构，减少硬件开销和功耗
 
-This architecture provides a solid foundation for a high-performance on-chip interconnect with advanced features like QoS prioritization, fault tolerance, and efficient direct routing capabilities.
+该架构为高性能片上互连提供了坚实的基础，具备QoS优先级、容错和高效直接路由等先进特性。
 
-## Available Agent Types for MAZE Project
+## MAZE项目可用的代理类型
 
-This project supports several specialized agents that can assist with different aspects of development and verification:
+本项目支持多种专业化代理，可在开发和验证的不同方面提供帮助：
 
-### 🎯 High Priority Agents (Immediate Impact)
+### 🎯 高优先级代理 (立即影响)
 
-#### 1. RTL Verification Agent
-**Purpose**: Comprehensive testing and verification of the 64-node network
-**Capabilities**:
-- Generate automated testbench environments for Verilator simulation
-- Create behavioral-level tests for the 4-stage pipeline
-- Implement assertion-based verification for packet routing
-- Perform fault injection and tolerance testing
-- Generate coverage analysis for router scenarios
+#### 1. RTL验证代理
+**用途**: 对64节点网络进行全面测试和验证
+**能力**:
+- 为Verilator仿真生成自动化测试台环境
+- 为4级流水线创建行为级测试
+- 实现数据包路由的断言式验证
+- 执行故障注入和容错测试
+- 生成路由器场景的覆盖率分析
 
-**When to Use**:
-- Validate incomplete Stage 1-3 pipeline implementation
-- Test QoS arbitration and fault tolerance mechanisms
-- Create regression tests for continuous validation
+**何时使用**:
+- 验证不完整的1-3级流水线实现
+- 测试QoS仲裁和容错机制
+- 创建持续验证的回归测试
 
-**Integration**: Works with existing build scripts (`scripts/build/build_maze.sh`) and Verilator infrastructure
+**集成**: 与现有构建脚本(`scripts/build/build_maze.sh`)和Verilator基础设施配合工作
 
-#### 2. Test Development and Automation Agent
-**Purpose**: Create comprehensive test infrastructure
-**Capabilities**:
-- Develop scalable testbenches for 64-node networks
-- Create automated regression testing scripts
-- Implement performance measurement and analysis tools
-- Generate constraint-random test cases
-- Build simulation result visualization tools
+#### 2. 测试开发和自动化代理
+**用途**: 创建全面的测试基础设施
+**能力**:
+- 为64节点网络开发可扩展的测试台
+- 创建自动化回归测试脚本
+- 实现性能测量和分析工具
+- 生成约束随机测试用例
+- 构建仿真结果可视化工具
 
-**When to Use**:
-- Expand beyond current 4-node simplified testing
-- Create systematic validation methodology
-- Generate performance benchmarks
+**何时使用**:
+- 扩展当前4节点的简化测试
+- 创建系统化验证方法学
+- 生成性能基准测试
 
-### 🏗️ Medium Priority Agents (Architecture Improvement)
+### 🏗️ 中等优先级代理 (架构改进)
 
-#### 3. Network-on-Chip Architecture Specialist
-**Purpose**: Analyze and optimize mesh topology and routing
-**Capabilities**:
-- Evaluate 8×8 mesh topology optimization
-- Analyze buffer depth and arbitration strategies
-- Validate inter-router communication protocols
-- Optimize XY routing algorithm performance
-- Identify congestion control bottlenecks
+#### 3. 片上网络架构专家
+**用途**: 分析和优化网格拓扑和路由
+**能力**:
+- 评估8×8网格拓扑优化
+- 分析缓冲器深度和仲裁策略
+- 验证路由器间通信协议
+- 优化XY路由算法性能
+- 识别拥塞控制瓶颈
 
-**When to Use**:
-- Analyze performance bottlenecks in current implementation
-- Optimize IRS module configuration for different Manhattan distances
-- Suggest improvements to the simplified directional arbitration
+**何时使用**:
+- 分析当前实现中的性能瓶颈
+- 针对不同曼哈顿距离优化IRS模块配置
+- 建议简化方向仲裁的改进方案
 
-#### 4. SystemVerilog Design Review Agent
-**Purpose**: Code quality, synthesis, and timing analysis
-**Capabilities**:
-- Comprehensive code review for synthesis readiness
-- Interface definition validation and improvement
-- Pipeline stage timing analysis
-- Parameterized design scalability verification
-- Static timing analysis preparation
+#### 4. SystemVerilog设计审查代理
+**用途**: 代码质量、综合和时序分析
+**能力**:
+- 面向综合准备的全面代码审查
+- 接口定义验证和改进
+- 流水线阶段时序分析
+- 参数化设计可扩展性验证
+- 静态时序分析准备
 
-**When to Use**:
-- Validate code quality before synthesis
-- Identify timing violations in pipeline design
-- Improve interface definitions for better standardization
+**何时使用**:
+- 综合前验证代码质量
+- 识别流水线设计中的时序违规
+- 改进接口定义以获得更好的标准化
 
-### 📊 Lower Priority Agents (Long-term Enhancement)
+### 📊 低优先级代理 (长期增强)
 
-#### 5. Performance Analysis and Optimization Agent
-**Purpose**: Quantitative performance analysis
-**Capabilities**:
-- Analyze throughput and latency characteristics
-- Identify implementation bottlenecks
-- Suggest pipeline optimizations
-- Evaluate buffer sizing requirements
-- Provide power consumption estimates
+#### 5. 性能分析和优化代理
+**用途**: 定量性能分析
+**能力**:
+- 分析吞吐量和延迟特征
+- 识别实现瓶颈
+- 建议流水线优化
+- 评估缓冲器大小需求
+- 提供功耗估算
 
-**When to Use**:
-- After basic functionality is complete
-- Need performance optimization for specific workloads
-- Generate detailed performance reports
+**何时使用**:
+- 基本功能完成后
+- 需要特定工作负载的性能优化
+- 生成详细性能报告
 
-#### 6. Documentation and Specification Agent
-**Purpose**: Maintain comprehensive project documentation
-**Capabilities**:
-- Generate API documentation for interfaces
-- Create architecture design documents
-- Maintain implementation specifications
-- Generate user guides for simulation
-- Create performance benchmark documentation
+#### 6. 文档和规范代理
+**用途**: 维护全面的项目文档
+**能力**:
+- 为接口生成API文档
+- 创建架构设计文档
+- 维护实现规范
+- 生成仿真用户指南
+- 创建性能基准文档
 
-**When to Use**:
-- Update documentation after major changes
-- Create detailed API references
-- Generate user guides for team members
+**何时使用**:
+- 重大更改后更新文档
+- 创建详细API参考
+- 为团队成员生成用户指南
 
-### 🚀 How to Use Agents
+### 🚀 如何使用代理
 
 **语法**: 在适当时机使用特定代理命令:
 - 对于RTL验证: "为节点模块的独立路由单元创建综合测试"
@@ -493,23 +524,39 @@ This project supports several specialized agents that can assist with different 
 - 对于代码审查: "审查当前node.v实现的综合问题"
 - 对于测试开发: "为64节点四方向网络创建验证测试台"
 
-**Current Project Status & Agent Priority**:
-1. **关键缺口**: 独立路由单元和仲裁器实现不完整
-2. **测试缺口**: 缺少四方向网格和故障感知路由的测试
-3. **架构缺口**: NWSE方向的C接口连接需要完成
-4. **算法缺口**: 故障感知的XY路由算法需要集成验证
+**当前项目状态和代理优先级**:
+1. ✅ **已完成**: 独立路由单元和仲裁器已完全实现
+2. ✅ **已完成**: 故障感知XY路由算法已集成
+3. ⚠️ **待完成**: 拓扑模块的NWSE方向C接口连接
+4. ⚠️ **待完成**: MAZE_TOP的64节点实例化和集成
+5. ⚠️ **测试缺口**: 缺少系统级测试基础设施
 
 **推荐代理使用序列**:
-1. 首先使用**RTL验证代理**完成并测试独立路由单元和仲裁器
-2. 使用**测试开发代理**创建四方向网格的综合测试基础设施
-3. 应用**NoC架构专家代理**优化故障感知路由和拓扑连接
-4. 启用**SystemVerilog审查代理**进行代码质量和时序验证
+1. 使用**NoC架构专家代理**完成拓扑模块的NWSE网格连接
+2. 使用**测试开发代理**创建64节点网络的验证测试台
+3. 应用**RTL验证代理**进行系统级功能和性能验证
+4. 启用**SystemVerilog审查代理**进行综合前代码质量检查
 
-### 💡 Agent Selection Guidelines
+### 💡 代理选择指南
 
-- **使用RTL验证代理** 当: 处理独立路由单元、QoS仲裁器或故障容错时
-- **使用测试开发代理** 当: 需要测试台、回归测试或性能测量时
-- **使用NoC架构专家代理** 当: 优化四方向拓扑、故障感知路由或缓冲管理时
-- **使用SystemVerilog审查代理** 当: 准备综合或时序分析时
+- **使用NoC架构专家代理** 当: 处理拓扑模块、NWSE网格连接或节点间通信时
+- **使用测试开发代理** 当: 需要测试台、回归测试或系统级验证时
+- **使用RTL验证代理** 当: 进行功能验证、性能测试或故障注入测试时
+- **使用SystemVerilog审查代理** 当: 准备综合、时序分析或代码质量检查时
 
-These agents integrate seamlessly with the existing file architecture (`rtl/`, `testbench/`, `sim/`) and build infrastructure to provide comprehensive support for the MAZE network development lifecycle.
+## 关键架构特性
+
+### 已实现的核心特性
+- **非流水线架构**: 2时钟周期总延迟，无流水线开销
+- **并行处理**: 5个独立路由单元和5个仲裁器
+- **QoS支持**: 高QoS数据包绝对优先权
+- **故障容错**: 9种故障相对位置的智能路由
+- **IRS_N集成**: 内置寄存器功能，无需额外打拍
+
+### 开发重点
+1. **拓扑模块完成**: 实现8×8网格的C接口连接
+2. **系统集成**: 完成MAZE_TOP的64节点实例化
+3. **测试基础设施**: 创建系统级验证环境
+4. **性能验证**: 吞吐量和延迟特性测试
+
+这些代理与现有文件架构(`rtl/`)和构建基础设施(`scripts/build/`)无缝集成，为MAZE网络开发生命周期提供全面支持。

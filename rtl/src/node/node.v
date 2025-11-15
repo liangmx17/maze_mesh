@@ -1,727 +1,586 @@
-// ====================================================================
-// MAZE Network Node Module - 4-Stage Pipeline Implementation
-// ====================================================================
-//
-// Implements 4-stage pipeline processing for 8x8 mesh topology
-// Based on Node_Technical_Implementation_Guide.md specifications
-//
-// Architecture Features:
-// - Stage 0: Input Preprocessing & Intermediate Node Calculation
-// - Stage 1: QoS Arbitration & XY Routing (7 X-arbiters + 7 Y-arbiters + 1 B-port arbiter)
-// - Stage 2: Output Selection with winner decoding and data MUX
-// - Stage 3: Output Buffering with IRS_LP buffers
-// - 16 input buffers (1 A-interface + 7 C-X-input + 7 C-Y-input)
-// - 15 output buffers (1 B-interface + 7 C-X-output + 7 C-Y-output)
-// - Two-hop unicast routing with intermediate node calculation
-// - QoS arbitration with high priority absolute priority
-// - Fault tolerance with clock gating
-//
-// Packet Format (23-bit): [22:21]=type, [20]=qos, [19:14]=src, [13:8]=tgt, [7:0]=data
-//
-// ====================================================================
+// =============================================================================
+// MAZE网络节点模块 - 模块化实现
+// =============================================================================
+// 功能说明：
+// 1. 非流水线直接路由架构，2时钟周期总延迟
+// 2. 支持四方向网格连接和故障感知XY路由算法
+// 3. 5个独立路由单元，每个输入端口对应一个路由器
+// 4. 5个QoS仲裁器，每个输出端口对应一个4输入QoS仲裁器
+// 5. IRS_N缓冲器用于输入输出流量控制和寄存器功能
+// 6. 支持故障容错和时钟门控
+// 7. 边缘节点特殊处理，防止越界访问
+// 8. 关键设计：IRS_N内部提供寄存器功能，无需额外打拍
+// =============================================================================
 
-// Include global definitions and interfaces
-`include "/home/liangmx/maze/rtl/include/global_defines/top_define.v"
-`include "/home/liangmx/maze/rtl/include/interfaces/interface_a.sv"
-`include "/home/liangmx/maze/rtl/include/interfaces/interface_b.sv"
-`include "/home/liangmx/maze/rtl/include/interfaces/interface_c.sv"
-`include "/home/liangmx/maze/rtl/lib/irs/irs.v"
-`include "/home/liangmx/maze/Provided_Code/arbiter_with_qos.v"
+// =============================================================================
+// MAZE网络节点主模块
+// =============================================================================
+
+// 包含模块定义 - 使用相对路径
+`include "rtl/include/global_defines/top_define.v"
+`include "rtl/src/node/node_components/router_unit.v"
+`include "rtl/src/node/node_components/arbiter.v"
 
 module node #(
-    parameter HP = 3'b000,    // Horizontal Position (0-7)
-    parameter VP = 3'b000     // Vertical Position (0-7)
+    parameter HP = 0,                    // 水平坐标 (0-7)
+    parameter VP = 0                     // 垂直坐标 (0-7)
 ) (
-    input               clk,
-    input               rst_n,
+    // 时钟和复位
+    input logic clk,
+    input logic rst_n,
 
-    // A Interface - External Input
-    pkt_in.mst          pkt_i,
+    // 故障容错配置
+    input logic pg_en,                   // 故障使能信号
+    input logic [`ID_W-1:0] pg_node,     // 故障节点坐标
 
-    // B Interface - External Output
-    pkt_out.mst         pkt_o,
-
-    // C Interface - Topology Connections
-    pkt_con_if.mst      pkt_con,
-
-    // Power Gating Control
-    input               pg_en,
-    input [5:0]         pg_node
+    // 接口连接
+    pkt_in.mst pkt_i,                    // A接口输入 - 外部数据包输入
+    pkt_out.mst pkt_o,                   // B接口输出 - 外部数据包输出
+    pkt_con_if.mst pkt_con               // C接口 - 四方向网格连接
 );
 
-// ====================================================================
-// Parameter Definitions and Constants
-// ====================================================================
+  // =============================================================================
+    // 参数定义和内部信号声明
+    // =============================================================================
 
-localparam PKT_W = 23;  // Total packet width: 2 type + 1 qos + 6 src + 6 tgt + 8 data
-localparam NODE_COORD = {VP, HP};
-localparam NUM_X_PORTS = 7;
-localparam NUM_Y_PORTS = 7;
+    // 数据包格式定义 (23位总宽度)
+    localparam PKT_W = `TYPE_W + `QOS_W + `SRCID_W + `TGTID_W + `FLIT_W;  // 2+1+6+6+8 = 23位
 
-// ====================================================================
-// Stage 0: Input Preprocessing & Intermediate Node Calculation
-// ====================================================================
+    // 数据包位位置常量
+    localparam QOS_POS      = 8;           // QoS位位置
+    localparam TYPE_POS_HI  = 22;          // 类型位高位置
+    localparam TYPE_POS_LO  = 21;          // 类型位低位置
+    localparam SRC_POS_HI   = 20;          // 源ID高位置
+    localparam SRC_POS_LO   = 15;          // 源ID低位置
+    localparam TGT_POS_HI   = 14;          // 目标ID高位置
+    localparam TGT_POS_LO   = 9;           // 目标ID低位置
 
-// Input signals from A interface
-wire        a_pkt_vld;
-wire        a_pkt_qos;
-wire [1:0]  a_pkt_type;
-wire [5:0]  a_pkt_src;
-wire [5:0]  a_pkt_tgt;
-wire [7:0]  a_pkt_data;
-wire        a_pkt_rdy;
+    // 故障相对位置类型定义
+    localparam NORMAL   = 4'd0;  // 正常状态，无故障影响
+    localparam N_OF_x   = 4'd1;  // 当前节点在故障节点北方
+    localparam NE_OF_x  = 4'd2;  // 当前节点在故障节点东北方
+    localparam E_OF_x   = 4'd3;  // 当前节点在故障节点东方
+    localparam SE_OF_x  = 4'd4;  // 当前节点在故障节点东南方
+    localparam S_OF_x   = 4'd5;  // 当前节点在故障节点南方
+    localparam SW_OF_x  = 4'd6;  // 当前节点在故障节点西南方
+    localparam W_OF_x   = 4'd7;  // 当前节点在故障节点西方
+    localparam NW_OF_x  = 4'd8;  // 当前节点在故障节点西北方
 
-// A-interface signal connections
-assign a_pkt_vld = pkt_i.pkt_in_vld;
-assign a_pkt_qos = pkt_i.pkt_in_qos;
-assign a_pkt_type = pkt_i.pkt_in_type;
-assign a_pkt_src = pkt_i.pkt_in_src;
-assign a_pkt_tgt = pkt_i.pkt_in_tgt;
-assign a_pkt_data = pkt_i.pkt_in_data;
-assign pkt_i.pkt_in_rdy = a_pkt_rdy;
+    // 路由方向定义
+    localparam DIR_N    = 3'd0;   // 北方向
+    localparam DIR_W    = 3'd1;   // 西方向
+    localparam DIR_S    = 3'd2;   // 南方向
+    localparam DIR_E    = 3'd3;   // 东方向
+    localparam DIR_B    = 3'd4;   // 本地输出
 
-// A-interface input buffer IRS_N - must be defined before fault detection logic
-wire [22:0] a_buffered_pkt;
-wire        a_buffered_vld;
-wire        a_buffered_rdy;
+  // =============================================================================
+    // 故障感知REGISTER信号计算
+    // =============================================================================
 
-IRS_N #(
-    .PYLD_W(23),
-    .IRS_DEEP(1),
-    .TYPE_NO_READY(0),
-    .TYPE_HALF(0),
-    .TYPE_RO_EN(1)
-) u_a_input_buffer (
-    .clk(clk),        // Use direct clk (clock gating in MAZE_TOP)
-    .rst_n(rst_n),
-    .valid_i(a_pkt_vld),
-    .ready_i(a_pkt_rdy),
-    .valid_o(a_buffered_vld),
-    .ready_o(a_buffered_rdy),
-    .payload_i({a_pkt_type, a_pkt_qos, a_pkt_src, a_pkt_tgt, a_pkt_data}),
-    .payload_o(a_buffered_pkt)
-);
+    // 故障节点坐标分解
+    logic [`ID_W/2-1:0] fault_x, fault_y;    // 故障节点的X和Y坐标
+    logic [`ID_W/2-1:0] local_x, local_y;    // 当前节点的X和Y坐标
 
-// Fix unconnected a_pkt_rdy signal - connect to input buffer ready
-assign a_pkt_rdy = a_buffered_rdy;
+    assign fault_x = pg_node[2:0];            // 低3位为X坐标
+    assign fault_y = pg_node[5:3];            // 高3位为Y坐标
+    assign local_x = HP[2:0];                 // 当前节点X坐标
+    assign local_y = VP[2:0];                 // 当前节点Y坐标
 
-// Internal signals for coordinate extraction - only source coordinates (from node position)
-wire [5:0]  src_coord = NODE_COORD;
-wire [2:0]  src_x = HP;
-wire [2:0]  src_y = VP;
+    // 故障相对位置计算
+    logic [3:0] fault_relative_pos;           // 故障相对位置（需要4位支持9种状态）
 
-// Direction decision signals
-reg         route_to_x_first;  // 1: X-first, 0: Y-first
-reg [5:0]   selected_intermediate;
+    // 边缘节点检测信号
+    logic is_north_edge, is_south_edge;       // 南北边缘检测
+    logic is_west_edge, is_east_edge;         // 东西边缘检测
 
-// Output buffer selection signals - fix multiple driver conflicts
-reg         select_x_buffer;
-reg         select_y_buffer;
+    // 边缘检测逻辑
+    assign is_north_edge = (VP == 7);          // Y坐标为7是北边缘
+    assign is_south_edge = (VP == 0);          // Y坐标为0是南边缘
+    assign is_west_edge = (HP == 0);           // X坐标为0是西边缘
+    assign is_east_edge = (HP == 7);           // X坐标为7是东边缘
 
-// Extract packet fields from A input buffer output - moved outside always_comb
-wire [1:0]  buffered_pkt_type = a_buffered_pkt[22:21];
-wire [5:0]  buffered_pkt_tgt = a_buffered_pkt[13:8];
-wire [5:0]  buffered_pkt_src = a_buffered_pkt[19:14];  // Fix undefined variable
-wire [2:0]  buffered_tgt_x = buffered_pkt_tgt[2:0];
-wire [2:0]  buffered_tgt_y = buffered_pkt_tgt[5:3];
-
-// Local delivery and intermediate node signals - moved outside always_comb
-wire        is_local_delivery = (buffered_pkt_src == buffered_pkt_tgt);
-wire [5:0]  buffered_intermediate_1 = {src_y, buffered_tgt_x};  // [src_y, tgt_x]
-wire [5:0]  buffered_intermediate_2 = {buffered_tgt_y, src_x};  // [tgt_y, src_x]
-
-// Stage 0 Logic Implementation - Fault-Aware Two-Hop Routing
-// Note: This logic operates on A input buffer output signals
-always_comb begin
-    // Default values
-    route_to_x_first = 1'b1;
-    selected_intermediate = src_coord;  // Default to source coordinate
-
-    // Only process unicast packets (type = 2'b00) from A input buffer
-    if (a_buffered_vld && buffered_pkt_type == 2'b00) begin
-        // Check for local delivery (source = target) - route to A-Y buffer
-        if (is_local_delivery) begin
-            // Local delivery: route to A-Y buffer (will exit through B port)
-            select_x_buffer = 1'b0;
-            select_y_buffer = 1'b1;  // Route to Y buffer for local delivery
-            selected_intermediate = src_coord;  // No intermediate node needed
-            route_to_x_first = 1'b0;  // Not applicable for local delivery
+    always_comb begin
+        if (!pg_en) begin
+            fault_relative_pos = NORMAL;      // 无故障使能时为正常状态
         end else begin
-            // Network routing: need intermediate node
-
-            // Simplified fault detection: at most 1 fault node
-            // If intermediate node 1 is the fault, use node 2. Otherwise, use node 1.
-            if (pg_en && (pg_node == buffered_intermediate_1)) begin
-                // Node 1 is faulted, use node 2
-                selected_intermediate = buffered_intermediate_2;
+            // 计算当前节点与故障节点的相对位置
+            if (local_y == fault_y && local_x == fault_x) begin
+                // 当前节点就是故障节点（不应该发生，因为故障节点会被时钟门控）
+                fault_relative_pos = NORMAL;
+            end else if (local_y > fault_y) begin
+                // 当前节点在故障节点北方
+                if (local_x < fault_x) fault_relative_pos = NW_OF_x;      // 西北方
+                else if (local_x == fault_x) fault_relative_pos = N_OF_x; // 正北方
+                else fault_relative_pos = NE_OF_x;                        // 东北方
+            end else if (local_y == fault_y) begin
+                // 当前节点与故障节点同一行
+                if (local_x < fault_x) fault_relative_pos = W_OF_x;       // 西方
+                else fault_relative_pos = E_OF_x;                         // 东方
             end else begin
-                // Node 1 is not faulted, use node 1 (regardless of node 2 status)
-                selected_intermediate = buffered_intermediate_1;
-            end
-
-            // Route to X first if we need to change X coordinate to reach intermediate
-            route_to_x_first = (src_x != selected_intermediate[2:0]);
-
-            // Buffer selection logic based on routing decision
-            select_x_buffer = route_to_x_first;
-            select_y_buffer = ~route_to_x_first;
-        end
-    end else begin
-        // Non-unicast packets or no valid packet: default routing
-        select_x_buffer = 1'b0;
-        select_y_buffer = 1'b0;
-    end
-end
-
-// A-interface input buffer already defined above before fault detection logic
-
-// A-X and A-Y route buffers for Stage 0 output
-wire [22:0] a_x_buffered_data;
-wire        a_x_buffered_vld;
-wire        a_x_buffered_rdy;
-
-IRS_N #(
-    .PYLD_W(23),
-    .IRS_DEEP(1),
-    .TYPE_NO_READY(0),
-    .TYPE_HALF(0),
-    .TYPE_RO_EN(1)
-) u_a_x_buffer (
-    .clk(clk),
-    .rst_n(rst_n),
-    .valid_i(a_buffered_vld && select_x_buffer),  // Only when X-direction selected
-    .ready_i(a_x_buffered_rdy),
-    .valid_o(a_x_buffered_vld),
-    .ready_o(a_x_buffered_rdy),
-    .payload_i(a_buffered_pkt),
-    .payload_o(a_x_buffered_data)
-);
-
-wire [22:0] a_y_buffered_data;
-wire        a_y_buffered_vld;
-wire        a_y_buffered_rdy;
-
-IRS_N #(
-    .PYLD_W(23),
-    .IRS_DEEP(1),
-    .TYPE_NO_READY(0),
-    .TYPE_HALF(0),
-    .TYPE_RO_EN(1)
-) u_a_y_buffer (
-    .clk(clk),
-    .rst_n(rst_n),
-    .valid_i(a_buffered_vld && select_y_buffer),  // Only when Y-direction selected
-    .ready_i(a_y_buffered_rdy),
-    .valid_o(a_y_buffered_vld),
-    .ready_o(a_y_buffered_rdy),
-    .payload_i(a_buffered_pkt),
-    .payload_o(a_y_buffered_data)
-);
-
-// A-B direct buffer removed - local delivery now uses A-Y buffer
-
-// ====================================================================
-// Input Buffer Management (16 total input buffers for B arbitration)
-// Architecture: 1 A-interface + 7 C-X-input + 7 C-Y-input + 1 A-X + 1 A-Y
-// Local delivery uses A-Y buffer, no direct B path
-// ====================================================================
-
-genvar i, j, k;
-
-// C-Interface Input Buffers - X Direction (7 buffers)
-wire [6:0]  c_x_in_vld, c_x_in_rdy;
-wire [6:0]  c_x_in_qos;
-wire [1:0]  c_x_in_type [6:0];
-wire [5:0]  c_x_in_src [6:0];
-wire [5:0]  c_x_in_tgt [6:0];
-wire [7:0]  c_x_in_data [6:0];
-wire [22:0] c_x_buffered_data [6:0];
-wire [6:0]  c_x_buffered_vld;
-wire [6:0]  c_x_buffered_rdy;
-
-// C-Interface Input Buffers - Y Direction (7 buffers)
-wire [6:0]  c_y_in_vld, c_y_in_rdy;
-wire [6:0]  c_y_in_qos;
-wire [1:0]  c_y_in_type [6:0];
-wire [5:0]  c_y_in_src [6:0];
-wire [5:0]  c_y_in_tgt [6:0];
-wire [7:0]  c_y_in_data [6:0];
-wire [22:0] c_y_buffered_data [6:0];
-wire [6:0]  c_y_buffered_vld;
-wire [6:0]  c_y_buffered_rdy;
-
-// Connect C-interface inputs and instantiate input buffers
-generate
-    for (i = 0; i < NUM_X_PORTS; i++) begin : gen_c_input_buffers
-        // X-direction inputs (from topology)
-        assign c_x_in_vld[i] = pkt_con.xi_vld[i];
-        assign c_x_in_qos[i] = pkt_con.xi_qos[i];
-        assign c_x_in_type[i] = pkt_con.xi_type[i];
-        assign c_x_in_src[i] = pkt_con.xi_src[i];
-        assign c_x_in_tgt[i] = pkt_con.xi_tgt[i];
-        assign c_x_in_data[i] = pkt_con.xi_data[i];
-        assign pkt_con.xi_rdy[i] = c_x_in_rdy[i];
-
-        // Y-direction inputs (from topology)
-        assign c_y_in_vld[i] = pkt_con.yi_vld[i];
-        assign c_y_in_qos[i] = pkt_con.yi_qos[i];
-        assign c_y_in_type[i] = pkt_con.yi_type[i];
-        assign c_y_in_src[i] = pkt_con.yi_src[i];
-        assign c_y_in_tgt[i] = pkt_con.yi_tgt[i];
-        assign c_y_in_data[i] = pkt_con.yi_data[i];
-        assign pkt_con.yi_rdy[i] = c_y_in_rdy[i];
-
-        // X-direction input buffer IRS_N
-        IRS_N #(
-            .PYLD_W(23),
-            .IRS_DEEP(1),
-            .TYPE_NO_READY(0),
-            .TYPE_HALF(0),
-            .TYPE_RO_EN(1)
-        ) u_c_x_input_buffer (
-            .clk(clk),
-            .rst_n(rst_n),
-            .valid_i(c_x_in_vld[i]),
-            .ready_i(c_x_in_rdy[i]),
-            .valid_o(c_x_buffered_vld[i]),
-            .ready_o(c_x_buffered_rdy[i]),
-            .payload_i({c_x_in_type[i], c_x_in_qos[i], c_x_in_src[i], c_x_in_tgt[i], c_x_in_data[i]}),
-            .payload_o(c_x_buffered_data[i])
-        );
-
-        // Y-direction input buffer IRS_N
-        IRS_N #(
-            .PYLD_W(23),
-            .IRS_DEEP(1),
-            .TYPE_NO_READY(0),
-            .TYPE_HALF(0),
-            .TYPE_RO_EN(1)
-        ) u_c_y_input_buffer (
-            .clk(clk),
-            .rst_n(rst_n),
-            .valid_i(c_y_in_vld[i]),
-            .ready_i(c_y_in_rdy[i]),
-            .valid_o(c_y_buffered_vld[i]),
-            .ready_o(c_y_buffered_rdy[i]),
-            .payload_i({c_y_in_type[i], c_y_in_qos[i], c_y_in_src[i], c_y_in_tgt[i], c_y_in_data[i]}),
-            .payload_o(c_y_buffered_data[i])
-        );
-    end
-endgenerate
-
-// ====================================================================
-// Complete Input Buffer Array (16 buffers total for Stage 1)
-// Index Mapping:
-// [0] = A-X buffer, [1-7] = C-Y buffers, [8] = A-Y buffer, [9-15] = C-X buffers
-// ====================================================================
-
-wire [22:0] all_input_data [15:0];
-wire [15:0] all_input_vld;
-wire [15:0] all_input_rdy;
-wire [15:0] all_input_qos;
-
-// Connect all input buffers to unified array for arbitration
-assign all_input_data[0] = a_x_buffered_data;        // A-X input
-assign all_input_vld[0] = a_x_buffered_vld;
-assign all_input_rdy[0] = a_x_buffered_rdy;
-assign all_input_qos[0] = a_x_buffered_data[20];     // QoS field
-
-assign all_input_data[7:1] = c_y_buffered_data;      // C-Y inputs (7 buffers)
-assign all_input_vld[7:1] = c_y_buffered_vld;
-assign all_input_rdy[7:1] = c_y_buffered_rdy;
-assign all_input_qos[7:1] = c_y_in_qos;
-
-assign all_input_data[8] = a_y_buffered_data;        // A-Y input
-assign all_input_vld[8] = a_y_buffered_vld;
-assign all_input_rdy[8] = a_y_buffered_rdy;
-assign all_input_qos[8] = a_y_buffered_data[20];     // QoS field
-
-assign all_input_data[15:9] = c_x_buffered_data;     // C-X inputs (7 buffers)
-assign all_input_vld[15:9] = c_x_buffered_vld;
-assign all_input_rdy[15:9] = c_x_buffered_rdy;
-assign all_input_qos[15:9] = c_x_in_qos;
-
-// ====================================================================
-// Stage 1&2: Combined Arbitration and Output Selection
-// Architecture: 7 X-direction arbiters + 7 Y-direction arbiters + 1 B-port arbiter
-// Each arbiter outputs grant vector used for direct data selection
-// ====================================================================
-
-// Output data for each direction
-reg [22:0]  x_output_data [6:0];       // X-direction output data
-reg [22:0]  y_output_data [6:0];       // Y-direction output data
-reg [22:0]  b_output_data;             // B-port output data
-
-// Backpressure signals from actual output buffers
-wire [6:0]  x_output_buffer_rdy;       // From X output buffers
-wire [6:0]  y_output_buffer_rdy;       // From Y output buffers
-wire        b_output_buffer_rdy;       // From B output buffer
-
-// Grant signal arrays for access outside generate blocks
-reg [7:0]   x_grant_reg [6:0];         // X-direction grant registers
-reg         x_grant_valid [6:0];       // X-direction grant valid signals
-reg [7:0]   y_grant_reg [6:0];         // Y-direction grant registers
-reg         y_grant_valid [6:0];       // Y-direction grant valid signals
-
-// X-Direction Output Selection (7 outputs)
-generate
-    for (i = 0; i < NUM_X_PORTS; i++) begin : gen_x_output_sel
-        wire [7:0] x_grant;                // Local grant signal
-
-        // C-X Output Port i: Accepts C-Y[y] requests where dst_x[y] == (HP + i + 1) mod 8, plus A-Y request
-        // Request logic: req[y][x] = dst_x[y] == (HP + x + 1) mod 8
-        wire [7:0] x_req_inputs;
-        wire [7:0] x_qos_inputs;
-
-        // Calculate target X coordinate for this output port
-        wire [2:0] target_x_coord = (HP + i + 1) % 8;
-
-        // A-Y input (index 0)
-        assign x_req_inputs[0] = all_input_vld[8];  // A-Y always participates
-        assign x_qos_inputs[0] = all_input_qos[8];
-
-        // C-Y inputs (index 1:7 correspond to C-Y[0:6])
-        for (j = 0; j < NUM_Y_PORTS; j++) begin : gen_x_req_logic
-            // Extract destination X coordinate from C-Y[j] packet
-            wire [2:0] cy_dst_x = c_y_buffered_data[j][13:8] & 3'b111;  // tgt[2:0] from C-Y[j]
-
-            // Request only if destination X matches target coordinate
-            assign x_req_inputs[j+1] = all_input_vld[j+1] && (cy_dst_x == target_x_coord);
-            assign x_qos_inputs[j+1] = all_input_qos[j+1];
-        end
-
-        // Use provided QoS arbiter for this output port
-        arbiter_with_qos #(
-            .WIDTH(8)
-        ) u_x_arbiter_port (
-            .req(x_req_inputs),
-            .qos(x_qos_inputs),
-            .gnt(x_grant)
-        );
-
-        // Register grant signal
-        always_ff @(posedge clk or negedge rst_n) begin
-            if (!rst_n) begin
-                x_grant_reg[i] <= 8'b0;
-                x_grant_valid[i] <= 1'b0;
-            end else begin
-                x_grant_reg[i] <= x_grant;
-                x_grant_valid[i] <= |x_grant;
+                // 当前节点在故障节点南方
+                if (local_x < fault_x) fault_relative_pos = SW_OF_x;      // 西南方
+                else if (local_x == fault_x) fault_relative_pos = S_OF_x; // 正南方
+                else fault_relative_pos = SE_OF_x;                        // 东南方
             end
         end
-
-        // Select data using registered grant vector (priority encoder)
-        always_comb begin
-            if (x_grant_valid[i] && x_output_buffer_rdy[i]) begin
-                case (1'b1)
-                    x_grant_reg[i][7]: x_output_data[i] = c_y_buffered_data[6];  // C-Y[6]
-                    x_grant_reg[i][6]: x_output_data[i] = c_y_buffered_data[5];  // C-Y[5]
-                    x_grant_reg[i][5]: x_output_data[i] = c_y_buffered_data[4];  // C-Y[4]
-                    x_grant_reg[i][4]: x_output_data[i] = c_y_buffered_data[3];  // C-Y[3]
-                    x_grant_reg[i][3]: x_output_data[i] = c_y_buffered_data[2];  // C-Y[2]
-                    x_grant_reg[i][2]: x_output_data[i] = c_y_buffered_data[1];  // C-Y[1]
-                    x_grant_reg[i][1]: x_output_data[i] = c_y_buffered_data[0];  // C-Y[0]
-                    x_grant_reg[i][0]: x_output_data[i] = a_x_buffered_data;      // A-X
-                    default: x_output_data[i] = 23'b0;
-                endcase
-            end else begin
-                x_output_data[i] = 23'b0;
-            end
-        end
-
-        // Note: Ready signals will be handled globally to avoid multiple driver conflicts
-    end
-endgenerate
-
-// Y-Direction Output Selection (7 outputs)
-generate
-    for (i = 0; i < NUM_Y_PORTS; i++) begin : gen_y_output_sel
-        wire [7:0] y_grant;                // Local grant signal
-
-        // C-Y Output Port i: Accepts C-X[x] requests where dst_y[x] == (VP + i + 1) mod 8, plus A-X request
-        // Request logic: req[x][y] = dst_y[x] == (VP + y + 1) mod 8
-        wire [7:0] y_req_inputs;
-        wire [7:0] y_qos_inputs;
-
-        // Calculate target Y coordinate for this output port
-        wire [2:0] target_y_coord = (VP + i + 1) % 8;
-
-        // A-X input (index 0)
-        assign y_req_inputs[0] = all_input_vld[0];  // A-X always participates
-        assign y_qos_inputs[0] = all_input_qos[0];
-
-        // C-X inputs (index 1:7 correspond to C-X[0:6])
-        for (k = 0; k < NUM_X_PORTS; k++) begin : gen_y_req_logic
-            // Extract destination Y coordinate from C-X[k] packet
-            wire [2:0] cx_dst_y = (c_x_buffered_data[k][13:8] >> 3) & 3'b111;  // tgt[5:3] from C-X[k]
-
-            // Request only if destination Y matches target coordinate
-            assign y_req_inputs[k+1] = all_input_vld[k+9] && (cx_dst_y == target_y_coord);
-            assign y_qos_inputs[k+1] = all_input_qos[k+9];
-        end
-
-        // Use provided QoS arbiter for this output port
-        arbiter_with_qos #(
-            .WIDTH(8)
-        ) u_y_arbiter_port (
-            .req(y_req_inputs),
-            .qos(y_qos_inputs),
-            .gnt(y_grant)
-        );
-
-        // Register grant signal
-        always_ff @(posedge clk or negedge rst_n) begin
-            if (!rst_n) begin
-                y_grant_reg[i] <= 8'b0;
-                y_grant_valid[i] <= 1'b0;
-            end else begin
-                y_grant_reg[i] <= y_grant;
-                y_grant_valid[i] <= |y_grant;
-            end
-        end
-
-        // Select data using registered grant vector (priority encoder)
-        always_comb begin
-            if (y_grant_valid[i] && y_output_buffer_rdy[i]) begin
-                case (1'b1)
-                    y_grant_reg[i][7]: y_output_data[i] = c_x_buffered_data[6];  // C-X[6]
-                    y_grant_reg[i][6]: y_output_data[i] = c_x_buffered_data[5];  // C-X[5]
-                    y_grant_reg[i][5]: y_output_data[i] = c_x_buffered_data[4];  // C-X[4]
-                    y_grant_reg[i][4]: y_output_data[i] = c_x_buffered_data[3];  // C-X[3]
-                    y_grant_reg[i][3]: y_output_data[i] = c_x_buffered_data[2];  // C-X[2]
-                    y_grant_reg[i][2]: y_output_data[i] = c_x_buffered_data[1];  // C-X[1]
-                    y_grant_reg[i][1]: y_output_data[i] = c_x_buffered_data[0];  // C-X[0]
-                    y_grant_reg[i][0]: y_output_data[i] = a_y_buffered_data;      // A-Y
-                    default: y_output_data[i] = 23'b0;
-                endcase
-            end else begin
-                y_output_data[i] = 23'b0;
-            end
-        end
-
-        // Note: Ready signals will be handled globally to avoid multiple driver conflicts
-    end
-endgenerate
-
-// B-Port Output Selection (1 output)
-wire [15:0] b_grant;
-reg [15:0] b_grant_reg;            // Registered grant signal
-reg b_grant_valid;                 // Registered grant valid
-
-// B-Port Arbiter - all 16 input sources compete for B output
-arbiter_with_qos #(
-    .WIDTH(16)
-) u_b_arbiter (
-    .req(all_input_vld),
-    .qos(all_input_qos),
-    .gnt(b_grant)
-);
-
-// Register grant signal
-always_ff @(posedge clk or negedge rst_n) begin
-    if (!rst_n) begin
-        b_grant_reg <= 16'b0;
-        b_grant_valid <= 1'b0;
-    end else begin
-        b_grant_reg <= b_grant;
-        b_grant_valid <= |b_grant;
-    end
-end
-
-always_comb begin
-    // B-port arbiter selects data from all input sources
-    if (b_grant_valid && b_output_buffer_rdy) begin
-        // Network routing: from B-port arbiter using registered grant vector
-        case (1'b1)
-            b_grant_reg[15]: b_output_data = c_x_buffered_data[6];  // C-X[6]
-            b_grant_reg[14]: b_output_data = c_x_buffered_data[5];  // C-X[5]
-            b_grant_reg[13]: b_output_data = c_x_buffered_data[4];  // C-X[4]
-            b_grant_reg[12]: b_output_data = c_x_buffered_data[3];  // C-X[3]
-            b_grant_reg[11]: b_output_data = c_x_buffered_data[2];  // C-X[2]
-            b_grant_reg[10]: b_output_data = c_x_buffered_data[1];  // C-X[1]
-            b_grant_reg[9]:  b_output_data = c_x_buffered_data[0];  // C-X[0]
-            b_grant_reg[8]:  b_output_data = a_y_buffered_data;      // A-Y
-            b_grant_reg[7]:  b_output_data = c_y_buffered_data[6];  // C-Y[6]
-            b_grant_reg[6]:  b_output_data = c_y_buffered_data[5];  // C-Y[5]
-            b_grant_reg[5]:  b_output_data = c_y_buffered_data[4];  // C-Y[4]
-            b_grant_reg[4]:  b_output_data = c_y_buffered_data[3];  // C-Y[3]
-            b_grant_reg[3]:  b_output_data = c_y_buffered_data[2];  // C-Y[2]
-            b_grant_reg[2]:  b_output_data = c_y_buffered_data[1];  // C-Y[1]
-            b_grant_reg[1]:  b_output_data = c_y_buffered_data[0];  // C-Y[0]
-            b_grant_reg[0]:  b_output_data = a_x_buffered_data;      // A-X
-            default:      b_output_data = 23'b0;
-        endcase
-    end else begin
-        b_output_data = 23'b0;
-    end
-end
-
-// ====================================================================
-// Global Backpressure Handling
-// Assign ready signals from all input buffers to avoid multiple driver conflicts
-// ====================================================================
-
-// Connect input buffer ready signals based on arbitration results
-// Check if any X or Y arbiter has a valid grant
-reg any_x_grant_valid;
-reg any_y_grant_valid;
-
-always_comb begin
-    any_x_grant_valid = 1'b0;
-    for (int idx = 0; idx < 7; idx++) begin
-        any_x_grant_valid = any_x_grant_valid || x_grant_valid[idx];
     end
 
-    any_y_grant_valid = 1'b0;
-    for (int idx = 0; idx < 7; idx++) begin
-        any_y_grant_valid = any_y_grant_valid || y_grant_valid[idx];
+    // =============================================================================
+    // 输入IRS_N缓冲器
+    // =============================================================================
+
+    // A接口输入缓冲器
+    logic a_in_valid, a_in_ready;
+    logic [PKT_W-1:0] a_in_pkt;
+
+    IRS_N #(
+        .PYLD_W(PKT_W),
+        .IRS_DEEP(2),               // 2级深度缓冲
+        .TYPE_RO_EN(0)              // 标准模式，支持读写
+    ) irs_input_A (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_i(pkt_i.pkt_in_vld),
+        .ready_i(pkt_i.pkt_in_rdy),
+        .valid_o(a_in_valid),
+        .ready_o(a_in_ready),
+        .payload_i({pkt_i.pkt_in_type, pkt_i.pkt_in_qos, pkt_i.pkt_in_src, pkt_i.pkt_in_tgt, pkt_i.pkt_in_data}),
+        .payload_o(a_in_pkt)
+    );
+
+    // C接口北方输入缓冲器
+    logic n_in_valid, n_in_ready;
+    logic [PKT_W-1:0] n_in_pkt;
+
+    IRS_N #(
+        .PYLD_W(PKT_W),
+        .IRS_DEEP(2),
+        .TYPE_RO_EN(0)
+    ) irs_input_N (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_i(pkt_con.ni_vld),
+        .ready_i(pkt_con.ni_rdy),
+        .valid_o(n_in_valid),
+        .ready_o(n_in_ready),
+        .payload_i({pkt_con.ni_type, pkt_con.ni_qos, pkt_con.ni_src, pkt_con.ni_tgt, pkt_con.ni_data}),
+        .payload_o(n_in_pkt)
+    );
+
+    // C接口西方输入缓冲器
+    logic w_in_valid, w_in_ready;
+    logic [PKT_W-1:0] w_in_pkt;
+
+    IRS_N #(
+        .PYLD_W(PKT_W),
+        .IRS_DEEP(2),
+        .TYPE_RO_EN(0)
+    ) irs_input_W (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_i(pkt_con.wi_vld),
+        .ready_i(pkt_con.wi_rdy),
+        .valid_o(w_in_valid),
+        .ready_o(w_in_ready),
+        .payload_i({pkt_con.wi_type, pkt_con.wi_qos, pkt_con.wi_src, pkt_con.wi_tgt, pkt_con.wi_data}),
+        .payload_o(w_in_pkt)
+    );
+
+    // C接口南方输入缓冲器
+    logic s_in_valid, s_in_ready;
+    logic [PKT_W-1:0] s_in_pkt;
+
+    IRS_N #(
+        .PYLD_W(PKT_W),
+        .IRS_DEEP(2),
+        .TYPE_RO_EN(0)
+    ) irs_input_S (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_i(pkt_con.si_vld),
+        .ready_i(pkt_con.si_rdy),
+        .valid_o(s_in_valid),
+        .ready_o(s_in_ready),
+        .payload_i({pkt_con.si_type, pkt_con.si_qos, pkt_con.si_src, pkt_con.si_tgt, pkt_con.si_data}),
+        .payload_o(s_in_pkt)
+    );
+
+    // C接口东方输入缓冲器
+    logic e_in_valid, e_in_ready;
+    logic [PKT_W-1:0] e_in_pkt;
+
+    IRS_N #(
+        .PYLD_W(PKT_W),
+        .IRS_DEEP(2),
+        .TYPE_RO_EN(0)
+    ) irs_input_E (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_i(pkt_con.ei_vld),
+        .ready_i(pkt_con.ei_rdy),
+        .valid_o(e_in_valid),
+        .ready_o(e_in_ready),
+        .payload_i({pkt_con.ei_type, pkt_con.ei_qos, pkt_con.ei_src, pkt_con.ei_tgt, pkt_con.ei_data}),
+        .payload_o(e_in_pkt)
+    );
+
+    // =============================================================================
+    // 独立路由单元 (5个并行路由器)
+    // =============================================================================
+
+    // 路由单元接口信号
+    logic [4:0] route_req_A, route_req_N, route_req_W, route_req_S, route_req_E;  // 5-bit one-hot请求信号
+    logic [PKT_W-1:0] route_pkt_A, route_pkt_N, route_pkt_W, route_pkt_S, route_pkt_E; // 路由数据包
+
+    // A端口路由单元
+    router_unit u_router_A (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_in(a_in_valid),
+        .pkt_in(a_in_pkt),
+        .local_x(local_x),
+        .local_y(local_y),
+        .fault_register(fault_relative_pos),
+        .is_north_edge(is_north_edge),
+        .is_south_edge(is_south_edge),
+        .is_west_edge(is_west_edge),
+        .is_east_edge(is_east_edge),
+        .route_req(route_req_A),
+        .pkt_out(route_pkt_A)
+    );
+
+    // 北端口路由单元
+    router_unit u_router_N (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_in(n_in_valid),
+        .pkt_in(n_in_pkt),
+        .local_x(local_x),
+        .local_y(local_y),
+        .fault_register(fault_relative_pos),
+        .is_north_edge(is_north_edge),
+        .is_south_edge(is_south_edge),
+        .is_west_edge(is_west_edge),
+        .is_east_edge(is_east_edge),
+        .route_req(route_req_N),
+        .pkt_out(route_pkt_N)
+    );
+
+    // 西端口路由单元
+    router_unit u_router_W (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_in(w_in_valid),
+        .pkt_in(w_in_pkt),
+        .local_x(local_x),
+        .local_y(local_y),
+        .fault_register(fault_relative_pos),
+        .is_north_edge(is_north_edge),
+        .is_south_edge(is_south_edge),
+        .is_west_edge(is_west_edge),
+        .is_east_edge(is_east_edge),
+        .route_req(route_req_W),
+        .pkt_out(route_pkt_W)
+    );
+
+    // 南端口路由单元
+    router_unit u_router_S (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_in(s_in_valid),
+        .pkt_in(s_in_pkt),
+        .local_x(local_x),
+        .local_y(local_y),
+        .fault_register(fault_relative_pos),
+        .is_north_edge(is_north_edge),
+        .is_south_edge(is_south_edge),
+        .is_west_edge(is_west_edge),
+        .is_east_edge(is_east_edge),
+        .route_req(route_req_S),
+        .pkt_out(route_pkt_S)
+    );
+
+    // 东端口路由单元
+    router_unit u_router_E (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_in(e_in_valid),
+        .pkt_in(e_in_pkt),
+        .local_x(local_x),
+        .local_y(local_y),
+        .fault_register(fault_relative_pos),
+        .is_north_edge(is_north_edge),
+        .is_south_edge(is_south_edge),
+        .is_west_edge(is_west_edge),
+        .is_east_edge(is_east_edge),
+        .route_req(route_req_E),
+        .pkt_out(route_pkt_E)
+    );
+
+    // =============================================================================
+    // QoS仲裁器 (5个仲裁器)
+    // =============================================================================
+
+    // 仲裁器请求信号映射
+    logic [3:0] arb_req_N, arb_qos_N, arb_gnt_N;  // 北仲裁器：4个输入(A,W,S,E)，排除北输入
+    logic [3:0] arb_req_W, arb_qos_W, arb_gnt_W;  // 西仲裁器：4个输入(A,N,S,E)，排除西输入
+    logic [3:0] arb_req_S, arb_qos_S, arb_gnt_S;  // 南仲裁器：4个输入(A,N,W,E)，排除南输入
+    logic [3:0] arb_req_E, arb_qos_E, arb_gnt_E;  // 东仲裁器：4个输入(A,N,W,S)，排除东输入
+    logic [3:0] arb_req_B, arb_qos_B, arb_gnt_B;  // B仲裁器：支持所有4个输入(A,N,W,S,E)
+
+    // 仲裁器输入映射 - 使用常量QOS_POS确保一致性
+    // 北仲裁器：4个输入，排除来自北方的输入 [A,W,S,E]
+    assign arb_req_N = {route_req_A[0], route_req_W[0], route_req_S[0], route_req_E[0]};
+    assign arb_qos_N = {route_pkt_A[QOS_POS], route_pkt_W[QOS_POS], route_pkt_S[QOS_POS], route_pkt_E[QOS_POS]};
+
+    // 西仲裁器：4个输入，排除来自西方的输入 [A,N,S,E]
+    assign arb_req_W = {route_req_A[1], route_req_N[1], route_req_S[1], route_req_E[1]};
+    assign arb_qos_W = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_S[QOS_POS], route_pkt_E[QOS_POS]};
+
+    // 南仲裁器：4个输入，排除来自南方的输入 [A,N,W,E]
+    assign arb_req_S = {route_req_A[2], route_req_N[2], route_req_W[2], route_req_E[2]};
+    assign arb_qos_S = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_W[QOS_POS], route_pkt_E[QOS_POS]};
+
+    // 东仲裁器：4个输入，排除来自东方的输入 [A,N,W,S]
+    assign arb_req_E = {route_req_A[3], route_req_N[3], route_req_W[3], route_req_S[3]};
+    assign arb_qos_E = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_W[QOS_POS], route_pkt_S[QOS_POS]};
+
+    // B仲裁器：支持所有4个输入 [A,N,W,S,E]
+    assign arb_req_B = {route_req_A[4], route_req_N[4], route_req_W[4], route_req_S[4]};
+    assign arb_qos_B = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_W[QOS_POS], route_pkt_S[QOS_POS]};
+
+    // 实例化仲裁器 - 所有仲裁器都使用WIDTH=4
+    // 北仲裁器：4输入仲裁器，排除北输入 [A,W,S,E]
+    arbiter #(.WIDTH(4)) u_arbiter_N (
+        .req(arb_req_N),
+        .qos(arb_qos_N),
+        .gnt(arb_gnt_N)
+    );
+
+    // 西仲裁器：4输入仲裁器，排除西输入 [A,N,S,E]
+    arbiter #(.WIDTH(4)) u_arbiter_W (
+        .req(arb_req_W),
+        .qos(arb_qos_W),
+        .gnt(arb_gnt_W)
+    );
+
+    // 南仲裁器：4输入仲裁器，排除南输入 [A,N,W,E]
+    arbiter #(.WIDTH(4)) u_arbiter_S (
+        .req(arb_req_S),
+        .qos(arb_qos_S),
+        .gnt(arb_gnt_S)
+    );
+
+    // 东仲裁器：4输入仲裁器，排除东输入 [A,N,W,S]
+    arbiter #(.WIDTH(4)) u_arbiter_E (
+        .req(arb_req_E),
+        .qos(arb_qos_E),
+        .gnt(arb_gnt_E)
+    );
+
+    // B仲裁器：4输入仲裁器，支持所有输入 [A,N,W,S,E]
+    arbiter #(.WIDTH(4)) u_arbiter_B (
+        .req(arb_req_B),
+        .qos(arb_qos_B),
+        .gnt(arb_gnt_B)
+    );
+
+    // =============================================================================
+    // 仲裁胜出数据选择
+    // =============================================================================
+
+    logic [PKT_W-1:0] pkt_N, pkt_W, pkt_S, pkt_E, pkt_B;
+
+    // 使用选择器信号进行数据选择
+    // 注意：仲裁器输入映射 [A,W,S,E], [A,N,S,E], [A,N,W,E], [A,N,W,S], [A,N,W,S,E]
+    always_comb begin
+        // 北输出选择 - 映射：[A,W,S,E]
+        if (arb_gnt_N[3]) begin pkt_N = route_pkt_A; end    // bit3: A输入
+        else if (arb_gnt_N[2]) begin pkt_N = route_pkt_W; end  // bit2: W输入
+        else if (arb_gnt_N[1]) begin pkt_N = route_pkt_S; end  // bit1: S输入
+        else if (arb_gnt_N[0]) begin pkt_N = route_pkt_E; end  // bit0: E输入
+        else begin pkt_N = {PKT_W{1'b0}}; end
+
+        // 西输出选择 - 映射：[A,N,S,E]
+        if (arb_gnt_W[3]) begin pkt_W = route_pkt_A; end    // bit3: A输入
+        else if (arb_gnt_W[2]) begin pkt_W = route_pkt_N; end  // bit2: N输入
+        else if (arb_gnt_W[1]) begin pkt_W = route_pkt_S; end  // bit1: S输入
+        else if (arb_gnt_W[0]) begin pkt_W = route_pkt_E; end  // bit0: E输入
+        else begin pkt_W = {PKT_W{1'b0}}; end
+
+        // 南输出选择 - 映射：[A,N,W,E]
+        if (arb_gnt_S[3]) begin pkt_S = route_pkt_A; end    // bit3: A输入
+        else if (arb_gnt_S[2]) begin pkt_S = route_pkt_N; end  // bit2: N输入
+        else if (arb_gnt_S[1]) begin pkt_S = route_pkt_W; end  // bit1: W输入
+        else if (arb_gnt_S[0]) begin pkt_S = route_pkt_E; end  // bit0: E输入
+        else begin pkt_S = {PKT_W{1'b0}}; end
+
+        // 东输出选择 - 映射：[A,N,W,S]
+        if (arb_gnt_E[3]) begin pkt_E = route_pkt_A; end    // bit3: A输入
+        else if (arb_gnt_E[2]) begin pkt_E = route_pkt_N; end  // bit2: N输入
+        else if (arb_gnt_E[1]) begin pkt_E = route_pkt_W; end  // bit1: W输入
+        else if (arb_gnt_E[0]) begin pkt_E = route_pkt_S; end  // bit0: S输入
+        else begin pkt_E = {PKT_W{1'b0}}; end
+
+        // B输出选择（本地输出）- 映射：[A,N,W,S,E]
+        if (arb_gnt_B[3]) begin pkt_B = route_pkt_A; end    // bit3: A输入
+        else if (arb_gnt_B[2]) begin pkt_B = route_pkt_N; end  // bit2: N输入
+        else if (arb_gnt_B[1]) begin pkt_B = route_pkt_W; end  // bit1: W输入
+        else if (arb_gnt_B[0]) begin pkt_B = route_pkt_S; end  // bit0: S输入
+        else begin pkt_B = {PKT_W{1'b0}}; end
     end
-end
 
-// Note: a_x_buffered_rdy and a_y_buffered_rdy are driven by IRS modules
-// No additional assignment needed to avoid multiple driver conflicts
+    // =============================================================================
+    // 输出IRS_N缓冲器 (只读模式RO_EN=1)
+    // =============================================================================
 
-// C-X input buffers ready signals - connect to Y arbitration results
-generate
-    for (i = 0; i < NUM_X_PORTS; i++) begin : gen_cx_rdy_assignment
-        assign c_x_in_rdy[i] = y_grant_valid[i] && y_output_buffer_rdy[i];
+    logic n_out_valid, n_out_ready;
+    logic [PKT_W-1:0] n_out_pkt;
+
+    IRS_N #(
+        .PYLD_W(PKT_W),
+        .IRS_DEEP(1),               // 1级深度缓冲
+        .TYPE_RO_EN(1)              // 只读模式
+    ) irs_output_N (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_i(|arb_gnt_N),
+        .ready_i(n_out_ready),
+        .valid_o(n_out_valid),
+        .ready_o(n_out_ready),      // 循环连接
+        .payload_i(pkt_N),
+        .payload_o(n_out_pkt)
+    );
+
+    logic w_out_valid, w_out_ready;
+    logic [PKT_W-1:0] w_out_pkt;
+
+    IRS_N #(
+        .PYLD_W(PKT_W),
+        .IRS_DEEP(1),
+        .TYPE_RO_EN(1)
+    ) irs_output_W (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_i(|arb_gnt_W),
+        .ready_i(w_out_ready),
+        .valid_o(w_out_valid),
+        .ready_o(w_out_ready),
+        .payload_i(pkt_W),
+        .payload_o(w_out_pkt)
+    );
+
+    logic s_out_valid, s_out_ready;
+    logic [PKT_W-1:0] s_out_pkt;
+
+    IRS_N #(
+        .PYLD_W(PKT_W),
+        .IRS_DEEP(1),
+        .TYPE_RO_EN(1)
+    ) irs_output_S (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_i(|arb_gnt_S),
+        .ready_i(s_out_ready),
+        .valid_o(s_out_valid),
+        .ready_o(s_out_ready),
+        .payload_i(pkt_S),
+        .payload_o(s_out_pkt)
+    );
+
+    logic e_out_valid, e_out_ready;
+    logic [PKT_W-1:0] e_out_pkt;
+
+    IRS_N #(
+        .PYLD_W(PKT_W),
+        .IRS_DEEP(1),
+        .TYPE_RO_EN(1)
+    ) irs_output_E (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_i(|arb_gnt_E),
+        .ready_i(e_out_ready),
+        .valid_o(e_out_valid),
+        .ready_o(e_out_ready),
+        .payload_i(pkt_E),
+        .payload_o(e_out_pkt)
+    );
+
+    logic b_out_valid, b_out_ready;
+    logic [PKT_W-1:0] b_out_pkt;
+
+    IRS_N #(
+        .PYLD_W(PKT_W),
+        .IRS_DEEP(1),
+        .TYPE_RO_EN(1)
+    ) irs_output_B (
+        .clk(clk),
+        .rst_n(rst_n),
+        .valid_i(|arb_gnt_B),
+        .ready_i(b_out_ready),
+        .valid_o(b_out_valid),
+        .ready_o(b_out_ready),
+        .payload_i(pkt_B),
+        .payload_o(b_out_pkt)
+    );
+
+    // =============================================================================
+    // 直接组合逻辑输出 (IRS_N内部已提供寄存器功能)
+    // =============================================================================
+
+    // B接口输出 - 直接连接IRS_N输出
+    assign pkt_o.pkt_out_vld = b_out_valid;
+    assign pkt_o.pkt_out_qos = b_out_pkt[QOS_POS];
+    assign pkt_o.pkt_out_type = b_out_pkt[TYPE_POS_HI:TYPE_POS_HI-1];
+    assign pkt_o.pkt_out_src = b_out_pkt[SRC_POS_HI:SRC_POS_LO];
+    assign pkt_o.pkt_out_tgt = b_out_pkt[TGT_POS_HI:TGT_POS_LO];
+    assign pkt_o.pkt_out_data = b_out_pkt[7:0];
+
+    // C接口北方向输出 - 直接连接IRS_N输出
+    assign pkt_con.no_vld = n_out_valid;
+    assign pkt_con.no_qos = n_out_pkt[QOS_POS];
+    assign pkt_con.no_type = n_out_pkt[TYPE_POS_HI:TYPE_POS_HI-1];
+    assign pkt_con.no_src = n_out_pkt[SRC_POS_HI:SRC_POS_LO];
+    assign pkt_con.no_tgt = n_out_pkt[TGT_POS_HI:TGT_POS_LO];
+    assign pkt_con.no_data = n_out_pkt[7:0];
+
+    // C接口西方向输出 - 直接连接IRS_N输出
+    assign pkt_con.wo_vld = w_out_valid;
+    assign pkt_con.wo_qos = w_out_pkt[QOS_POS];
+    assign pkt_con.wo_type = w_out_pkt[TYPE_POS_HI:TYPE_POS_HI-1];
+    assign pkt_con.wo_src = w_out_pkt[SRC_POS_HI:SRC_POS_LO];
+    assign pkt_con.wo_tgt = w_out_pkt[TGT_POS_HI:TGT_POS_LO];
+    assign pkt_con.wo_data = w_out_pkt[7:0];
+
+    // C接口南方向输出 - 直接连接IRS_N输出
+    assign pkt_con.so_vld = s_out_valid;
+    assign pkt_con.so_qos = s_out_pkt[QOS_POS];
+    assign pkt_con.so_type = s_out_pkt[TYPE_POS_HI:TYPE_POS_HI-1];
+    assign pkt_con.so_src = s_out_pkt[SRC_POS_HI:SRC_POS_LO];
+    assign pkt_con.so_tgt = s_out_pkt[TGT_POS_HI:TGT_POS_LO];
+    assign pkt_con.so_data = s_out_pkt[7:0];
+
+    // C接口东方向输出 - 直接连接IRS_N输出
+    assign pkt_con.eo_vld = e_out_valid;
+    assign pkt_con.eo_qos = e_out_pkt[QOS_POS];
+    assign pkt_con.eo_type = e_out_pkt[TYPE_POS_HI:TYPE_POS_HI-1];
+    assign pkt_con.eo_src = e_out_pkt[SRC_POS_HI:SRC_POS_LO];
+    assign pkt_con.eo_tgt = e_out_pkt[TGT_POS_HI:TGT_POS_LO];
+    assign pkt_con.eo_data = e_out_pkt[7:0];
+
+    // =============================================================================
+    // 输入ready信号连接
+    // =============================================================================
+
+    always_comb begin
+        // A接口ready信号
+        pkt_i.pkt_in_rdy = a_in_ready;
+
+        // C接口输入ready信号
+        pkt_con.ni_rdy = n_in_ready;
+        pkt_con.wi_rdy = w_in_ready;
+        pkt_con.si_rdy = s_in_ready;
+        pkt_con.ei_rdy = e_in_ready;
     end
-endgenerate
-
-// C-Y input buffers ready signals - connect to X arbitration results
-generate
-    for (i = 0; i < NUM_Y_PORTS; i++) begin : gen_cy_rdy_assignment
-        assign c_y_in_rdy[i] = x_grant_valid[i] && x_output_buffer_rdy[i];
-    end
-endgenerate
-
-// ====================================================================
-// Stage 3: Output Buffering
-// Architecture: 15 output buffers with IRS_LP Deep=1, RO_EN=1
-// ====================================================================
-
-// Output buffer signals
-wire [22:0] x_buffered_data [6:0];   // C-X output buffers
-wire [6:0]  x_buffered_vld;
-wire [6:0]  x_buffered_rdy;
-
-wire [22:0] y_buffered_data [6:0];   // C-Y output buffers
-wire [6:0]  y_buffered_vld;
-wire [6:0]  y_buffered_rdy;
-
-wire [22:0] b_buffered_data;         // B output buffer
-wire        b_buffered_vld;
-wire        b_buffered_rdy;
-
-// X-Direction Output Buffers (7 C-X outputs)
-generate
-    for (i = 0; i < NUM_X_PORTS; i++) begin : gen_x_output_buffers
-        IRS_N #(
-            .PYLD_W(23),
-            .IRS_DEEP(1),
-            .TYPE_NO_READY(0),
-            .TYPE_HALF(0),
-            .TYPE_RO_EN(1)
-        ) u_x_output_buffer (
-            .clk(clk),
-            .rst_n(rst_n),
-            .valid_i(x_grant_valid[i]),                        // Use registered grant valid for this port
-            .ready_i(1'b1),                                     // Always ready - break combinatorial loop
-            .valid_o(x_buffered_vld[i]),
-            .ready_o(x_buffered_rdy[i]),
-            .payload_i(x_output_data[i]),
-            .payload_o(x_buffered_data[i])
-        );
-    end
-endgenerate
-
-// Y-Direction Output Buffers (7 C-Y outputs)
-generate
-    for (i = 0; i < NUM_Y_PORTS; i++) begin : gen_y_output_buffers
-        IRS_N #(
-            .PYLD_W(23),
-            .IRS_DEEP(1),
-            .TYPE_NO_READY(0),
-            .TYPE_HALF(0),
-            .TYPE_RO_EN(1)
-        ) u_y_output_buffer (
-            .clk(clk),
-            .rst_n(rst_n),
-            .valid_i(y_grant_valid[i]),                         // Use registered grant valid for this port
-            .ready_i(1'b1),                                     // Always ready - break combinatorial loop
-            .valid_o(y_buffered_vld[i]),
-            .ready_o(y_buffered_rdy[i]),
-            .payload_i(y_output_data[i]),
-            .payload_o(y_buffered_data[i])
-        );
-    end
-endgenerate
-
-// B-Port Output Buffer (1 B output)
-IRS_N #(
-    .PYLD_W(23),
-    .IRS_DEEP(1),
-    .TYPE_NO_READY(0),
-    .TYPE_HALF(0),
-    .TYPE_RO_EN(1)
-) u_b_output_buffer (
-    .clk(clk),
-    .rst_n(rst_n),
-    .valid_i(b_grant_valid),                                   // Use grant valid only
-    .ready_i(1'b1),                                           // Always ready - break combinatorial loop
-    .valid_o(b_buffered_vld),
-    .ready_o(b_buffered_rdy),
-    .payload_i(b_output_data),
-    .payload_o(b_buffered_data)
-);
-
-// Connect backpressure signals from output buffers to arbitration logic
-assign x_output_buffer_rdy = x_buffered_rdy;      // X direction backpressure
-assign y_output_buffer_rdy = y_buffered_rdy;      // Y direction backpressure
-assign b_output_buffer_rdy = b_buffered_rdy;      // B port backpressure
-
-// ====================================================================
-// Interface Output Connections
-// Connect buffered outputs to external interfaces with proper signal mapping
-// ====================================================================
-
-// C Interface output connections (to topology)
-// X-direction outputs (7 ports) - Connect buffered data to interface signals
-generate
-    for (i = 0; i < NUM_X_PORTS; i++) begin : gen_c_x_outputs
-        // Decode 23-bit packet format: [22:21]=type, [20]=qos, [19:14]=src, [13:8]=tgt, [7:0]=data
-        assign pkt_con.xo_vld[i] = x_buffered_vld[i];
-        assign pkt_con.xo_qos[i] = x_buffered_data[i][20];
-        assign pkt_con.xo_type[i] = x_buffered_data[i][22:21];
-        assign pkt_con.xo_src[i] = x_buffered_data[i][19:14];
-        assign pkt_con.xo_tgt[i] = x_buffered_data[i][13:8];
-        assign pkt_con.xo_data[i] = x_buffered_data[i][7:0];
-        assign x_buffered_rdy[i] = pkt_con.xo_rdy[i];
-    end
-endgenerate
-
-// Y-direction outputs (7 ports)
-generate
-    for (i = 0; i < NUM_Y_PORTS; i++) begin : gen_c_y_outputs
-        // Decode 23-bit packet format: [22:21]=type, [20]=qos, [19:14]=src, [13:8]=tgt, [7:0]=data
-        assign pkt_con.yo_vld[i] = y_buffered_vld[i];
-        assign pkt_con.yo_qos[i] = y_buffered_data[i][20];
-        assign pkt_con.yo_type[i] = y_buffered_data[i][22:21];
-        assign pkt_con.yo_src[i] = y_buffered_data[i][19:14];
-        assign pkt_con.yo_tgt[i] = y_buffered_data[i][13:8];
-        assign pkt_con.yo_data[i] = y_buffered_data[i][7:0];
-        assign y_buffered_rdy[i] = pkt_con.yo_rdy[i];
-    end
-endgenerate
-
-// B-Port output connections (external output)
-// Decode 23-bit packet format: [22:21]=type, [20]=qos, [19:14]=src, [13:8]=tgt, [7:0]=data
-assign pkt_o.pkt_out_vld = b_buffered_vld;
-assign pkt_o.pkt_out_qos = b_buffered_data[20];
-assign pkt_o.pkt_out_type = b_buffered_data[22:21];
-assign pkt_o.pkt_out_src = b_buffered_data[19:14];
-assign pkt_o.pkt_out_tgt = b_buffered_data[13:8];
-assign pkt_o.pkt_out_data = b_buffered_data[7:0];
-assign b_buffered_rdy = pkt_o.pkt_out_rdy;
 
 endmodule

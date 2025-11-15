@@ -21,9 +21,9 @@
 //
 // ====================================================================
 
-`include "/home/liangmx/maze/rtl/include/global_defines/top_define.v"
-`include "/home/liangmx/maze/rtl/include/interfaces/interface_c.sv"
-`include "/home/liangmx/maze/rtl/lib/irs/irs.v"
+`include "/Users/liangmx17/Documents/maze_mesh/rtl/include/global_defines/top_define.v"
+`include "/Users/liangmx17/Documents/maze_mesh/rtl/include/interfaces/interface_c.sv"
+`include "/Users/liangmx17/Documents/maze_mesh/rtl/lib/irs/irs.v"
 
 module TOPO (
     input   clk,
