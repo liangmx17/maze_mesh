@@ -14,11 +14,12 @@ This document provides a comprehensive analysis of the MAZE 64-node network syst
 
 The MAZE network implements a **64-node (8×8 grid) mesh topology** with the following key characteristics:
 
-- **Network Topology**: 8×8 grid where each node connects to 7 neighbors in X-direction and 7 neighbors in Y-direction
-- **Pipeline Architecture**: 4-stage pipeline for packet processing
+- **Network Topology**: 8×8 grid where each node connects to 4 neighbors in North, West, South, East directions
+- **Non-Pipeline Architecture**: Direct routing with per-input processing and output arbitration
 - **Data Path Width**: 23-bit packets (2 type + 1 QoS + 6 source + 6 target + 8 data)
 - **QoS Support**: 2-level priority system (QoS=0: low, QoS=1: high)
 - **Fault Tolerance**: Single node failure support with clock gating in MAZE_TOP
+- **Routing Algorithm**: Fault-aware XY routing with dynamic direction selection based on node position relative to failed nodes
 
 ### Core Components
 
@@ -26,7 +27,7 @@ The MAZE network implements a **64-node (8×8 grid) mesh topology** with the fol
 Top-level module that instantiates the entire 64-node network. See `Provided_Code/MAZE_TOP.v` for reference implementation.
 
 #### 2. Node Module
-Individual network node with 4-stage pipeline processing. See `Provided_Code/node.v` for reference implementation.
+Individual network node with direct routing architecture. Each node processes 5 inputs (4 NWSE directions + 1 A port) through individual routing units, generates 5-bit one-hot request signals for arbiters, and outputs through 5 ports (4 NWSE directions + 1 B port). Uses IRS_N buffers at both input and output ports. See `Provided_Code/node.v` for reference implementation.
 
 #### 3. Topo Module
 Manages network connectivity between nodes. See `Provided_Code/topo.v` for reference implementation.
@@ -63,15 +64,34 @@ See `Provided_Code/top_define.v` for global parameter definitions.
 
 #### Routing Algorithm
 
-**Unicast Routing (Two-Hop Strategy)**:
-- Source → Intermediate Node → Destination
-- Intermediate nodes: `[src_y, tgt_x]` or `[tgt_y, src_x]`
-- Selection criteria: fault avoidance, then congestion avoidance
+**故障感知XY路由算法** (详见 路由策略.md):
+
+**基本原理**:
+- 基于目标坐标(X_Destination, Y_Destination)和当前节点坐标(X_Local, Y_Local)
+- 考虑故障节点位置 REGISTER (静态配置信号)
+- 支持多种故障相对位置: NORMAL, N_OF_x, NE_OF_x, E_OF_x, SE_OF_x, S_OF_x, SW_OF_x, W_OF_x, NW_OF_x
+
+**路由决策逻辑**:
+1. **X方向优先**:
+   - 目标在东方 (X_Destination > X_Local): 优先向东，根据故障位置选择绕行路径
+   - 目标在西方 (X_Destination < X_Local): 优先向西，根据故障位置选择绕行路径
+
+2. **Y方向次要**:
+   - 目标在北方 (Y_Destination > Y_Local): 优先向北，南方故障时选择东西绕行
+   - 目标在南方 (Y_Destination < Y_Local): 优先向南，北方故障时选择东西绕行
+
+3. **本地到达**: 目标坐标与当前坐标相同时选择LOCAL输出
+
+**容错策略**:
+- 静态故障信息 REGISTER 预先配置到所有节点
+- 路由算法根据与故障节点的相对位置动态调整
+- 支持东、西、南、北四个主要方向及八个故障区域的位置感知
 
 **Multicast/Broadcast**:
-- X-Multicast: All nodes with same X coordinate
-- Y-Multicast: All nodes with same Y coordinate  
-- Broadcast: All 64 nodes
+- X-Multicast: 所有相同X坐标的节点
+- Y-Multicast: 所有相同Y坐标的节点
+- Broadcast: 所有64个节点
+- 多播/广播时故障节点自动排除
 
 ## Build and Compilation Commands
 
@@ -119,37 +139,86 @@ make -f VMAZE_TOP.mk
 ### Data Flow Architecture
 
 ```
-                                      C Interface ← Topology (IRS) ← C Interface
-                                      ↓                                      
-External Input → A Interface → Stage 0 → Stage 1 → Stage 2 → Stage 3 → B Interface → External Output
-                                                                     ↓ 
-                                                                       C Interface → Topology (IRS) → C Interface
+                                      C接口(NWSE) ← 拓扑网络(IRS_N) ← C接口(NWSE)
+                                      ↓
+外部输入 → A接口 → IRS_N缓存 → 5个独立路由单元 → 5个仲裁器 → IRS_N缓存 → B接口 → 外部输出
+                                      ↓
+                                   C接口(NWSE) → 拓扑网络(IRS_N) → C接口(NWSE)
+
+节点内部详细架构:
+┌─────────────────────────────────────────────────────────────────┐
+│                        MAZE节点内部架构                          │
+├─────────────────────────────────────────────────────────────────┤
+│ 输入端口:                                                       │
+│ ├─ A口 (外部输入) → IRS_N                                        │
+│ ├─ C口_N (北方输入) → IRS_N                                      │
+│ ├─ C口_W (西方输入) → IRS_N                                      │
+│ ├─ C口_S (南方输入) → IRS_N                                      │
+│ └─ C口_E (东方输入) → IRS_N                                      │
+│                                                                │
+│ 路由处理:                                                       │
+│ ├─ 5个独立路由单元 (每个输入一个)                                │
+│ │  └─ 故障感知的XY路由算法 (见路由策略.md)                       │
+│ └─ 生成5个5-bit one-hot请求信号                                  │
+│                                                                │
+│ 输出仲裁:                                                       │
+│ ├─ 5个仲裁器 (每个输出端口一个)                                  │
+│ │  ├─ 仲裁器_N: 4-bit输入 → 1-bit输出                            │
+│ │  ├─ 仲裁器_W: 4-bit输入 → 1-bit输出                            │
+│ │  ├─ 仲裁器_S: 4-bit输入 → 1-bit输出                            │
+│ │  ├─ 仲裁器_E: 4-bit输入 → 1-bit输出                            │
+│ │  └─ 仲裁器_B: 4-bit输入 → 1-bit输出                            │
+│                                                                │
+│ 输出端口:                                                       │
+│ ├─ B口 (外部输出) → IRS_N (RO_EN=1)                             │
+│ ├─ C口_N (北方输出) → IRS_N (RO_EN=1)                            │
+│ ├─ C口_W (西方输出) → IRS_N (RO_EN=1)                            │
+│ ├─ C口_S (南方输出) → IRS_N (RO_EN=1)                            │
+│ └─ C口_E (东方输出) → IRS_N (RO_EN=1)                            │
+└─────────────────────────────────────────────────────────────────┘
 
 ```
 
 ### Control Flow
 
-1. **Input Stage (A Interface)**:
-   - Packet validation and type detection
-   - Intermediate node calculation for unicast
-   - Fault node checking and avoidance
+1. **输入缓存阶段 (IRS_N)**:
+   - A接口和4个C接口(NWSE)的数据包进入各自的IRS_N缓存
+   - IRS_N提供基本的流量控制和反压管理
 
-2. **Arbitration Stage (Stage 1)**:
-   - QoS-based arbitration between multiple inputs
-   - XY routing decision logic
-   - Winner selection based on priority
+2. **路由计算阶段 (独立路由单元)**:
+   - 每个输入端口对应一个独立的路由单元
+   - 基于故障感知的XY路由算法计算输出方向
+   - 根据目标坐标和当前节点位置生成路由决策
+   - 考虑故障节点位置，选择最优路径 (详见 路由策略.md)
 
-3. **Output Stage (Stage 2-3)**:
-   - Output port selection and buffering
-   - Backpressure management
-   - Topology interface connection
+3. **请求生成阶段**:
+   - 5个路由单元分别生成5-bit one-hot请求信号
+   - 每个信号位对应一个输出端口(N, W, S, E, B)
+   - 请求信号基于路由计算结果生成
+
+4. **仲裁阶段 (5个仲裁器)**:
+   - 每个输出端口有独立的仲裁器
+   - 仲裁器接收4个输入请求 (排除本地输入)
+   - 基于QoS优先级进行仲裁决策
+   - 高QoS数据包获得绝对优先权
+
+5. **输出缓存阶段 (IRS_N, RO_EN=1)**:
+   - 仲裁胜出的数据包进入对应输出端口的IRS_N
+   - IRS_N配置为只读模式 (RO_EN=1)
+   - 提供到拓扑网络或外部输出的缓冲
+
+6. **拓扑连接阶段**:
+   - NWSE输出端口连接到相邻节点的对应输入端口
+   - 通过IRS_N实现节点间的可靠数据传输
 
 ### Fault Tolerance Mechanism
 
-- **Clock Gating**: Failed nodes receive no clock signal
-- **Static Configuration**: Fault info propagated to all nodes (`pg_en`, `pg_node`)
-- **Route Avoidance**: Routing algorithms avoid failed nodes
-- **Multicast Handling**: Failed nodes excluded from multicast outputs
+- **时钟门控**: 故障节点接收不到时钟信号，实现功耗隔离
+- **静态配置**: 故障信息 (`pg_en`, `pg_node`) 预先配置到所有节点
+- **REGISTER信号**: 每个节点根据自身坐标与故障坐标计算相对位置，生成静态REGISTER信号
+- **路由避障**: 基于故障感知的XY路由算法自动避开故障节点
+- **多播处理**: 多播和广播时故障节点自动从目标列表中排除
+- **容错区域**: 支持9种故障相对位置，包括正常状态和8个方向的故障区域
 
 ## Development Workflow Information
 
@@ -174,11 +243,12 @@ External Input → A Interface → Stage 0 → Stage 1 → Stage 2 → Stage 3 �
 
 #### Current Testing Status
 - ✅ **Interface Definitions**: Complete A/B/C interface implementations
-- ✅ **Pipeline Framework**: 4-stage pipeline structure implemented
-- ✅ **Unicast Logic**: Stage 0 intermediate node calculation working
-- ⚠️ **Arbitration Logic**: Stage 1 QoS arbitration needs completion
-- ⚠️ **Topology Integration**: Full C-interface connections pending
-- ✅ **Fault Tolerance**: Clock gating implemented
+- ✅ **Node Architecture**: Non-pipeline direct routing framework implemented
+- ✅ **IRS_N Integration**: Input/output buffer modules integrated
+- ✅ **Fault Tolerance**: Clock gating and REGISTER signal calculation implemented
+- ⚠️ **Independent Routing Units**: 5 separate routing units need implementation
+- ⚠️ **Arbiter Implementation**: 5 output arbiters need QoS logic completion
+- ⚠️ **NWSE Topology**: 4-direction mesh connections need completion
 
 #### Recommended Test Development
 
@@ -202,18 +272,22 @@ External Input → A Interface → Stage 0 → Stage 1 → Stage 2 → Stage 3 �
 
 ### Known Implementation Challenges
 
-1. **Complex Interface Arrays**: Large-scale interface connections between nodes and topology
-2. **IRS Depth Configuration**: Dynamic Manhattan distance calculation for IRS depth
-3. **Multi-Input Arbitration**: Efficient QoS arbitration for multiple input sources
-4. **Timing Synchronization**: Proper clock gating and fault propagation timing
-5. **State Space Explosion**: 64-node network verification complexity
+1. **四方向网格连接**: NWSE四个方向的接口数组连接复杂性
+2. **独立路由单元实现**: 5个并行路由单元的资源开销和时序优化
+3. **多仲裁器协同**: 5个输出仲裁器的QoS优先级一致性和死锁避免
+4. **故障感知路由**: 复杂的故障相对位置计算和路径选择逻辑
+5. **时序同步**: 时钟门控、故障信息传播和数据包路由的时序协调
+6. **验证复杂度**: 64节点四方向网格的状态空间爆炸问题
 
 ### Critical Design Decisions
 
-1. **Two-Hop Routing**: Simplifies individual node complexity but increases latency
-2. **QoS Arbitration**: High QoS absolute priority ensures predictable performance
-3. **Clock Gating**: Simple but effective fault isolation mechanism
-4. **Parameterized Design**: Enables easy scaling and modification
+1. **非流水线架构**: 简化节点内部设计，通过并行路由和仲裁提高吞吐量
+2. **四方向网格**: NWSE四个方向连接，简化拓扑复杂度，便于故障容错
+3. **独立路由单元**: 每输入独立路由计算，避免共享资源的竞争
+4. **QoS仲裁**: 高QoS绝对优先权确保可预测的性能表现
+5. **故障感知路由**: 基于静态故障信息的智能路由选择
+6. **IRS_N缓冲**: 输入输出端口的统一缓冲机制，简化时序设计
+7. **参数化设计**: 支持不同规模网络的可扩展性
 
 ## File Architecture System
 
@@ -305,12 +379,15 @@ ls ../sim/wave/vcd/  # Check generated waveforms
 
 ## Performance Characteristics
 
-- **Network Latency**: 4 clock cycles (pipeline stages) + 2 hops for unicast
-- **Throughput**: Depends on QoS arbitration and congestion levels
-- **Scalability**: Designed for 64-node network, parameterizable for larger networks
-- **Fault Resilience**: Single node fault tolerance with automatic routing adaptation
+- **网络延迟**: 1-2时钟周期 (直接路由) + 路径跳数，无流水线延迟
+- **吞吐量**: 每个时钟周期每个节点可处理最多5个输入数据包 (并行路由)
+- **仲裁延迟**: 1个时钟周期的QoS仲裁延迟
+- **可扩展性**: 设计为64节点网络，可参数化扩展到更大规模
+- **容错性能**: 单节点故障容错，自动路由重构
+- **缓冲能力**: IRS_N提供输入输出缓冲，支持流量控制
+- **资源效率**: 相比流水线架构，减少硬件开销和功耗
 
-This architecture provides a solid foundation for a high-performance on-chip interconnect with advanced features like QoS prioritization, fault tolerance, and efficient multicast/broadcast capabilities.
+This architecture provides a solid foundation for a high-performance on-chip interconnect with advanced features like QoS prioritization, fault tolerance, and efficient direct routing capabilities.
 
 ## Available Agent Types for MAZE Project
 
@@ -410,28 +487,29 @@ This project supports several specialized agents that can assist with different 
 
 ### 🚀 How to Use Agents
 
-**Syntax**: Use specific agent commands when appropriate:
-- For RTL verification: "Create comprehensive tests for the node module's Stage 1 QoS arbitration"
-- For architecture analysis: "Analyze the current mesh topology and suggest optimizations"
-- For code review: "Review the current node.v implementation for synthesis issues"
-- For test development: "Create testbenches for 64-node network validation"
+**语法**: 在适当时机使用特定代理命令:
+- 对于RTL验证: "为节点模块的独立路由单元创建综合测试"
+- 对于架构分析: "分析当前四方向网格拓扑并优化故障感知路由"
+- 对于代码审查: "审查当前node.v实现的综合问题"
+- 对于测试开发: "为64节点四方向网络创建验证测试台"
 
 **Current Project Status & Agent Priority**:
-1. **Critical Gap**: Stage 1-3 pipeline implementation is incomplete
-2. **Testing Gap**: Limited to 4-node simplified testing
-3. **Architecture Gap**: C-interface connections between nodes need completion
+1. **关键缺口**: 独立路由单元和仲裁器实现不完整
+2. **测试缺口**: 缺少四方向网格和故障感知路由的测试
+3. **架构缺口**: NWSE方向的C接口连接需要完成
+4. **算法缺口**: 故障感知的XY路由算法需要集成验证
 
-**Recommended Agent Usage Sequence**:
-1. Start with **RTL Verification Agent** to complete and test pipeline stages
-2. Use **Test Development Agent** to create comprehensive 64-node test infrastructure
-3. Apply **NoC Architecture Specialist** to optimize topology and routing
-4. Engage **SystemVerilog Review Agent** for code quality and timing validation
+**推荐代理使用序列**:
+1. 首先使用**RTL验证代理**完成并测试独立路由单元和仲裁器
+2. 使用**测试开发代理**创建四方向网格的综合测试基础设施
+3. 应用**NoC架构专家代理**优化故障感知路由和拓扑连接
+4. 启用**SystemVerilog审查代理**进行代码质量和时序验证
 
 ### 💡 Agent Selection Guidelines
 
-- **Use RTL Verification Agent** when: Working on pipeline stages, QoS logic, or fault tolerance
-- **Use Test Development Agent** when: Need testbenches, regression tests, or performance measurement
-- **Use NoC Architecture Specialist** when: Optimizing topology, routing, or buffer management
-- **Use SystemVerilog Review Agent** when: Preparing for synthesis or timing analysis
+- **使用RTL验证代理** 当: 处理独立路由单元、QoS仲裁器或故障容错时
+- **使用测试开发代理** 当: 需要测试台、回归测试或性能测量时
+- **使用NoC架构专家代理** 当: 优化四方向拓扑、故障感知路由或缓冲管理时
+- **使用SystemVerilog审查代理** 当: 准备综合或时序分析时
 
 These agents integrate seamlessly with the existing file architecture (`rtl/`, `testbench/`, `sim/`) and build infrastructure to provide comprehensive support for the MAZE network development lifecycle.
