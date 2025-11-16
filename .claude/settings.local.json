@@ -84,7 +84,18 @@
       "Bash(./build_simple_test.sh:*)",
       "Bash(tee:*)",
       "Bash(./scripts/verification/check_file_structure.sh:*)",
-      "Bash(./Vdebug_simple:*)"
+      "Bash(./Vdebug_simple:*)",
+      "Bash(./scripts/build/build_debug_test.sh:*)",
+      "Bash(PROJECT_ROOT=/home/liangmx/maze_mesh ./verification/scripts/build/build_debug_test.sh verilator:*)",
+      "Bash(PROJECT_ROOT=/home/liangmx/maze_mesh VERIFICATION_DIR=/home/liangmx/maze_mesh/verification ./verification/scripts/build/build_debug_test.sh:*)",
+      "Bash(./Vdebug_simple_test)",
+      "Bash(./sim/work/build/Vsimple_test:*)",
+      "Bash(./Vsimple_test +trace)",
+      "Bash(./Vsimple_test:*)",
+      "Bash(/home/liangmx/maze_mesh/verification/sim/work/build/Vsimple_test:*)",
+      "Bash(echo:*)",
+      "Bash(/dev/null)",
+      "Bash(git config:*)"
     ],
     "deny": [],
     "ask": []

@@ -128,7 +128,7 @@ EOF
         -I$RTL_DIR/src/node_components \
         -I$RTL_DIR/lib \
         -f simple_test.filelist \
-        -CFLAGS "-std=c++11" \
+        -CFLAGS "-std=c++14" \
         --Mdir . \
         --exe \
         --trace \

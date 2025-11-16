@@ -1,5 +1,6 @@
 [0;34m[INFO][0m  运行快速测试...
-/Applications/Xcode.app/Contents/Developer/usr/bin/make test-node-basic SIMULATOR=verilator NODE_X=3 NODE_Y=3
+make test-node-basic SIMULATOR=verilator NODE_X=3 NODE_Y=3
+make[1]: Entering directory '/home/liangmx/maze_mesh/verification'
 [0;34m[INFO][0m  开始基本路由功能测试...
   仿真器: verilator
   节点位置: (3, 3)
@@ -10,10 +11,10 @@ MAZE节点基本路由功能测试编译脚本
 ==============================================
 仿真器: verilator
 测试节点: (3, 3)
-项目根目录: /Users/liangmx17/Documents/maze_mesh
-验证目录: /Users/liangmx17/Documents/maze_mesh/verification
-RTL目录: /Users/liangmx17/Documents/maze_mesh/rtl
-脚本目录: /Users/liangmx17/Documents/maze_mesh/verification/scripts/build
+项目根目录: /home/liangmx/maze_mesh
+验证目录: /home/liangmx/maze_mesh/verification
+RTL目录: /home/liangmx/maze_mesh/rtl
+脚本目录: /home/liangmx/maze_mesh/verification/scripts/build
 ==============================================
 
 检查仿真器依赖...
@@ -23,21 +24,22 @@ RTL目录: /Users/liangmx17/Documents/maze_mesh/rtl
 清理旧文件...
 ✓ 清理完成
 使用Verilator编译...
-- V e r i l a t i o n   R e p o r t: Verilator 5.042 2025-11-02 rev UNKNOWN.REV
-- Verilator: Built from 0.309 MB sources in 12 modules, into 0.662 MB in 10 C++ files needing 0.001 MB
-- Verilator: Walltime 0.092 s (elab=0.016, cvt=0.046, bld=0.000); cpu 0.064 s on 1 threads
-/Users/liangmx17/Documents/maze_mesh/verification/scripts/build/build_simple_test.sh: line 141: nproc: command not found
-c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated.o /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/verilated.cpp
-c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated_vcd_c.o /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/verilated_vcd_c.cpp
-c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated_timing.o /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/verilated_timing.cpp
-c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated_threads.o /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/verilated_threads.cpp
-python3 /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/bin/verilator_includer -DVL_INCLUDE_OPT=include Vsimple_test.cpp Vsimple_test___024root__0.cpp Vsimple_test__main.cpp Vsimple_test__Trace__0.cpp Vsimple_test__ConstPool_0.cpp Vsimple_test___024root__Slow.cpp Vsimple_test___024root__0__Slow.cpp Vsimple_test__Syms.cpp Vsimple_test__Trace__0__Slow.cpp Vsimple_test__TraceDecls__0__Slow.cpp > Vsimple_test__ALL.cpp
+- V e r i l a t i o n   R e p o r t: Verilator 5.042 2025-11-02 rev v5.042-51-gd91574507
+- Verilator: Built from 0.307 MB sources in 12 modules, into 0.531 MB in 10 C++ files needing 0.000 MB
+- Verilator: Walltime 0.047 s (elab=0.005, cvt=0.029, bld=0.000); cpu 0.047 s on 1 threads; alloced 24.855 MB
+make[2]: Entering directory '/home/liangmx/maze_mesh/verification/sim/work/build'
+g++ -Os  -I.  -MMD -I/usr/local/share/verilator/include -I/usr/local/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++14 -DVL_TIME_CONTEXT   -fcoroutines -c -o verilated.o /usr/local/share/verilator/include/verilated.cpp
+g++ -Os  -I.  -MMD -I/usr/local/share/verilator/include -I/usr/local/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++14 -DVL_TIME_CONTEXT   -fcoroutines -c -o verilated_vcd_c.o /usr/local/share/verilator/include/verilated_vcd_c.cpp
+g++ -Os  -I.  -MMD -I/usr/local/share/verilator/include -I/usr/local/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++14 -DVL_TIME_CONTEXT   -fcoroutines -c -o verilated_timing.o /usr/local/share/verilator/include/verilated_timing.cpp
+g++ -Os  -I.  -MMD -I/usr/local/share/verilator/include -I/usr/local/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++14 -DVL_TIME_CONTEXT   -fcoroutines -c -o verilated_threads.o /usr/local/share/verilator/include/verilated_threads.cpp
+python3 /usr/local/share/verilator/bin/verilator_includer -DVL_INCLUDE_OPT=include Vsimple_test.cpp Vsimple_test___024root__0.cpp Vsimple_test__main.cpp Vsimple_test__Trace__0.cpp Vsimple_test__ConstPool_0.cpp Vsimple_test___024root__Slow.cpp Vsimple_test___024root__0__Slow.cpp Vsimple_test__Syms.cpp Vsimple_test__Trace__0__Slow.cpp Vsimple_test__TraceDecls__0__Slow.cpp > Vsimple_test__ALL.cpp
 echo "" > Vsimple_test__ALL.verilator_deplist.tmp
-c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o Vsimple_test__ALL.o Vsimple_test__ALL.cpp
-c++  -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv   verilated.o verilated_vcd_c.o verilated_timing.o verilated_threads.o Vsimple_test__ALL.a    -pthread -lpthread   -o Vsimple_test
+g++ -Os  -I.  -MMD -I/usr/local/share/verilator/include -I/usr/local/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fcf-protection=none -Wno-bool-operation -Wno-int-in-bool-context -Wno-shadow -Wno-sign-compare -Wno-subobject-linkage -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++14 -DVL_TIME_CONTEXT   -fcoroutines -c -o Vsimple_test__ALL.o Vsimple_test__ALL.cpp
+g++    verilated.o verilated_vcd_c.o verilated_timing.o verilated_threads.o Vsimple_test__ALL.a    -pthread -lpthread -latomic   -o Vsimple_test
 rm Vsimple_test__ALL.verilator_deplist.tmp
+make[2]: Leaving directory '/home/liangmx/maze_mesh/verification/sim/work/build'
 ✓ Verilator编译成功
-生成运行脚本: /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build/run_simple_test.sh
+生成运行脚本: /home/liangmx/maze_mesh/verification/sim/work/build/run_simple_test.sh
 ✓ 运行脚本生成完成
 
 ==============================================
@@ -45,63 +47,506 @@ rm Vsimple_test__ALL.verilator_deplist.tmp
 ==============================================
 仿真器: verilator
 测试节点位置: (3, 3)
-编译目录: /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build
-运行脚本: /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build/run_simple_test.sh
+编译目录: /home/liangmx/maze_mesh/verification/sim/work/build
+运行脚本: /home/liangmx/maze_mesh/verification/sim/work/build/run_simple_test.sh
 
-可执行文件: /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build/Vsimple_test
-运行命令: /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build/Vsimple_test
+可执行文件: /home/liangmx/maze_mesh/verification/sim/work/build/Vsimple_test
+运行命令: /home/liangmx/maze_mesh/verification/sim/work/build/Vsimple_test
 
 使用方法:
-  cd /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build
+  cd /home/liangmx/maze_mesh/verification/sim/work/build
   ./run_simple_test.sh
 
 或直接运行:
-  /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build/Vsimple_test
+  /home/liangmx/maze_mesh/verification/sim/work/build/Vsimple_test
 
 编译成功完成！
 ==============================================
-MAZE节点基本路由功能测试
+MAZE节点基本路由功能测试 - DEBUG版本
 测试节点: (3, 3)
 ==============================================
+DEBUG: 节点位置和路由信息分析
+测试节点坐标: (X=3, Y=3)
+当前节点ID: 27 (binary: 011011)
+当前节点分解: Y坐标(bit5:3)=011, X坐标(bit2:0)=011
+邻居节点ID:
+  - 西侧节点(X=2, Y=3): ID=26
+  - 东侧节点(X=4, Y=3): ID=28
+  - 南侧节点(X=3, Y=2): ID=19
+  - 北侧节点(X=3, Y=4): ID=35
+预期路由端口映射:
+  - 向西路由(X-1): 端口1 (WEST)
+  - 向东路由(X+1): 端口3 (EAST)
+  - 向南路由(Y-1): 端口2 (SOUTH)
+  - 向北路由(Y+1): 端口0 (NORTH)
+  - 本地路由(相同坐标): 端口4 (LOCAL)
+==============================================
+[INIT DEBUG] Reset phase starting...
+=================================================================
+[INTERNAL DEBUG] Cycle 0 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b00000 (N,W,S,E,B), route_pkt_A=0x000000
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b0000(A,N,W,S), qos=0b0000, gnt=0b0000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=0, e_out_ready=1, e_out_pkt=0x000000
+  External pkt_con_eo_vld=0, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
+=================================================================
+[INTERNAL DEBUG] Cycle 1 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b00000 (N,W,S,E,B), route_pkt_A=0x000000
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b0000(A,N,W,S), qos=0b0000, gnt=0b0000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=0, e_out_ready=1, e_out_pkt=0x000000
+  External pkt_con_eo_vld=0, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
+[INIT DEBUG] Reset completed. Testing node interfaces...
+[INIT DEBUG] Initial interface states:
+  A_PORT: vld=0, rdy=1
+  B_PORT: vld=0, rdy=1
+  N_PORT: out_vld=0, out_rdy=1
+  W_PORT: out_vld=0, out_rdy=1
+  S_PORT: out_vld=0, out_rdy=1
+  E_PORT: out_vld=0, out_rdy=1
 复位完成，开始基本路由功能测试...
 
 --- N-RF-001: X方向正向路由测试 ---
-[Cycle 2] Sending packet: Type=0, QoS=0, Src=27, Tgt=28, Data=0xa5
+==============================================
+[SEND DEBUG] Cycle 2: STARTING PACKET SEND
+  Packet Info: Type=0, QoS=0, Src=27, Tgt=28, Data=0xa5
+  Target Direction: Expected output port calculation:
+    -> EAST (port 3) - X+ (3 -> 4)
+==============================================
+[SEND DEBUG] Cycle 2: Before send - pkt_in_rdy=1
+[SEND DEBUG] Cycle 2: Packet valid set - waiting for ready...
+[SEND SUCCESS] Cycle 2: Packet accepted after 0 cycles
+=================================================================
+[INTERNAL DEBUG] Cycle 2 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=1, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x06dca5, payload_o=0x000000
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b00000 (N,W,S,E,B), route_pkt_A=0x000000
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b0000(A,N,W,S), qos=0b0000, gnt=0b0000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=0, e_out_ready=1, e_out_pkt=0x000000
+  External pkt_con_eo_vld=0, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
+[SEND DEBUG] Cycle 3: Valid signal cleared
+[ENCODE_DEBUG] Function inputs: type=0, qos=0, src=27(0b011011), tgt=28(0b011100), data=0xa5
+[ENCODE_DEBUG] Function result: 06dca5
 [Cycle 3] Waiting for expected output on port 3: 06dca5
-[Cycle 4] West Output: 000000 (Type=0, QoS=0, Src= 0, Tgt= 0, Data=0x00)
-ERROR: Expected output not found
-  Expected: Port=3, Pkt=06dca5
---- N-RF-002: X方向反向路由测试 ---
-[Cycle 54] Sending packet: Type=0, QoS=0, Src=27, Tgt=26, Data=0x5a
-[Cycle 55] Waiting for expected output on port 1: 06da5a
-[Cycle 56] West Output: 000000 (Type=0, QoS=0, Src= 0, Tgt= 0, Data=0x00)
-ERROR: Expected output not found
-  Expected: Port=1, Pkt=06da5a
---- N-RF-003: Y方向正向路由测试 ---
-[Cycle 106] Sending packet: Type=0, QoS=0, Src=27, Tgt=35, Data=0x33
-[Cycle 107] Waiting for expected output on port 0: 06e333
-[Cycle 108] West Output: 000000 (Type=0, QoS=0, Src= 0, Tgt= 0, Data=0x00)
-ERROR: Expected output not found
-  Expected: Port=0, Pkt=06e333
---- N-RF-004: Y方向反向路由测试 ---
-[Cycle 158] Sending packet: Type=0, QoS=0, Src=27, Tgt=19, Data=0xcc
-[Cycle 159] Waiting for expected output on port 2: 06d3cc
-[Cycle 160] West Output: 000000 (Type=0, QoS=0, Src= 0, Tgt= 0, Data=0x00)
-ERROR: Expected output not found
-  Expected: Port=2, Pkt=06d3cc
---- N-RF-005: 本地路由测试 ---
-[Cycle 210] Sending packet: Type=0, QoS=0, Src=27, Tgt=27, Data=0xff
-[Cycle 211] Waiting for expected output on port 4: 06dbff
-[Cycle 212] West Output: 000000 (Type=0, QoS=0, Src= 0, Tgt= 0, Data=0x00)
-ERROR: Expected output not found
-  Expected: Port=4, Pkt=06dbff
-ERROR: 测试超时！
-- /Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv:551: Verilog $finish
-- S i m u l a t i o n   R e p o r t: Verilator 5.042 2025-11-02
-- Verilator: $finish at 100us; walltime 0.010 s; speed 9.956 ms/s
-- Verilator: cpu 0.010 s on 1 threads; alloced 0 MB
+=================================================================
+[INTERNAL DEBUG] Cycle 3 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=0, ready_i=1, valid_o=1, ready_o=1
+    payload_i=0x06dca5, payload_o=0x06dca5
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b01000 (N,W,S,E,B), route_pkt_A=0x06dca5
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b1000(A,N,W,S), qos=0b0000, gnt=0b1000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=1, ready_o=1, payload_i=0x06dca5,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=0, e_out_ready=1, e_out_pkt=0x000000
+  External pkt_con_eo_vld=0, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
+=================================================================
+[INTERNAL DEBUG] Cycle 4 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x06dca5, payload_o=0x06dca5
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b00000 (N,W,S,E,B), route_pkt_A=0x06dca5
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b0000(A,N,W,S), qos=0b0000, gnt=0b0000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=1, ready_i=1, payload_o=0x06dca5
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=1, e_out_ready=1, e_out_pkt=0x06dca5
+  External pkt_con_eo_vld=1, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
+[ENCODE_DEBUG] Function inputs: type=0, qos=0, src=27(0b011011), tgt=28(0b011100), data=0xa5
+[ENCODE_DEBUG] Function result: 06dca5
+[OUTPUT MONITOR] Cycle 4: EAST Output detected:
+  Raw signals: vld=1, rdy=1, type=0, qos=0, src=27, tgt=28, data=0xa5
+  Manual encoded: 06dca5
+  Function result: 000000
+  Match: 0
+[Cycle 5] PASS: Expected output found
+=================================================================
+[INTERNAL DEBUG] Cycle 5 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x06dca5, payload_o=0x06dca5
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b00000 (N,W,S,E,B), route_pkt_A=0x06dca5
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b0000(A,N,W,S), qos=0b0000, gnt=0b0000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x06dca5
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=0, e_out_ready=1, e_out_pkt=0x06dca5
+  External pkt_con_eo_vld=0, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
 
-/bin/sh: line 0: [: -eq: unary operator expected
+==============================================
+测试总结
+==============================================
+总测试数: 1
+通过测试: 1
+失败测试: 0
+通过率: 100.00%
+✓ 所有基本路由功能测试通过！
+TEST_RESULT: PASS
+=================================================================
+[INTERNAL DEBUG] Cycle 6 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x06dca5, payload_o=0x06dca5
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b00000 (N,W,S,E,B), route_pkt_A=0x06dca5
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b0000(A,N,W,S), qos=0b0000, gnt=0b0000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x06dca5
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=0, e_out_ready=1, e_out_pkt=0x06dca5
+  External pkt_con_eo_vld=0, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
+=================================================================
+[INTERNAL DEBUG] Cycle 7 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x06dca5, payload_o=0x06dca5
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b00000 (N,W,S,E,B), route_pkt_A=0x06dca5
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b0000(A,N,W,S), qos=0b0000, gnt=0b0000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x06dca5
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=0, e_out_ready=1, e_out_pkt=0x06dca5
+  External pkt_con_eo_vld=0, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
+=================================================================
+[INTERNAL DEBUG] Cycle 8 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x06dca5, payload_o=0x06dca5
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b00000 (N,W,S,E,B), route_pkt_A=0x06dca5
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b0000(A,N,W,S), qos=0b0000, gnt=0b0000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x06dca5
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=0, e_out_ready=1, e_out_pkt=0x06dca5
+  External pkt_con_eo_vld=0, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
+=================================================================
+[INTERNAL DEBUG] Cycle 9 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x06dca5, payload_o=0x06dca5
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b00000 (N,W,S,E,B), route_pkt_A=0x06dca5
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b0000(A,N,W,S), qos=0b0000, gnt=0b0000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x06dca5
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=0, e_out_ready=1, e_out_pkt=0x06dca5
+  External pkt_con_eo_vld=0, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
+=================================================================
+[INTERNAL DEBUG] Cycle 10 - Full Internal Signal Analysis:
+=================================================================
+=== IRS_N Input Signals ===
+  irs_input_A: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x06dca5, payload_o=0x06dca5
+  irs_input_N: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_W: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_S: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+  irs_input_E: valid_i=0, ready_i=1, valid_o=0, ready_o=1
+    payload_i=0x000000, payload_o=0x000000
+=== Router Output Signals ===
+  route_req_A=0b00000 (N,W,S,E,B), route_pkt_A=0x06dca5
+  route_req_N=0b00000, route_pkt_N=0x000000
+  route_req_W=0b00000, route_pkt_W=0x000000
+  route_req_S=0b00000, route_pkt_S=0x000000
+  route_req_E=0b00000, route_pkt_E=0x000000
+=== Arbiter I/O Signals ===
+  Arbiter_N: req=0b0000(A,W,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_W: req=0b0000(A,N,S,E), qos=0b0000, gnt=0b0000
+  Arbiter_S: req=0b0000(A,N,W,E), qos=0b0000, gnt=0b0000
+  Arbiter_E: req=0b0000(A,N,W,S), qos=0b0000, gnt=0b0000
+  Arbiter_B: req=0b00000(A,N,W,S,E), qos=0b00000, gnt=0b00000
+=== Output IRS_N Input Signals ===
+  irs_output_N: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_W: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_S: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+  irs_output_E: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x06dca5
+  irs_output_B: valid_i=0, ready_o=1, payload_i=0x000000,  valid_o=0, ready_i=1, payload_o=0x000000
+=================================================================
+=== Node Internal Output Connections ===
+  Node.e_out_valid=0, e_out_ready=1, e_out_pkt=0x06dca5
+  External pkt_con_eo_vld=0, pkt_con_eo_rdy=1
+  Connection match: vld=1, rdy_match=1
+=================================================================
+- /home/liangmx/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv:856: Verilog $finish
+==============================================
+- S i m u l a t i o n   R e p o r t: Verilator 5.042 2025-11-02
+- Verilator: $finish at 275ns; walltime 0.001 s; speed 237.585 us/s
+- Verilator: cpu 0.001 s on 1 threads; alloced 127 MB
+
 [0;31m[FAIL][0m  基本路由功能测试失败 (退出码: )
-make[1]: *** [test-node-basic] Error 1
-make: *** [test-quick] Error 2
+make[1]: Leaving directory '/home/liangmx/maze_mesh/verification'

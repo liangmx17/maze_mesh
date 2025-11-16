@@ -192,6 +192,7 @@ always@(posedge clk or negedge rst_n) begin
 end
 
 always@(posedge clk) begin
+  // $display("valid0_r: %h, payload0_r: %h, valid1_r: %h,  payload1_r: %h, payload_i: %h.",valid0_r, payload0_r, valid1_r, payload1_r, payload_i);
   if(set[0]) payload0_r <= valid1_r ? payload1_r : payload_i;
   if(set[1]) payload1_r <= payload_i;
 end

@@ -42,13 +42,15 @@ module node #(
     localparam PKT_W = `TYPE_W + `QOS_W + `SRCID_W + `TGTID_W + `FLIT_W;  // 2+1+6+6+8 = 23位
 
     // 数据包位位置常量
-    localparam QOS_POS      = 8;           // QoS位位置
+    // 实际数据包格式: {TYPE[1:0], QOS[0], SRC[5:0], TGT[5:0], DATA[7:0]}
+    // 位位置:         [22:21], [20],   [19:14], [13:8], [7:0]
+    localparam QOS_POS      = 20;          // QoS位位置 (修复)
     localparam TYPE_POS_HI  = 22;          // 类型位高位置
     localparam TYPE_POS_LO  = 21;          // 类型位低位置
-    localparam SRC_POS_HI   = 20;          // 源ID高位置
-    localparam SRC_POS_LO   = 15;          // 源ID低位置
-    localparam TGT_POS_HI   = 14;          // 目标ID高位置
-    localparam TGT_POS_LO   = 9;           // 目标ID低位置
+    localparam SRC_POS_HI   = 19;          // 源ID高位置 (修复)
+    localparam SRC_POS_LO   = 14;          // 源ID低位置 (修复)
+    localparam TGT_POS_HI   = 13;          // 目标ID高位置 (修复)
+    localparam TGT_POS_LO   = 8;           // 目标ID低位置 (修复)
 
     // 故障相对位置类型定义
     localparam NORMAL   = 4'd0;  // 正常状态，无故障影响
@@ -128,10 +130,9 @@ module node #(
     logic a_in_valid, a_in_ready;
     logic [PKT_W-1:0] a_in_pkt;
 
-    IRS_N #(
-        .PYLD_W(PKT_W),
-        .IRS_DEEP(1),               // 1级深度缓冲
-        .TYPE_RO_EN(1)              // Reg_Out，寄存器输出模式
+        IRS_LP #(
+          .PYLD_W (PKT_W)
+          ,.RO_EN(1)
     ) irs_input_A (
         .clk(clk),
         .rst_n(rst_n),
@@ -147,10 +148,9 @@ module node #(
     logic n_in_valid, n_in_ready;
     logic [PKT_W-1:0] n_in_pkt;
 
-    IRS_N #(
-        .PYLD_W(PKT_W),
-        .IRS_DEEP(1),
-        .TYPE_RO_EN(1)
+        IRS_LP #(
+          .PYLD_W (PKT_W)
+          ,.RO_EN(1)
     ) irs_input_N (
         .clk(clk),
         .rst_n(rst_n),
@@ -166,10 +166,9 @@ module node #(
     logic w_in_valid, w_in_ready;
     logic [PKT_W-1:0] w_in_pkt;
 
-    IRS_N #(
-        .PYLD_W(PKT_W),
-        .IRS_DEEP(1),
-        .TYPE_RO_EN(1)
+        IRS_LP #(
+          .PYLD_W (PKT_W)
+          ,.RO_EN(1)
     ) irs_input_W (
         .clk(clk),
         .rst_n(rst_n),
@@ -185,10 +184,9 @@ module node #(
     logic s_in_valid, s_in_ready;
     logic [PKT_W-1:0] s_in_pkt;
 
-    IRS_N #(
-        .PYLD_W(PKT_W),
-        .IRS_DEEP(1),
-        .TYPE_RO_EN(1)
+        IRS_LP #(
+          .PYLD_W (PKT_W)
+          ,.RO_EN(1)
     ) irs_input_S (
         .clk(clk),
         .rst_n(rst_n),
@@ -204,10 +202,9 @@ module node #(
     logic e_in_valid, e_in_ready;
     logic [PKT_W-1:0] e_in_pkt;
 
-    IRS_N #(
-        .PYLD_W(PKT_W),
-        .IRS_DEEP(1),
-        .TYPE_RO_EN(1)
+        IRS_LP #(
+          .PYLD_W (PKT_W)
+          ,.RO_EN(1)
     ) irs_input_E (
         .clk(clk),
         .rst_n(rst_n),
@@ -444,10 +441,9 @@ module node #(
     logic w_out_valid, w_out_ready;
     logic [PKT_W-1:0] w_out_pkt;
 
-    IRS_N #(
-        .PYLD_W(PKT_W),
-        .IRS_DEEP(1),
-        .TYPE_RO_EN(1)
+        IRS_LP #(
+          .PYLD_W (PKT_W)
+          ,.RO_EN(1)
     ) irs_output_W (
         .clk(clk),
         .rst_n(rst_n),
@@ -462,10 +458,9 @@ module node #(
     logic s_out_valid, s_out_ready;
     logic [PKT_W-1:0] s_out_pkt;
 
-    IRS_N #(
-        .PYLD_W(PKT_W),
-        .IRS_DEEP(1),
-        .TYPE_RO_EN(1)
+        IRS_LP #(
+          .PYLD_W (PKT_W)
+          ,.RO_EN(1)
     ) irs_output_S (
         .clk(clk),
         .rst_n(rst_n),
@@ -480,10 +475,9 @@ module node #(
     logic e_out_valid, e_out_ready;
     logic [PKT_W-1:0] e_out_pkt;
 
-    IRS_N #(
-        .PYLD_W(PKT_W),
-        .IRS_DEEP(1),
-        .TYPE_RO_EN(1)
+        IRS_LP #(
+          .PYLD_W (PKT_W)
+          ,.RO_EN(1)
     ) irs_output_E (
         .clk(clk),
         .rst_n(rst_n),
@@ -498,10 +492,9 @@ module node #(
     logic b_out_valid, b_out_ready;
     logic [PKT_W-1:0] b_out_pkt;
 
-    IRS_N #(
-        .PYLD_W(PKT_W),
-        .IRS_DEEP(1),
-        .TYPE_RO_EN(1)
+        IRS_LP #(
+          .PYLD_W (PKT_W)
+          ,.RO_EN(1)
     ) irs_output_B (
         .clk(clk),
         .rst_n(rst_n),
@@ -556,5 +549,6 @@ module node #(
     assign pkt_con.eo_src = e_out_pkt[SRC_POS_HI:SRC_POS_LO];
     assign pkt_con.eo_tgt = e_out_pkt[TGT_POS_HI:TGT_POS_LO];
     assign pkt_con.eo_data = e_out_pkt[7:0];
+
 
 endmodule

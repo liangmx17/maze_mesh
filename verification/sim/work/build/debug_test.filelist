@@ -1,0 +1,9 @@
+# MAZE节点调试测试文件列表
+/home/liangmx/maze_mesh/rtl/include/global_defines/top_define.v
+/home/liangmx/maze_mesh/rtl/include/interfaces/interface_a.sv
+/home/liangmx/maze_mesh/rtl/include/interfaces/interface_b.sv
+/home/liangmx/maze_mesh/rtl/include/interfaces/interface_c.sv
+/home/liangmx/maze_mesh/rtl/lib/irs/irs.v
+/home/liangmx/maze_mesh/rtl/src/node/node.v
+/home/liangmx/maze_mesh/verification/testbench/integration_tests/node_basic_routing/test_node_wrapper.sv
+/home/liangmx/maze_mesh/verification/testbench/integration_tests/node_basic_routing/debug_simple_test.sv

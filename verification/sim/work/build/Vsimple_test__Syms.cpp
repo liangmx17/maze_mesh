@@ -18,7 +18,7 @@ Vsimple_test__Syms::Vsimple_test__Syms(VerilatedContext* contextp, const char* n
     , TOP{this, namep}
 {
     // Check resources
-    Verilated::stackCheck(796);
+    Verilated::stackCheck(754);
     // Configure time unit / time precision
     _vm_contextp__->timeunit(-9);
     _vm_contextp__->timeprecision(-12);

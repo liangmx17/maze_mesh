@@ -145,12 +145,15 @@ test-node-basic:
 		$(SCRIPTS_DIR)/build/build_simple_test.sh verilator $(NODE_X) $(NODE_Y) && \
 		cd $(BUILD_DIR) && ./Vsimple_test; \
 		TEST_EXIT_CODE=$$?; \
-	fi
-	@echo ""
-	@if [ $$TEST_EXIT_CODE -eq 0 ]; then \
-		echo "$(GREEN)[PASS]$(NC) 基本路由功能测试完成"; \
+		echo ""; \
+		if [ $$TEST_EXIT_CODE -eq 0 ]; then \
+			echo "$(GREEN)[PASS]$(NC) 基本路由功能测试完成"; \
+		else \
+			echo "$(RED)[FAIL]$(NC) 基本路由功能测试失败 (退出码: $$TEST_EXIT_CODE)"; \
+			exit 1; \
+		fi; \
 	else \
-		echo "$(RED)[FAIL]$(NC) 基本路由功能测试失败 (退出码: $$TEST_EXIT_CODE)"; \
+		echo "$(RED)[ERROR]$(NC) 不支持的仿真器: $(SIMULATOR)"; \
 		exit 1; \
 	fi
 

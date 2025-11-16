@@ -35,13 +35,15 @@ module router_unit #(
 // =============================================================================
 
 // 数据包位位置常量 (与node.v保持一致)
-localparam QOS_POS      = 8;               // QoS位位置
+// 实际数据包格式: {TYPE[1:0], QOS[0], SRC[5:0], TGT[5:0], DATA[7:0]}
+// 位位置:         [22:21], [20],   [19:14], [13:8], [7:0]
+localparam QOS_POS      = 20;              // QoS位位置 (修复)
 localparam TYPE_POS_HI  = 22;              // 类型位高位置
 localparam TYPE_POS_LO  = 21;              // 类型位低位置
-localparam SRC_POS_HI   = 20;              // 源ID高位置
-localparam SRC_POS_LO   = 15;              // 源ID低位置
-localparam TGT_POS_HI   = 14;              // 目标ID高位置
-localparam TGT_POS_LO   = 9;               // 目标ID低位置
+localparam SRC_POS_HI   = 19;              // 源ID高位置 (修复)
+localparam SRC_POS_LO   = 14;              // 源ID低位置 (修复)
+localparam TGT_POS_HI   = 13;              // 目标ID高位置 (修复)
+localparam TGT_POS_LO   = 8;               // 目标ID低位置 (修复)
 localparam PKT_W        = 23;              // 数据包总宽度
 
 // 路由方向定义
