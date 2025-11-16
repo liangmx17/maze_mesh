@@ -1,5 +1,4 @@
-`include "global_defines/top_define.v"
-
+`timescale 1ns/1ps
 module MAZE_TOP (
     input clk,
     input rst_n,

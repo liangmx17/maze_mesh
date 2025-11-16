@@ -1,0 +1,102 @@
+[0;34m[INFO][0m  开始基本路由功能测试...
+  仿真器: verilator
+  节点位置: (3, 3)
+
+[0;33m[INFO][0m  使用Verilator编译和运行测试...
+==============================================
+MAZE节点基本路由功能测试编译脚本
+==============================================
+仿真器: verilator
+测试节点: (3, 3)
+项目根目录: /Users/liangmx17/Documents/maze_mesh
+验证目录: /Users/liangmx17/Documents/maze_mesh/verification
+RTL目录: /Users/liangmx17/Documents/maze_mesh/rtl
+脚本目录: /Users/liangmx17/Documents/maze_mesh/verification/scripts/build
+==============================================
+
+检查仿真器依赖...
+✓ Verilator 检查通过
+检查源文件...
+✓ 源文件检查通过
+清理旧文件...
+✓ 清理完成
+使用Verilator编译...
+- V e r i l a t i o n   R e p o r t: Verilator 5.042 2025-11-02 rev UNKNOWN.REV
+- Verilator: Built from 0.307 MB sources in 12 modules, into 0.639 MB in 10 C++ files needing 0.001 MB
+- Verilator: Walltime 0.084 s (elab=0.015, cvt=0.043, bld=0.000); cpu 0.060 s on 1 threads
+/Users/liangmx17/Documents/maze_mesh/verification/scripts/build/build_simple_test.sh: line 141: nproc: command not found
+c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated.o /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/verilated.cpp
+c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated_vcd_c.o /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/verilated_vcd_c.cpp
+c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated_timing.o /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/verilated_timing.cpp
+c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated_threads.o /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/verilated_threads.cpp
+python3 /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/bin/verilator_includer -DVL_INCLUDE_OPT=include Vsimple_test.cpp Vsimple_test___024root__0.cpp Vsimple_test__main.cpp Vsimple_test__Trace__0.cpp Vsimple_test__ConstPool_0.cpp Vsimple_test___024root__Slow.cpp Vsimple_test___024root__0__Slow.cpp Vsimple_test__Syms.cpp Vsimple_test__Trace__0__Slow.cpp Vsimple_test__TraceDecls__0__Slow.cpp > Vsimple_test__ALL.cpp
+echo "" > Vsimple_test__ALL.verilator_deplist.tmp
+c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o Vsimple_test__ALL.o Vsimple_test__ALL.cpp
+c++  -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv   verilated.o verilated_vcd_c.o verilated_timing.o verilated_threads.o Vsimple_test__ALL.a    -pthread -lpthread   -o Vsimple_test
+rm Vsimple_test__ALL.verilator_deplist.tmp
+✓ Verilator编译成功
+生成运行脚本: /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build/run_simple_test.sh
+✓ 运行脚本生成完成
+
+==============================================
+编译完成
+==============================================
+仿真器: verilator
+测试节点位置: (3, 3)
+编译目录: /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build
+运行脚本: /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build/run_simple_test.sh
+
+可执行文件: /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build/Vsimple_test
+运行命令: /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build/Vsimple_test
+
+使用方法:
+  cd /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build
+  ./run_simple_test.sh
+
+或直接运行:
+  /Users/liangmx17/Documents/maze_mesh/verification/sim/work/build/Vsimple_test
+
+编译成功完成！
+==============================================
+MAZE节点基本路由功能测试
+测试节点: (3, 3)
+==============================================
+复位完成，开始基本路由功能测试...
+
+--- N-RF-001: X方向正向路由测试 ---
+[Cycle 2] Sending packet: Type=0, QoS=0, Src=27, Tgt=28, Data=0xa5
+[Cycle 3] Waiting for expected output on port 3: 06dca5
+[Cycle 4] West Output: 000000
+ERROR: Expected output not found
+  Expected: Port=3, Pkt=06dca5
+--- N-RF-002: X方向反向路由测试 ---
+[Cycle 54] Sending packet: Type=0, QoS=0, Src=27, Tgt=26, Data=0x5a
+[Cycle 55] Waiting for expected output on port 1: 06da5a
+[Cycle 56] West Output: 000000
+ERROR: Expected output not found
+  Expected: Port=1, Pkt=06da5a
+--- N-RF-003: Y方向正向路由测试 ---
+[Cycle 106] Sending packet: Type=0, QoS=0, Src=27, Tgt=35, Data=0x33
+[Cycle 107] Waiting for expected output on port 0: 06e333
+[Cycle 108] West Output: 000000
+ERROR: Expected output not found
+  Expected: Port=0, Pkt=06e333
+--- N-RF-004: Y方向反向路由测试 ---
+[Cycle 158] Sending packet: Type=0, QoS=0, Src=27, Tgt=19, Data=0xcc
+[Cycle 159] Waiting for expected output on port 2: 06d3cc
+[Cycle 160] West Output: 000000
+ERROR: Expected output not found
+  Expected: Port=2, Pkt=06d3cc
+--- N-RF-005: 本地路由测试 ---
+[Cycle 210] Sending packet: Type=0, QoS=0, Src=27, Tgt=27, Data=0xff
+[Cycle 211] Waiting for expected output on port 4: 06dbff
+[Cycle 212] West Output: 000000
+ERROR: Expected output not found
+  Expected: Port=4, Pkt=06dbff
+ERROR: 测试超时！
+- /Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv:513: Verilog $finish
+- S i m u l a t i o n   R e p o r t: Verilator 5.042 2025-11-02
+- Verilator: $finish at 100us; walltime 0.007 s; speed 14.854 ms/s
+- Verilator: cpu 0.007 s on 1 threads; alloced 0 MB
+
+[0;32m[PASS][0m  基本路由功能测试完成

@@ -1,33 +1,28 @@
-// IRS_N - 插入式环形缓冲器模块
-// 用于MAZE网络节点输入输出端口的缓冲和流量控制
-// 支持可配置的缓冲深度和不同的工作模式
-
+`timescale 1ns/1ps
 module IRS_N #(
-    parameter PYLD_W = 1,           // 数据负载宽度
-    parameter IRS_DEEP = 1,         // IRS缓冲深度（0表示直通）
-    parameter TYPE_NO_READY = 0,    // 无ready信号模式标志
-    parameter TYPE_HALF = 0,        // 半缓冲模式标志
-    parameter TYPE_RO_EN = 1        // 只读使能模式标志（输出端使用）
+    parameter PYLD_W = 1,
+    parameter IRS_DEEP = 1,
+    parameter TYPE_NO_READY = 0,
+    parameter TYPE_HALF = 0,
+    parameter TYPE_RO_EN = 1
 )(
-    input   clk,                    // 时钟信号
-    input   rst_n,                  // 复位信号（低电平有效）
-    input   valid_i,                // 输入数据有效信号
-    input   ready_i,                // 输出就绪信号（来自下游）
-    output  valid_o,                // 输出数据有效信号
-    output  ready_o,                // 输入就绪信号（给上游）
-    input   [PYLD_W-1:0] payload_i, // 输入数据负载
-    output  [PYLD_W-1:0] payload_o  // 输出数据负载
+    input   clk,
+    input   rst_n,
+    input   valid_i,
+    input   ready_i,
+    output  valid_o,
+    output  ready_o,
+    input   [PYLD_W-1:0] payload_i,
+    output  [PYLD_W-1:0] payload_o
 );
 
 genvar i;
-generate
-  // 缓冲深度为0时的直通模式
+generate 
   if(IRS_DEEP == 0) begin:proc_irs_bypass
-    assign valid_o  = valid_i;            // 直通传递有效信号
-    assign payload_o= payload_i;          // 直通传递数据
-    assign  ready_o = ready_i;            // 直通传递就绪信号
+    assign valid_o  = valid_i;
+    assign payload_o= payload_i;
+    assign  ready_o = ready_i;
   end
-  // 插入IRS缓冲器的模式
   else begin:proc_insert_irs
     wire  [IRS_DEEP-1:0]  ready_irs_i;
     wire  [IRS_DEEP-1:0]  valid_irs_i;
@@ -116,21 +111,19 @@ endgenerate
 
 endmodule
 
-// IRS_HALF - 半缓冲器模块
-// 简化的单级缓冲器，支持可选的ready信号握手协议
-
+`timescale 1ns/1ps
 module IRS_HALF #(
-    parameter PYLD_W = 1,           // 数据负载宽度
-    parameter WITH_READY = 1        // 是否支持ready信号握手
+    parameter PYLD_W = 1,
+    parameter WITH_READY = 1
 )(
-    input   clk,                    // 时钟信号
-    input   rst_n,                  // 复位信号（低电平有效）
-    input   valid_i,                // 输入数据有效信号
-    output  ready_o,                // 输入就绪信号
-    input   [PYLD_W-1:0] payload_i, // 输入数据负载
-    output  valid_o,                // 输出数据有效信号
-    input   ready_i,                // 输出就绪信号
-    output  [PYLD_W-1:0] payload_o  // 输出数据负载
+    input   clk,
+    input   rst_n,
+    input   valid_i,
+    output  ready_o,
+    input   [PYLD_W-1:0] payload_i,
+    output  valid_o,
+    input   ready_i,
+    output  [PYLD_W-1:0] payload_o
 );
 
 reg        valid_r;
@@ -159,21 +152,19 @@ end
 
 endmodule
 
-// IRS_LP - 纵向流水线缓冲器模块
-// 支持两级缓冲的流水线结构，可用于只读模式
-
+`timescale 1ns/1ps
 module IRS_LP #(
-    parameter PYLD_W = 1,           // 数据负载宽度
-    parameter RO_EN = 0              // 只读使能标志（用于输出端）
+    parameter PYLD_W = 1,
+    parameter RO_EN = 0
 )(
-    input   clk,                    // 时钟信号
-    input   rst_n,                  // 复位信号（低电平有效）
-    input   valid_i,                // 输入数据有效信号
-    output  ready_o,                // 输入就绪信号
-    input   [PYLD_W-1:0] payload_i, // 输入数据负载
-    output  valid_o,                // 输出数据有效信号
-    input   ready_i,                // 输出就绪信号
-    output  [PYLD_W-1:0] payload_o  // 输出数据负载
+    input   clk,
+    input   rst_n,
+    input   valid_i,
+    output  ready_o,
+    input   [PYLD_W-1:0] payload_i,
+    output  valid_o,
+    input   ready_i,
+    output  [PYLD_W-1:0] payload_o
 );
 
 reg        valid0_r, valid1_r;

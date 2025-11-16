@@ -20,10 +20,7 @@
 // IRS Depth = max(0, torus_distance - 1)
 //
 // ====================================================================
-
-`include "/Users/liangmx17/Documents/maze_mesh/rtl/include/global_defines/top_define.v"
-`include "/Users/liangmx17/Documents/maze_mesh/rtl/include/interfaces/interface_c.sv"
-`include "/Users/liangmx17/Documents/maze_mesh/rtl/lib/irs/irs.v"
+`timescale 1ns/1ps
 
 module TOPO (
     input   clk,

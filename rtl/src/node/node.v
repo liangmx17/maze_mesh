@@ -15,12 +15,7 @@
 // =============================================================================
 // MAZE网络节点主模块
 // =============================================================================
-
-// 包含模块定义 - 使用相对路径
-`include "rtl/include/global_defines/top_define.v"
-`include "rtl/src/node/node_components/router_unit.v"
-`include "rtl/src/node/node_components/arbiter.v"
-
+`timescale 1ns/1ps
 module node #(
     parameter HP = 0,                    // 水平坐标 (0-7)
     parameter VP = 0                     // 垂直坐标 (0-7)
@@ -126,7 +121,7 @@ module node #(
     end
 
     // =============================================================================
-    // 输入IRS_N缓冲器
+    // 输入IRS_N缓冲器 (寄存器输出模式RO_EN=1)
     // =============================================================================
 
     // A接口输入缓冲器
@@ -135,15 +130,15 @@ module node #(
 
     IRS_N #(
         .PYLD_W(PKT_W),
-        .IRS_DEEP(2),               // 2级深度缓冲
-        .TYPE_RO_EN(0)              // 标准模式，支持读写
+        .IRS_DEEP(1),               // 1级深度缓冲
+        .TYPE_RO_EN(1)              // Reg_Out，寄存器输出模式
     ) irs_input_A (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(pkt_i.pkt_in_vld),
-        .ready_i(pkt_i.pkt_in_rdy),
+        .ready_i(a_in_ready),
         .valid_o(a_in_valid),
-        .ready_o(a_in_ready),
+        .ready_o(pkt_i.pkt_in_rdy),
         .payload_i({pkt_i.pkt_in_type, pkt_i.pkt_in_qos, pkt_i.pkt_in_src, pkt_i.pkt_in_tgt, pkt_i.pkt_in_data}),
         .payload_o(a_in_pkt)
     );
@@ -154,15 +149,15 @@ module node #(
 
     IRS_N #(
         .PYLD_W(PKT_W),
-        .IRS_DEEP(2),
-        .TYPE_RO_EN(0)
+        .IRS_DEEP(1),
+        .TYPE_RO_EN(1)
     ) irs_input_N (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(pkt_con.ni_vld),
-        .ready_i(pkt_con.ni_rdy),
+        .ready_i(n_in_ready),
         .valid_o(n_in_valid),
-        .ready_o(n_in_ready),
+        .ready_o(pkt_con.ni_rdy),
         .payload_i({pkt_con.ni_type, pkt_con.ni_qos, pkt_con.ni_src, pkt_con.ni_tgt, pkt_con.ni_data}),
         .payload_o(n_in_pkt)
     );
@@ -173,15 +168,15 @@ module node #(
 
     IRS_N #(
         .PYLD_W(PKT_W),
-        .IRS_DEEP(2),
-        .TYPE_RO_EN(0)
+        .IRS_DEEP(1),
+        .TYPE_RO_EN(1)
     ) irs_input_W (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(pkt_con.wi_vld),
-        .ready_i(pkt_con.wi_rdy),
+        .ready_i(w_in_ready),
         .valid_o(w_in_valid),
-        .ready_o(w_in_ready),
+        .ready_o(pkt_con.wi_rdy),
         .payload_i({pkt_con.wi_type, pkt_con.wi_qos, pkt_con.wi_src, pkt_con.wi_tgt, pkt_con.wi_data}),
         .payload_o(w_in_pkt)
     );
@@ -192,15 +187,15 @@ module node #(
 
     IRS_N #(
         .PYLD_W(PKT_W),
-        .IRS_DEEP(2),
-        .TYPE_RO_EN(0)
+        .IRS_DEEP(1),
+        .TYPE_RO_EN(1)
     ) irs_input_S (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(pkt_con.si_vld),
-        .ready_i(pkt_con.si_rdy),
+        .ready_i(s_in_ready),
         .valid_o(s_in_valid),
-        .ready_o(s_in_ready),
+        .ready_o(pkt_con.si_rdy),
         .payload_i({pkt_con.si_type, pkt_con.si_qos, pkt_con.si_src, pkt_con.si_tgt, pkt_con.si_data}),
         .payload_o(s_in_pkt)
     );
@@ -211,15 +206,15 @@ module node #(
 
     IRS_N #(
         .PYLD_W(PKT_W),
-        .IRS_DEEP(2),
-        .TYPE_RO_EN(0)
+        .IRS_DEEP(1),
+        .TYPE_RO_EN(1)
     ) irs_input_E (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(pkt_con.ei_vld),
-        .ready_i(pkt_con.ei_rdy),
+        .ready_i(e_in_ready),
         .valid_o(e_in_valid),
-        .ready_o(e_in_ready),
+        .ready_o(pkt_con.ei_rdy),
         .payload_i({pkt_con.ei_type, pkt_con.ei_qos, pkt_con.ei_src, pkt_con.ei_tgt, pkt_con.ei_data}),
         .payload_o(e_in_pkt)
     );
@@ -232,87 +227,80 @@ module node #(
     logic [4:0] route_req_A, route_req_N, route_req_W, route_req_S, route_req_E;  // 5-bit one-hot请求信号
     logic [PKT_W-1:0] route_pkt_A, route_pkt_N, route_pkt_W, route_pkt_S, route_pkt_E; // 路由数据包
 
+    // 输入ready信号连接逻辑
+    // 基于路由单元可以处理新数据的能力来控制输入缓冲器的ready信号
+    assign a_in_ready = 1'b1;  // A端口路由器始终可以接收新数据（非流水线设计）
+    assign n_in_ready = 1'b1;  // 北端口路由器始终可以接收新数据
+    assign w_in_ready = 1'b1;  // 西端口路由器始终可以接收新数据
+    assign s_in_ready = 1'b1;  // 南端口路由器始终可以接收新数据
+    assign e_in_ready = 1'b1;  // 东端口路由器始终可以接收新数据
+
     // A端口路由单元
-    router_unit u_router_A (
+    router_unit #(
+        .LOCAL_X(HP),
+        .LOCAL_Y(VP)
+    ) u_router_A (
         .clk(clk),
         .rst_n(rst_n),
         .valid_in(a_in_valid),
         .pkt_in(a_in_pkt),
-        .local_x(local_x),
-        .local_y(local_y),
         .fault_register(fault_relative_pos),
-        .is_north_edge(is_north_edge),
-        .is_south_edge(is_south_edge),
-        .is_west_edge(is_west_edge),
-        .is_east_edge(is_east_edge),
         .route_req(route_req_A),
         .pkt_out(route_pkt_A)
     );
 
     // 北端口路由单元
-    router_unit u_router_N (
+    router_unit #(
+        .LOCAL_X(HP),
+        .LOCAL_Y(VP)
+    ) u_router_N (
         .clk(clk),
         .rst_n(rst_n),
         .valid_in(n_in_valid),
         .pkt_in(n_in_pkt),
-        .local_x(local_x),
-        .local_y(local_y),
         .fault_register(fault_relative_pos),
-        .is_north_edge(is_north_edge),
-        .is_south_edge(is_south_edge),
-        .is_west_edge(is_west_edge),
-        .is_east_edge(is_east_edge),
         .route_req(route_req_N),
         .pkt_out(route_pkt_N)
     );
 
     // 西端口路由单元
-    router_unit u_router_W (
+    router_unit #(
+        .LOCAL_X(HP),
+        .LOCAL_Y(VP)
+    ) u_router_W (
         .clk(clk),
         .rst_n(rst_n),
         .valid_in(w_in_valid),
         .pkt_in(w_in_pkt),
-        .local_x(local_x),
-        .local_y(local_y),
         .fault_register(fault_relative_pos),
-        .is_north_edge(is_north_edge),
-        .is_south_edge(is_south_edge),
-        .is_west_edge(is_west_edge),
-        .is_east_edge(is_east_edge),
         .route_req(route_req_W),
         .pkt_out(route_pkt_W)
     );
 
     // 南端口路由单元
-    router_unit u_router_S (
+    router_unit #(
+        .LOCAL_X(HP),
+        .LOCAL_Y(VP)
+    ) u_router_S (
         .clk(clk),
         .rst_n(rst_n),
         .valid_in(s_in_valid),
         .pkt_in(s_in_pkt),
-        .local_x(local_x),
-        .local_y(local_y),
         .fault_register(fault_relative_pos),
-        .is_north_edge(is_north_edge),
-        .is_south_edge(is_south_edge),
-        .is_west_edge(is_west_edge),
-        .is_east_edge(is_east_edge),
         .route_req(route_req_S),
         .pkt_out(route_pkt_S)
     );
 
     // 东端口路由单元
-    router_unit u_router_E (
+    router_unit #(
+        .LOCAL_X(HP),
+        .LOCAL_Y(VP)
+    ) u_router_E (
         .clk(clk),
         .rst_n(rst_n),
         .valid_in(e_in_valid),
         .pkt_in(e_in_pkt),
-        .local_x(local_x),
-        .local_y(local_y),
         .fault_register(fault_relative_pos),
-        .is_north_edge(is_north_edge),
-        .is_south_edge(is_south_edge),
-        .is_west_edge(is_west_edge),
-        .is_east_edge(is_east_edge),
         .route_req(route_req_E),
         .pkt_out(route_pkt_E)
     );
@@ -326,7 +314,7 @@ module node #(
     logic [3:0] arb_req_W, arb_qos_W, arb_gnt_W;  // 西仲裁器：4个输入(A,N,S,E)，排除西输入
     logic [3:0] arb_req_S, arb_qos_S, arb_gnt_S;  // 南仲裁器：4个输入(A,N,W,E)，排除南输入
     logic [3:0] arb_req_E, arb_qos_E, arb_gnt_E;  // 东仲裁器：4个输入(A,N,W,S)，排除东输入
-    logic [3:0] arb_req_B, arb_qos_B, arb_gnt_B;  // B仲裁器：支持所有4个输入(A,N,W,S,E)
+    logic [4:0] arb_req_B, arb_qos_B, arb_gnt_B;  // B仲裁器：支持所有4个输入(A,N,W,S,E)
 
     // 仲裁器输入映射 - 使用常量QOS_POS确保一致性
     // 北仲裁器：4个输入，排除来自北方的输入 [A,W,S,E]
@@ -346,8 +334,8 @@ module node #(
     assign arb_qos_E = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_W[QOS_POS], route_pkt_S[QOS_POS]};
 
     // B仲裁器：支持所有4个输入 [A,N,W,S,E]
-    assign arb_req_B = {route_req_A[4], route_req_N[4], route_req_W[4], route_req_S[4]};
-    assign arb_qos_B = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_W[QOS_POS], route_pkt_S[QOS_POS]};
+    assign arb_req_B = {route_req_A[4], route_req_N[4], route_req_W[4], route_req_S[4], route_req_E[4]};
+    assign arb_qos_B = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_W[QOS_POS], route_pkt_S[QOS_POS], route_pkt_E[QOS_POS]};
 
     // 实例化仲裁器 - 所有仲裁器都使用WIDTH=4
     // 北仲裁器：4输入仲裁器，排除北输入 [A,W,S,E]
@@ -378,8 +366,8 @@ module node #(
         .gnt(arb_gnt_E)
     );
 
-    // B仲裁器：4输入仲裁器，支持所有输入 [A,N,W,S,E]
-    arbiter #(.WIDTH(4)) u_arbiter_B (
+    // B仲裁器：5输入仲裁器，支持所有输入 [A,N,W,S,E]
+    arbiter #(.WIDTH(5)) u_arbiter_B (
         .req(arb_req_B),
         .qos(arb_qos_B),
         .gnt(arb_gnt_B)
@@ -423,15 +411,16 @@ module node #(
         else begin pkt_E = {PKT_W{1'b0}}; end
 
         // B输出选择（本地输出）- 映射：[A,N,W,S,E]
-        if (arb_gnt_B[3]) begin pkt_B = route_pkt_A; end    // bit3: A输入
-        else if (arb_gnt_B[2]) begin pkt_B = route_pkt_N; end  // bit2: N输入
-        else if (arb_gnt_B[1]) begin pkt_B = route_pkt_W; end  // bit1: W输入
-        else if (arb_gnt_B[0]) begin pkt_B = route_pkt_S; end  // bit0: S输入
+        if (arb_gnt_B[4]) begin pkt_B = route_pkt_A; end    // bit4: A输入
+        else if (arb_gnt_B[3]) begin pkt_B = route_pkt_N; end  // bit3: N输入
+        else if (arb_gnt_B[2]) begin pkt_B = route_pkt_W; end  // bit2: W输入
+        else if (arb_gnt_B[1]) begin pkt_B = route_pkt_S; end  // bit1: S输入
+        else if (arb_gnt_B[0]) begin pkt_B = route_pkt_E; end  // bit0: E输入
         else begin pkt_B = {PKT_W{1'b0}}; end
     end
 
     // =============================================================================
-    // 输出IRS_N缓冲器 (只读模式RO_EN=1)
+    // 输出IRS_N缓冲器 (寄存器输出模式RO_EN=1)
     // =============================================================================
 
     logic n_out_valid, n_out_ready;
@@ -440,14 +429,14 @@ module node #(
     IRS_N #(
         .PYLD_W(PKT_W),
         .IRS_DEEP(1),               // 1级深度缓冲
-        .TYPE_RO_EN(1)              // 只读模式
+        .TYPE_RO_EN(1)              // Reg_Out寄存器输出模式
     ) irs_output_N (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_N),
-        .ready_i(n_out_ready),
+        .ready_i(pkt_con.no_rdy),   // 连接到C接口北输出端口的ready信号
         .valid_o(n_out_valid),
-        .ready_o(n_out_ready),      // 循环连接
+        .ready_o(n_out_ready),      // 内部使用，告知上游是否ready
         .payload_i(pkt_N),
         .payload_o(n_out_pkt)
     );
@@ -463,9 +452,9 @@ module node #(
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_W),
-        .ready_i(w_out_ready),
+        .ready_i(pkt_con.wo_rdy),   // 连接到C接口西输出端口的ready信号
         .valid_o(w_out_valid),
-        .ready_o(w_out_ready),
+        .ready_o(w_out_ready),      // 内部使用，告知上游是否ready
         .payload_i(pkt_W),
         .payload_o(w_out_pkt)
     );
@@ -481,9 +470,9 @@ module node #(
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_S),
-        .ready_i(s_out_ready),
+        .ready_i(pkt_con.so_rdy),   // 连接到C接口南输出端口的ready信号
         .valid_o(s_out_valid),
-        .ready_o(s_out_ready),
+        .ready_o(s_out_ready),      // 内部使用，告知上游是否ready
         .payload_i(pkt_S),
         .payload_o(s_out_pkt)
     );
@@ -499,9 +488,9 @@ module node #(
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_E),
-        .ready_i(e_out_ready),
+        .ready_i(pkt_con.eo_rdy),   // 连接到C接口东输出端口的ready信号
         .valid_o(e_out_valid),
-        .ready_o(e_out_ready),
+        .ready_o(e_out_ready),      // 内部使用，告知上游是否ready
         .payload_i(pkt_E),
         .payload_o(e_out_pkt)
     );
@@ -517,9 +506,9 @@ module node #(
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_B),
-        .ready_i(b_out_ready),
+        .ready_i(pkt_o.pkt_out_rdy), // 连接到B接口输出端口的ready信号
         .valid_o(b_out_valid),
-        .ready_o(b_out_ready),
+        .ready_o(b_out_ready),       // 内部使用，告知上游是否ready
         .payload_i(pkt_B),
         .payload_o(b_out_pkt)
     );
@@ -567,20 +556,5 @@ module node #(
     assign pkt_con.eo_src = e_out_pkt[SRC_POS_HI:SRC_POS_LO];
     assign pkt_con.eo_tgt = e_out_pkt[TGT_POS_HI:TGT_POS_LO];
     assign pkt_con.eo_data = e_out_pkt[7:0];
-
-    // =============================================================================
-    // 输入ready信号连接
-    // =============================================================================
-
-    always_comb begin
-        // A接口ready信号
-        pkt_i.pkt_in_rdy = a_in_ready;
-
-        // C接口输入ready信号
-        pkt_con.ni_rdy = n_in_ready;
-        pkt_con.wi_rdy = w_in_ready;
-        pkt_con.si_rdy = s_in_ready;
-        pkt_con.ei_rdy = e_in_ready;
-    end
 
 endmodule

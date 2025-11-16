@@ -8,8 +8,12 @@
 // 4. 考虑边缘节点限制和故障节点位置
 // 5. 支持单播、多播和广播路由
 // =============================================================================
-
-module router_unit (
+`timescale 1ns/1ps
+module router_unit #(
+    // 节点位置参数
+    parameter logic [2:0] LOCAL_X = 3'd0,     // 当前节点X坐标 (0-7)
+    parameter logic [2:0] LOCAL_Y = 3'd0      // 当前节点Y坐标 (0-7)
+) (
     // 时钟和复位
     input logic clk,
     input logic rst_n,
@@ -18,16 +22,8 @@ module router_unit (
     input logic valid_in,                    // 输入有效信号
     input logic [22:0] pkt_in,               // 输入数据包 (23位)
 
-    // 节点位置信息
-    input logic [2:0] local_x,               // 当前节点X坐标
-    input logic [2:0] local_y,               // 当前节点Y坐标
-
-    // 故障信息和边缘信息
+    // 故障信息
     input logic [3:0] fault_register,        // 故障相对位置寄存器
-    input logic is_north_edge,               // 是否在北边缘
-    input logic is_south_edge,               // 是否在南边缘
-    input logic is_west_edge,                // 是否在西边缘
-    input logic is_east_edge,                // 是否在东边缘
 
     // 路由输出接口
     output logic [4:0] route_req,            // 5-bit one-hot路由请求 [N,W,S,E,B]
@@ -71,6 +67,24 @@ logic [2:0] target_x, target_y;           // 目标节点坐标
 logic [1:0] pkt_type;                     // 数据包类型
 logic valid_route;                        // 路由有效信号
 
+// 边缘判断信号 (内部计算)
+logic is_north_edge;                      // 是否在北边缘 (Y=7)
+logic is_south_edge;                      // 是否在南边缘 (Y=0)
+logic is_west_edge;                       // 是否在西边缘 (X=0)
+logic is_east_edge;                       // 是否在东边缘 (X=7)
+
+// =============================================================================
+// 边缘位置计算
+// =============================================================================
+
+always_comb begin
+    // 根据参数计算边缘位置
+    is_north_edge = (LOCAL_Y == 3'd7);     // 北边缘 (Y=7)
+    is_south_edge = (LOCAL_Y == 3'd0);     // 南边缘 (Y=0)
+    is_west_edge  = (LOCAL_X == 3'd0);     // 西边缘 (X=0)
+    is_east_edge  = (LOCAL_X == 3'd7);     // 东边缘 (X=7)
+end
+
 // =============================================================================
 // 输入数据包解析
 // =============================================================================
@@ -83,8 +97,8 @@ always_comb begin
         pkt_type = pkt_in[TYPE_POS_HI:TYPE_POS_LO];      // 数据包类型
         valid_route = 1'b1;
     end else begin
-        target_x = local_x;
-        target_y = local_y;
+        target_x = LOCAL_X;
+        target_y = LOCAL_Y;
         pkt_type = 2'b00;
         valid_route = 1'b0;
     end
@@ -104,19 +118,19 @@ always_comb begin
         case (pkt_type)
             2'b00: begin  // 单播路由 (Unicast)
                 // 检查是否到达本地节点
-                if (target_x == local_x && target_y == local_y) begin
+                if (target_x == LOCAL_X && target_y == LOCAL_Y) begin
                     route_req[DIR_B] = 1'b1;  // 本地输出
                 end else begin
                     // 实现故障感知XY路由
                     // X方向优先策略
-                    if (target_x > local_x) begin
+                    if (target_x > LOCAL_X) begin
                         // 目标在东方
                         case (fault_register)
                             E_OF_x, NE_OF_x, SE_OF_x: begin
                                 // 东方故障，选择绕行路径
-                                if (target_y > local_y && local_y < 7) begin
+                                if (target_y > LOCAL_Y && LOCAL_Y < 3'd7) begin
                                     route_req[DIR_N] = 1'b1;  // 向北绕行
-                                end else if (local_y > 0) begin
+                                end else if (LOCAL_Y > 3'd0) begin
                                     route_req[DIR_S] = 1'b1;  // 向南绕行
                                 end
                             end
@@ -125,14 +139,14 @@ always_comb begin
                                 route_req[DIR_E] = 1'b1;
                             end
                         endcase
-                    end else if (target_x < local_x) begin
+                    end else if (target_x < LOCAL_X) begin
                         // 目标在西方
                         case (fault_register)
                             W_OF_x, NW_OF_x, SW_OF_x: begin
                                 // 西方故障，选择绕行路径
-                                if (target_y > local_y && local_y < 7) begin
+                                if (target_y > LOCAL_Y && LOCAL_Y < 3'd7) begin
                                     route_req[DIR_N] = 1'b1;  // 向北绕行
-                                end else if (local_y > 0) begin
+                                end else if (LOCAL_Y > 3'd0) begin
                                     route_req[DIR_S] = 1'b1;  // 向南绕行
                                 end
                             end
@@ -143,14 +157,14 @@ always_comb begin
                         endcase
                     end else begin
                         // X坐标相同，Y方向路由
-                        if (target_y > local_y) begin
+                        if (target_y > LOCAL_Y) begin
                             // 目标在北方
                             case (fault_register)
                                 N_OF_x, NW_OF_x, NE_OF_x: begin
                                     // 北方故障，选择东西绕行
-                                    if (local_x < 7) begin
+                                    if (LOCAL_X < 3'd7) begin
                                         route_req[DIR_E] = 1'b1;  // 向东绕行
-                                    end else if (local_x > 0) begin
+                                    end else if (LOCAL_X > 3'd0) begin
                                         route_req[DIR_W] = 1'b1;  // 向西绕行
                                     end
                                 end
@@ -159,14 +173,14 @@ always_comb begin
                                     route_req[DIR_N] = 1'b1;
                                 end
                             endcase
-                        end else if (target_y < local_y) begin
+                        end else if (target_y < LOCAL_Y) begin
                             // 目标在南方
                             case (fault_register)
                                 S_OF_x, SW_OF_x, SE_OF_x: begin
                                     // 南方故障，选择东西绕行
-                                    if (local_x < 7) begin
+                                    if (LOCAL_X < 3'd7) begin
                                         route_req[DIR_E] = 1'b1;  // 向东绕行
-                                    end else if (local_x > 0) begin
+                                    end else if (LOCAL_X > 3'd0) begin
                                         route_req[DIR_W] = 1'b1;  // 向西绕行
                                     end
                                 end
@@ -181,28 +195,28 @@ always_comb begin
             end
 
             2'b01: begin  // X-Multicast (相同X坐标的所有节点)
-                if (target_x == local_x) begin
+                if (target_x == LOCAL_X) begin
                     // 当前节点在目标X列，本地输出
                     route_req[DIR_B] = 1'b1;
                 end else begin
                     // 需要到达目标X列
-                    if (target_x > local_x) begin
+                    if (target_x > LOCAL_X) begin
                         route_req[DIR_E] = 1'b1;  // 向东移动
-                    end else if (target_x < local_x) begin
+                    end else if (target_x < LOCAL_X) begin
                         route_req[DIR_W] = 1'b1;  // 向西移动
                     end
                 end
             end
 
             2'b10: begin  // Y-Multicast (相同Y坐标的所有节点)
-                if (target_y == local_y) begin
+                if (target_y == LOCAL_Y) begin
                     // 当前节点在目标Y行，本地输出
                     route_req[DIR_B] = 1'b1;
                 end else begin
                     // 需要到达目标Y行
-                    if (target_y > local_y) begin
+                    if (target_y > LOCAL_Y) begin
                         route_req[DIR_N] = 1'b1;  // 向北移动
-                    end else if (target_y < local_y) begin
+                    end else if (target_y < LOCAL_Y) begin
                         route_req[DIR_S] = 1'b1;  // 向南移动
                     end
                 end
@@ -220,10 +234,10 @@ always_comb begin
         endcase
 
         // 边缘节点处理 - 确保不越界
-        if (local_x == 0) route_req[DIR_W] = 1'b0;     // 西边界，不能向西
-        if (local_x == 7) route_req[DIR_E] = 1'b0;     // 东边界，不能向东
-        if (local_y == 0) route_req[DIR_S] = 1'b0;     // 南边界，不能向南
-        if (local_y == 7) route_req[DIR_N] = 1'b0;     // 北边界，不能向北
+        if (LOCAL_X == 3'd0) route_req[DIR_W] = 1'b0;     // 西边界，不能向西
+        if (LOCAL_X == 3'd7) route_req[DIR_E] = 1'b0;     // 东边界，不能向东
+        if (LOCAL_Y == 3'd0) route_req[DIR_S] = 1'b0;     // 南边界，不能向南
+        if (LOCAL_Y == 3'd7) route_req[DIR_N] = 1'b0;     // 北边界，不能向北
 
         // 如果所有方向都被阻止，强制本地输出
         if (route_req == 5'b00000) begin
