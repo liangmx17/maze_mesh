@@ -24,8 +24,8 @@ RTL目录: /Users/liangmx17/Documents/maze_mesh/rtl
 ✓ 清理完成
 使用Verilator编译...
 - V e r i l a t i o n   R e p o r t: Verilator 5.042 2025-11-02 rev UNKNOWN.REV
-- Verilator: Built from 0.309 MB sources in 12 modules, into 0.661 MB in 10 C++ files needing 0.001 MB
-- Verilator: Walltime 0.086 s (elab=0.013, cvt=0.047, bld=0.000); cpu 0.065 s on 1 threads
+- Verilator: Built from 0.309 MB sources in 12 modules, into 0.662 MB in 10 C++ files needing 0.001 MB
+- Verilator: Walltime 0.092 s (elab=0.016, cvt=0.046, bld=0.000); cpu 0.064 s on 1 threads
 /Users/liangmx17/Documents/maze_mesh/verification/scripts/build/build_simple_test.sh: line 141: nproc: command not found
 c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated.o /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/verilated.cpp
 c++ -Os  -I.  -MMD -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include -I/OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/vltstd -DVERILATOR=1 -DVM_COVERAGE=0 -DVM_SC=0 -DVM_TIMING=1 -DVM_TRACE=1 -DVM_TRACE_FST=0 -DVM_TRACE_VCD=1 -DVM_TRACE_SAIF=0 -faligned-new -fbracket-depth=4096 -fcf-protection=none -Xclang -fno-pch-timestamp -Qunused-arguments -Wno-bool-operation -Wno-c++11-narrowing -Wno-constant-logical-operand -Wno-int-in-bool-context -Wno-non-pod-varargs -Wno-parentheses-equality -Wno-shadow -Wno-sign-compare -Wno-tautological-bitwise-compare -Wno-tautological-compare -Wno-uninitialized -Wno-unused-but-set-parameter -Wno-unused-but-set-variable -Wno-unused-parameter -Wno-unused-variable    -std=c++11 -DVL_TIME_CONTEXT   -std=gnu++20 -c -o verilated_vcd_c.o /OPT/HOMEBREW/Cellar/verilator/5.042/share/verilator/include/verilated_vcd_c.cpp
@@ -96,9 +96,12 @@ ERROR: Expected output not found
 ERROR: Expected output not found
   Expected: Port=4, Pkt=06dbff
 ERROR: 测试超时！
-- /Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv:544: Verilog $finish
+- /Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv:551: Verilog $finish
 - S i m u l a t i o n   R e p o r t: Verilator 5.042 2025-11-02
-- Verilator: $finish at 100us; walltime 0.007 s; speed 13.282 ms/s
-- Verilator: cpu 0.008 s on 1 threads; alloced 0 MB
+- Verilator: $finish at 100us; walltime 0.010 s; speed 9.956 ms/s
+- Verilator: cpu 0.010 s on 1 threads; alloced 0 MB
 
-[0;32m[PASS][0m  基本路由功能测试完成
+/bin/sh: line 0: [: -eq: unary operator expected
+[0;31m[FAIL][0m  基本路由功能测试失败 (退出码: )
+make[1]: *** [test-node-basic] Error 1
+make: *** [test-quick] Error 2

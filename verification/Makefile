@@ -145,21 +145,6 @@ test-node-basic:
 		$(SCRIPTS_DIR)/build/build_simple_test.sh verilator $(NODE_X) $(NODE_Y) && \
 		cd $(BUILD_DIR) && ./Vsimple_test; \
 		TEST_EXIT_CODE=$$?; \
-	elif [ "$(SIMULATOR)" = "modelsim" ] || [ "$(SIMULATOR)" = "questasim" ]; then \
-		echo "$(YELLOW)[INFO]$(NC) 使用ModelSim编译和运行测试..."; \
-		$(SCRIPTS_DIR)/build/build_simple_test.sh modelsim $(NODE_X) $(NODE_Y) && \
-		cd $(BUILD_DIR) && ./Vsimple_test; \
-		TEST_EXIT_CODE=$$?; \
-	elif [ "$(SIMULATOR)" = "vcs" ]; then \
-		echo "$(YELLOW)[INFO]$(NC) 使用VCS编译和运行测试..."; \
-		$(SCRIPTS_DIR)/build/build_simple_test.sh vcs $(NODE_X) $(NODE_Y) && \
-		cd $(BUILD_DIR) && ./Vsimple_test; \
-		TEST_EXIT_CODE=$$?; \
-	else \
-		echo "$(YELLOW)[INFO]$(NC) 使用Verilator编译和运行测试..."; \
-		$(SCRIPTS_DIR)/build/build_simple_test.sh verilator $(NODE_X) $(NODE_Y) && \
-		cd $(BUILD_DIR) && ./Vsimple_test; \
-		TEST_EXIT_CODE=$$?; \
 	fi
 	@echo ""
 	@if [ $$TEST_EXIT_CODE -eq 0 ]; then \
