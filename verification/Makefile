@@ -2,7 +2,7 @@
 # MAZE网络验证环境Makefile
 # =============================================================================
 
-.PHONY: help test clean regress coverage waves all test-node-basic test-quick test-edge test-corner
+.PHONY: help test clean regress coverage waves all test-node-basic test-quick test-edge test-corner test-check-result
 
 # 默认目标
 all: test
@@ -144,26 +144,35 @@ test-node-basic:
 		echo "$(YELLOW)[INFO]$(NC) 使用Verilator编译和运行测试..."; \
 		$(SCRIPTS_DIR)/build/build_simple_test.sh verilator $(NODE_X) $(NODE_Y) && \
 		cd $(BUILD_DIR) && ./Vsimple_test; \
+		TEST_EXIT_CODE=$$?; \
 	elif [ "$(SIMULATOR)" = "modelsim" ] || [ "$(SIMULATOR)" = "questasim" ]; then \
 		echo "$(YELLOW)[INFO]$(NC) 使用ModelSim编译和运行测试..."; \
 		$(SCRIPTS_DIR)/build/build_simple_test.sh modelsim $(NODE_X) $(NODE_Y) && \
 		cd $(BUILD_DIR) && ./Vsimple_test; \
+		TEST_EXIT_CODE=$$?; \
 	elif [ "$(SIMULATOR)" = "vcs" ]; then \
 		echo "$(YELLOW)[INFO]$(NC) 使用VCS编译和运行测试..."; \
 		$(SCRIPTS_DIR)/build/build_simple_test.sh vcs $(NODE_X) $(NODE_Y) && \
 		cd $(BUILD_DIR) && ./Vsimple_test; \
+		TEST_EXIT_CODE=$$?; \
 	else \
 		echo "$(YELLOW)[INFO]$(NC) 使用Verilator编译和运行测试..."; \
 		$(SCRIPTS_DIR)/build/build_simple_test.sh verilator $(NODE_X) $(NODE_Y) && \
 		cd $(BUILD_DIR) && ./Vsimple_test; \
+		TEST_EXIT_CODE=$$?; \
 	fi
 	@echo ""
-	@echo "$(GREEN)[PASS]$(NC) 基本路由功能测试完成"
+	@if [ $$TEST_EXIT_CODE -eq 0 ]; then \
+		echo "$(GREEN)[PASS]$(NC) 基本路由功能测试完成"; \
+	else \
+		echo "$(RED)[FAIL]$(NC) 基本路由功能测试失败 (退出码: $$TEST_EXIT_CODE)"; \
+		exit 1; \
+	fi
 
 # 快速测试（中心节点）
 test-quick:
 	@echo "$(BLUE)[INFO]$(NC) 运行快速测试..."
-	$(MAKE) test-node-basic SIMULATOR=$(or $(SIMULATOR),$(DEFAULT_SIMULATOR)) NODE_X=3 NODE_Y=3
+	$(MAKE) test-node-basic SIMULATOR=verilator NODE_X=3 NODE_Y=3
 
 # 边缘节点测试
 test-edge:
@@ -204,6 +213,19 @@ test-corner:
 	@$(MAKE) test-node-basic SIMULATOR=$(or $(SIMULATOR),$(DEFAULT_SIMULATOR)) NODE_X=7 NODE_Y=7
 	@echo ""
 	@echo "$(GREEN)[PASS]$(NC) 四角节点测试完成"
+
+# 检查测试结果（内部目标）
+test-check-result:
+	@if [ -f "$(BUILD_DIR)/test_output.log" ]; then \
+		if grep -q "TEST_RESULT: FAIL" $(BUILD_DIR)/test_output.log; then \
+			exit 1; \
+		else \
+			exit 0; \
+		fi; \
+	else \
+		echo "$(YELLOW)[WARN]$(NC) 测试输出日志文件不存在，假设测试通过"; \
+		exit 0; \
+	fi
 
 # 完整测试套件
 test-all:

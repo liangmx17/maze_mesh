@@ -526,8 +526,15 @@ module simple_test;
 
         if (error_count == 0) begin
             $display("✓ 所有基本路由功能测试通过！");
+            $display("TEST_RESULT: PASS");
+            #(CLK_PERIOD * 10);
+            $finish;
         end else begin
             $display("✗ 部分基本路由功能测试失败");
+            $display("失败测试数: %0d / %0d", error_count, test_count);
+            $display("TEST_RESULT: FAIL");
+            #(CLK_PERIOD * 10);
+            $finish;
         end
 
         $display("==============================================");

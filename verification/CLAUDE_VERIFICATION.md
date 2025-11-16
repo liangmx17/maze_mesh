@@ -191,7 +191,8 @@ make clean && make test-quick
 
 ## 📚 相关文档
 
-- **文件结构规范**: `docs/FILE_STRUCTURE_STANDARD.md`
+- **文件结构规范**: `docs/FILE_STRUCTURE_STANDARD.md` - 必读
+- **测试结果判断标准**: `docs/TEST_RESULT_VALIDATION_STANDARD.md` - 强制执行
 - **测试点分解**: `docs/test_plans/test_point_decomposition.md`
 - **测试用例规格**: `docs/test_plans/test_cases_specification.md`
 - **用户指南**: `docs/user_guides/node_basic_routing_guide.md`

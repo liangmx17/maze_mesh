@@ -1009,16 +1009,30 @@ VlCoroutine Vsimple_test___024root___eval_initial__TOP__Vtiming__0(Vsimple_test_
                          / VL_ISTOR_D_I(32, vlSelfRef.simple_test__DOT__test_count))
                       : 0.0));
     if ((0U == vlSelfRef.simple_test__DOT__error_count)) {
-        VL_WRITEF_NX("\342\234\223 \346\211\200\346\234\211\345\237\272\346\234\254\350\267\257\347\224\261\345\212\237\350\203\275\346\265\213\350\257\225\351\200\232\350\277\207\357\274\201\n",0);
+        VL_WRITEF_NX("\342\234\223 \346\211\200\346\234\211\345\237\272\346\234\254\350\267\257\347\224\261\345\212\237\350\203\275\346\265\213\350\257\225\351\200\232\350\277\207\357\274\201\nTEST_RESULT: PASS\n",0);
+        co_await vlSelfRef.__VdlySched.delay(0x00000000000186a0ULL, 
+                                             nullptr, 
+                                             "/Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv", 
+                                             530);
+        vlSelfRef.__Vm_traceActivity[2U] = 1U;
+        VL_FINISH_MT("/Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv", 531, "");
     } else {
-        VL_WRITEF_NX("\342\234\227 \351\203\250\345\210\206\345\237\272\346\234\254\350\267\257\347\224\261\345\212\237\350\203\275\346\265\213\350\257\225\345\244\261\350\264\245\n",0);
+        VL_WRITEF_NX("\342\234\227 \351\203\250\345\210\206\345\237\272\346\234\254\350\267\257\347\224\261\345\212\237\350\203\275\346\265\213\350\257\225\345\244\261\350\264\245\n\345\244\261\350\264\245\346\265\213\350\257\225\346\225\260: %0d / %0d\nTEST_RESULT: FAIL\n",0,
+                     32,vlSelfRef.simple_test__DOT__error_count,
+                     32,vlSelfRef.simple_test__DOT__test_count);
+        co_await vlSelfRef.__VdlySched.delay(0x00000000000186a0ULL, 
+                                             nullptr, 
+                                             "/Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv", 
+                                             536);
+        vlSelfRef.__Vm_traceActivity[2U] = 1U;
+        VL_FINISH_MT("/Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv", 537, "");
     }
     VL_WRITEF_NX("==============================================\n",0);
     co_await vlSelfRef.__VdlySched.delay(0x00000000000186a0ULL, 
                                          nullptr, "/Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv", 
-                                         536);
+                                         543);
     vlSelfRef.__Vm_traceActivity[2U] = 1U;
-    VL_FINISH_MT("/Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv", 537, "");
+    VL_FINISH_MT("/Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv", 544, "");
     vlSelfRef.__Vm_traceActivity[2U] = 1U;
 }
 
@@ -1029,9 +1043,9 @@ VlCoroutine Vsimple_test___024root___eval_initial__TOP__Vtiming__1(Vsimple_test_
     // Body
     co_await vlSelfRef.__VdlySched.delay(0x0000000005f5e100ULL, 
                                          nullptr, "/Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv", 
-                                         542);
+                                         549);
     VL_WRITEF_NX("ERROR: \346\265\213\350\257\225\350\266\205\346\227\266\357\274\201\n",0);
-    VL_FINISH_MT("/Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv", 544, "");
+    VL_FINISH_MT("/Users/liangmx17/Documents/maze_mesh/verification/testbench/integration_tests/node_basic_routing/simple_test.sv", 551, "");
 }
 
 VlCoroutine Vsimple_test___024root___eval_initial__TOP__Vtiming__2(Vsimple_test___024root* vlSelf) {
