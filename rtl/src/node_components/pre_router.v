@@ -19,9 +19,9 @@
 `timescale 1ns/1ps
 module router_unit #(
     // 节点位置参数
-    parameter wire [2:0] LOCAL_X = 3'd0,     // 当前节点X坐标 (0-7)
-    parameter wire [2:0] LOCAL_Y = 3'd0,      // 当前节点Y坐标 (0-7)
-    parameter wire [1:0] router_id = 2'b00  // 当前router是NWSE的哪一个router
+    parameter [2:0] LOCAL_X = 3'd0,     // 当前节点X坐标 (0-7)
+    parameter [2:0] LOCAL_Y = 3'd0,      // 当前节点Y坐标 (0-7)
+    parameter [2:0] router_id = 3'd0  // 当前router是NWSE的哪一个router NSWE 0123
 ) (
     // 输入数据包接口
     input wire [2:0] tgt_x,               // 包原始目标X坐标 (0-7)
@@ -32,14 +32,10 @@ module router_unit #(
 
     
     input wire       pg_en,                   // 坏点存在信号
-    input wire [2:0] pg_node_x,               // 坏点X坐标 (0-7)
-    input wire [2:0] pg_node_y,               // 坏点Y坐标 (0-7)
     input wire [3:0] fault_relative_pos,               // 坏点Y坐标 (0-7)
 
     // 路由输出接口
-    output wire [4:0] route_req,            // 5-bit 路由请求 [N,W,S,E,B]，多播、广播模式下存在多bit 1
-    input wire [2:0] tgt_x_new,               // 包新目标X坐标 (0-7)
-    input wire [2:0] tgt_y_new               // 包新目标Y坐标 (0-7)
+    output wire [4:0] route_req            // 5-bit 路由请求 [N,W,S,E,B]，多播、广播模式下存在多bit 1
 );
 
 // =============================================================================
@@ -87,6 +83,7 @@ wire tgt_x_ls_loc_x_m1 = tgt_x < (local_x-1);
 wire tgt_y_gt_loc_y = tgt_y > local_y;
 wire tgt_y_gt_loc_y_p1 = tgt_y > (local_y+1);
 wire tgt_y_ls_loc_y = tgt_y < local_y;
+wire src_y_eq_loc_y = src_y == loc_y;
 
 
 always_comb begin
@@ -137,28 +134,18 @@ always_comb begin
             route_req[DIR_B] = tgt_x_eq_loc_x & tgt_y_eq_loc_y;
         end
         2'b01: begin
-            if(tgt_x_gt_loc_x)
-                route_req[DIR_E] = 1'b1;
-            else if(tgt_x < local_x)
-                route_req[DIR_W] = 1'b1;
-            else
-                route_req[DIR_B] = 1'b1;
-                route_req[DIR_N] = local_y >= src_y;
-                route_req[DIR_S] = local_y <= src_y;
+            route_req[DIR_E] = tgt_x_gt_loc_x;
+            route_req[DIR_W] = tgt_x_ls_loc_x;
+            route_req[DIR_N] = tgt_x_eq_loc_x & (router_id != DIR_N);
+            route_req[DIR_S] = tgt_x_eq_loc_x & (router_id != DIR_S);
+            route_req[DIR_B] = tgt_x_eq_loc_x;
         end
         2'b10: begin
-            if(local_y == src_y)
-                route_req[DIR_B] = local_y == tgt_y;
-                route_req[DIR_E] = local_x >= src_x;
-                route_req[DIR_W] = local_x <= src_x;
-                route_req[DIR_N] = local_y < tgt_y;
-                route_req[DIR_S] = local_y > tgt_y;
-            else if(local_y == tgt_y)
-                route_req[DIR_B] = 1'b1;
-            else if(local_y > tgt_y)
-                route_req[DIR_S] = 1'b1;
-            else if(local_y < tgt_y)
-                route_req[DIR_N] = 1'b1;
+            route_req[DIR_E] = src_y_eq_loc_y & (local_x >= src_x) ;
+            route_req[DIR_W] = src_y_eq_loc_y & (local_x <= src_x) ;
+            route_req[DIR_N] = tgt_y_gt_loc_y;
+            route_req[DIR_S] = tgt_y_ls_loc_y;
+            route_req[DIR_B] = tgt_y_eq_loc_y;
         end
         2'b11: begin
             route_req[DIR_B] = 1'b1;

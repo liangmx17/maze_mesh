@@ -69,6 +69,7 @@ module node #(
     localparam DIR_S    = 3'd2;   // 南方向
     localparam DIR_E    = 3'd3;   // 东方向
     localparam DIR_B    = 3'd4;   // 本地输出
+    localparam DIR_A    = 3'd4;   // 本地输入
 
   // =============================================================================
     // 故障感知REGISTER信号计算
@@ -89,6 +90,17 @@ module node #(
     // 边缘节点检测信号
     logic is_north_edge, is_south_edge;       // 南北边缘检测
     logic is_west_edge, is_east_edge;         // 东西边缘检测
+    wire [4:0]  route_req_N;
+    wire [4:0]  route_req_S;
+    wire [4:0]  route_req_E;
+    wire [4:0]  route_req_W;
+    wire [4:0]  route_req_A;
+
+    wire [4:0]  arb_req[4:0];   // arb_req[from_input][to_output]
+    wire [4:0]  arb_gnt[4:0];   // arb_gnt[from_input][to_output]
+    wire [`PYLD_W-1:0]  pld_buf[4:0];
+    wire obuf_rdy[4:0];
+
 
     // 边缘检测逻辑
     assign is_north_edge = (VP == 7);          // Y坐标为7是北边缘
@@ -122,189 +134,163 @@ module node #(
         end
     end
 
-    // =============================================================================
-    // 输入IRS_N缓冲器 (寄存器输出模式RO_EN=1)
-    // =============================================================================
 
-    // A接口输入缓冲器
-    logic a_in_valid, a_in_ready;
-    logic [PKT_W-1:0] a_in_pkt;
+router_unit#(
+    .LOCAL_X              ( HP ),
+    .LOCAL_Y              ( VP ),
+    .router_id              ( DIR_A )
+)u_router_A(
+    .tgt_x              ( pkt_con.ni_tgt[2:0]              ),
+    .tgt_y              ( pkt_con.ni_tgt[5:3]              ),
+    .src_x              ( pkt_con.ni_src[2:0]              ),
+    .src_y              ( pkt_con.ni_src[5:3]              ),
+    .pkt_type           ( pkt_con.ni_type           ),
+    .pg_en              ( pg_en              ),
+    .fault_relative_pos ( fault_relative_pos ),
+    .route_req          ( route_req_N          )
+);
 
-        IRS_LP #(
-          .PYLD_W (PKT_W)
-          ,.RO_EN(1)
-    ) irs_input_A (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_i(pkt_i.pkt_in_vld),
-        .ready_i(a_in_ready),
-        .valid_o(a_in_valid),
-        .ready_o(pkt_i.pkt_in_rdy),
-        .payload_i({pkt_i.pkt_in_type, pkt_i.pkt_in_qos, pkt_i.pkt_in_src, pkt_i.pkt_in_tgt, pkt_i.pkt_in_data}),
-        .payload_o(a_in_pkt)
-    );
+router_unit#(
+    .LOCAL_X              ( HP ),
+    .LOCAL_Y              ( VP ),
+    .router_id              ( DIR_N )
+)u_router_N(
+    .tgt_x              ( pkt_con.ni_tgt[2:0]              ),
+    .tgt_y              ( pkt_con.ni_tgt[5:3]              ),
+    .src_x              ( pkt_con.ni_src[2:0]              ),
+    .src_y              ( pkt_con.ni_src[5:3]              ),
+    .pkt_type           ( pkt_con.ni_type           ),
+    .pg_en              ( pg_en              ),
+    .fault_relative_pos ( fault_relative_pos ),
+    .route_req          ( route_req_N          )
+);
 
-    // C接口北方输入缓冲器
-    logic n_in_valid, n_in_ready;
-    logic [PKT_W-1:0] n_in_pkt;
 
-        IRS_LP #(
-          .PYLD_W (PKT_W)
-          ,.RO_EN(1)
-    ) irs_input_N (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_i(pkt_con.ni_vld),
-        .ready_i(n_in_ready),
-        .valid_o(n_in_valid),
-        .ready_o(pkt_con.ni_rdy),
-        .payload_i({pkt_con.ni_type, pkt_con.ni_qos, pkt_con.ni_src, pkt_con.ni_tgt, pkt_con.ni_data}),
-        .payload_o(n_in_pkt)
-    );
+router_unit#(
+    .LOCAL_X              ( HP ),
+    .LOCAL_Y              ( VP ),
+    .router_id            ( DIR_S )
+)u_router_S(
+    .tgt_x              ( pkt_con.si_tgt[2:0]              ),
+    .tgt_y              ( pkt_con.si_tgt[5:3]              ),
+    .src_x              ( pkt_con.si_src[2:0]              ),
+    .src_y              ( pkt_con.si_src[5:3]              ),
+    .pkt_type           ( pkt_con.si_type           ),
+    .pg_en              ( pg_en              ),
+    .fault_relative_pos ( fault_relative_pos ),
+    .route_req          ( route_req_S          )
+);
 
-    // C接口西方输入缓冲器
-    logic w_in_valid, w_in_ready;
-    logic [PKT_W-1:0] w_in_pkt;
 
-        IRS_LP #(
-          .PYLD_W (PKT_W)
-          ,.RO_EN(1)
-    ) irs_input_W (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_i(pkt_con.wi_vld),
-        .ready_i(w_in_ready),
-        .valid_o(w_in_valid),
-        .ready_o(pkt_con.wi_rdy),
-        .payload_i({pkt_con.wi_type, pkt_con.wi_qos, pkt_con.wi_src, pkt_con.wi_tgt, pkt_con.wi_data}),
-        .payload_o(w_in_pkt)
-    );
+router_unit#(
+    .LOCAL_X              ( HP ),
+    .LOCAL_Y              ( VP ),
+    .router_id            ( DIR_E )
+)u_router_E(
+    .tgt_x              ( pkt_con.ei_tgt[2:0]              ),
+    .tgt_y              ( pkt_con.ei_tgt[5:3]              ),
+    .src_x              ( pkt_con.ei_src[2:0]              ),
+    .src_y              ( pkt_con.ei_src[5:3]              ),
+    .pkt_type           ( pkt_con.ei_type           ),
+    .pg_en              ( pg_en              ),
+    .fault_relative_pos ( fault_relative_pos ),
+    .route_req          ( route_req_E          )
+);
 
-    // C接口南方输入缓冲器
-    logic s_in_valid, s_in_ready;
-    logic [PKT_W-1:0] s_in_pkt;
 
-        IRS_LP #(
-          .PYLD_W (PKT_W)
-          ,.RO_EN(1)
-    ) irs_input_S (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_i(pkt_con.si_vld),
-        .ready_i(s_in_ready),
-        .valid_o(s_in_valid),
-        .ready_o(pkt_con.si_rdy),
-        .payload_i({pkt_con.si_type, pkt_con.si_qos, pkt_con.si_src, pkt_con.si_tgt, pkt_con.si_data}),
-        .payload_o(s_in_pkt)
-    );
+router_unit#(
+    .LOCAL_X              ( HP ),
+    .LOCAL_Y              ( VP ),
+    .router_id            ( DIR_W )
+)u_router_W(
+    .tgt_x              ( pkt_con.wi_tgt[2:0]              ),
+    .tgt_y              ( pkt_con.wi_tgt[5:3]              ),
+    .src_x              ( pkt_con.wi_src[2:0]              ),
+    .src_y              ( pkt_con.wi_src[5:3]              ),
+    .pkt_type           ( pkt_con.wi_type           ),
+    .pg_en              ( pg_en              ),
+    .fault_relative_pos ( fault_relative_pos ),
+    .route_req          ( route_req_W          )
+);
 
-    // C接口东方输入缓冲器
-    logic e_in_valid, e_in_ready;
-    logic [PKT_W-1:0] e_in_pkt;
+IBUF#(
+    .PYLD_W    ( 23 )
+)u_IBUF_A(
+    .clk       ( clk       ),
+    .rst_n     ( rst_n     ),
+    .ibuf_vld  ( pkt_i.pkt_in_vld  ),
+    .ibuf_rdy  ( pkt_i.pkt_in_rdy  ),
+    .route_req ( route_req_A ),
+    .payload_i ( {pkt_i.pkt_in_qos, pkt_i.pkt_in_type, pkt_i.pkt_in_src, pkt_i.pkt_in_tgt, pkt_i.pkt_in_data} ),
+    .arb_req   ( arb_req[DIR_B]   ),
+    .arb_gnt   ( arb_gnt[DIR_B]   ),
+    .obuf_rdy  ( obuf_rdy  ),
+    .payload_o  ( payload_o  )
+);
 
-        IRS_LP #(
-          .PYLD_W (PKT_W)
-          ,.RO_EN(1)
-    ) irs_input_E (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_i(pkt_con.ei_vld),
-        .ready_i(e_in_ready),
-        .valid_o(e_in_valid),
-        .ready_o(pkt_con.ei_rdy),
-        .payload_i({pkt_con.ei_type, pkt_con.ei_qos, pkt_con.ei_src, pkt_con.ei_tgt, pkt_con.ei_data}),
-        .payload_o(e_in_pkt)
-    );
+IBUF#(
+    .PYLD_W    ( 23 )
+)u_IBUF_N(
+    .clk       ( clk       ),
+    .rst_n     ( rst_n     ),
+    .ibuf_vld  ( pkt_con.ni_vld  ),
+    .ibuf_rdy  ( pkt_con.ni_rdy  ),
+    .route_req ( route_req_N ),
+    .payload_i ( {pkt_con.ni_qos, pkt_con.ni_type, pkt_con.src, pkt_con.ni_tgt, pkt_con.ni_data} ),
+    .arb_req   ( arb_req[DIR_N]   ),
+    .arb_gnt   ( arb_gnt[DIR_N]   ),
+    .obuf_rdy  ( {obuf_rdy[DIR_B], obuf_rdy[DIR_E], obuf_rdy[DIR_S], obuf_rdy[DIR_W], obuf_rdy[DIR_N]}),
+    .payload_o  ( pld_buf[DIR_N]  )
+);
 
-    // =============================================================================
-    // 独立路由单元 (5个并行路由器)
-    // =============================================================================
 
-    // 路由单元接口信号
-    logic [4:0] route_req_A, route_req_N, route_req_W, route_req_S, route_req_E;  // 5-bit one-hot请求信号
-    logic [PKT_W-1:0] route_pkt_A, route_pkt_N, route_pkt_W, route_pkt_S, route_pkt_E; // 路由数据包
+IBUF#(
+    .PYLD_W    ( 23 )
+)u_IBUF_W(
+    .clk       ( clk       ),
+    .rst_n     ( rst_n     ),
+    .ibuf_vld  ( pkt_con.wi_vld  ),
+    .ibuf_rdy  ( pkt_con.wi_rdy  ),
+    .route_req ( route_req_W ),
+    .payload_i ( {pkt_con.wi_qos, pkt_con.wi_type, pkt_con.src, pkt_con.wi_tgt, pkt_con.wi_data} ),
+    .arb_req   ( arb_req[DIR_W]   ),
+    .arb_gnt   ( arb_gnt[DIR_W]   ),
+    .obuf_rdy  ( {obuf_rdy[DIR_B], obuf_rdy[DIR_E], obuf_rdy[DIR_S], obuf_rdy[DIR_W], obuf_rdy[DIR_N]}),
+    .payload_o  ( pld_buf[DIR_W]  )
+);
 
-    // 输入ready信号连接逻辑
-    // 基于路由单元可以处理新数据的能力来控制输入缓冲器的ready信号
-    assign a_in_ready = 1'b1;  // A端口路由器始终可以接收新数据（非流水线设计）
-    assign n_in_ready = 1'b1;  // 北端口路由器始终可以接收新数据
-    assign w_in_ready = 1'b1;  // 西端口路由器始终可以接收新数据
-    assign s_in_ready = 1'b1;  // 南端口路由器始终可以接收新数据
-    assign e_in_ready = 1'b1;  // 东端口路由器始终可以接收新数据
+IBUF#(
+    .PYLD_W    ( 23 )
+)u_IBUF_S(
+    .clk       ( clk       ),
+    .rst_n     ( rst_n     ),
+    .ibuf_vld  ( pkt_con.si_vld  ),
+    .ibuf_rdy  ( pkt_con.si_rdy  ),
+    .route_req ( route_req_S ),
+    .payload_i ( {pkt_con.si_qos, pkt_con.si_type, pkt_con.src, pkt_con.si_tgt, pkt_con.si_data} ),
+    .arb_req   ( arb_req[DIR_S]   ),
+    .arb_gnt   ( arb_gnt[DIR_S]   ),
+    .obuf_rdy  ( {obuf_rdy[DIR_B], obuf_rdy[DIR_E], obuf_rdy[DIR_S], obuf_rdy[DIR_W], obuf_rdy[DIR_N]}),
+    .payload_o  ( pld_buf[DIR_S]  )
+);
 
-    // A端口路由单元
-    router_unit #(
-        .LOCAL_X(HP),
-        .LOCAL_Y(VP)
-    ) u_router_A (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_in(a_in_valid),
-        .pkt_in(a_in_pkt),
-        .fault_register(fault_relative_pos),
-        .route_req(route_req_A),
-        .pkt_out(route_pkt_A)
-    );
 
-    // 北端口路由单元
-    router_unit #(
-        .LOCAL_X(HP),
-        .LOCAL_Y(VP)
-    ) u_router_N (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_in(n_in_valid),
-        .pkt_in(n_in_pkt),
-        .fault_register(fault_relative_pos),
-        .route_req(route_req_N),
-        .pkt_out(route_pkt_N)
-    );
 
-    // 西端口路由单元
-    router_unit #(
-        .LOCAL_X(HP),
-        .LOCAL_Y(VP)
-    ) u_router_W (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_in(w_in_valid),
-        .pkt_in(w_in_pkt),
-        .fault_register(fault_relative_pos),
-        .route_req(route_req_W),
-        .pkt_out(route_pkt_W)
-    );
+IBUF#(
+    .PYLD_W    ( 23 )
+)u_IBUF_E(
+    .clk       ( clk       ),
+    .rst_n     ( rst_n     ),
+    .ibuf_vld  ( pkt_con.ei_vld  ),
+    .ibuf_rdy  ( pkt_con.ei_rdy  ),
+    .route_req ( route_req_E ),
+    .payload_i ( {pkt_con.ei_qos, pkt_con.ei_type, pkt_con.src, pkt_con.ei_tgt, pkt_con.ei_data} ),
+    .arb_req   ( arb_req[DIR_E]   ),
+    .arb_gnt   ( arb_gnt[DIR_E]   ),
+    .obuf_rdy  ( {obuf_rdy[DIR_B], obuf_rdy[DIR_E], obuf_rdy[DIR_S], obuf_rdy[DIR_W], obuf_rdy[DIR_N]}),
+    .payload_o  ( pld_buf[DIR_E]  )
+);
 
-    // 南端口路由单元
-    router_unit #(
-        .LOCAL_X(HP),
-        .LOCAL_Y(VP)
-    ) u_router_S (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_in(s_in_valid),
-        .pkt_in(s_in_pkt),
-        .fault_register(fault_relative_pos),
-        .route_req(route_req_S),
-        .pkt_out(route_pkt_S)
-    );
-
-    // 东端口路由单元
-    router_unit #(
-        .LOCAL_X(HP),
-        .LOCAL_Y(VP)
-    ) u_router_E (
-        .clk(clk),
-        .rst_n(rst_n),
-        .valid_in(e_in_valid),
-        .pkt_in(e_in_pkt),
-        .fault_register(fault_relative_pos),
-        .route_req(route_req_E),
-        .pkt_out(route_pkt_E)
-    );
-
-    // =============================================================================
-    // QoS仲裁器 (5个仲裁器)
-    // =============================================================================
 
     // 仲裁器请求信号映射
     logic [3:0] arb_req_N, arb_qos_N, arb_gnt_N;  // 北仲裁器：4个输入(A,W,S,E)，排除北输入
@@ -315,24 +301,24 @@ module node #(
 
     // 仲裁器输入映射 - 使用常量QOS_POS确保一致性
     // 北仲裁器：4个输入，排除来自北方的输入 [A,W,S,E]
-    assign arb_req_N = {route_req_A[0], route_req_W[0], route_req_S[0], route_req_E[0]};
-    assign arb_qos_N = {route_pkt_A[QOS_POS], route_pkt_W[QOS_POS], route_pkt_S[QOS_POS], route_pkt_E[QOS_POS]};
+    assign arb_req_N = {arb_req[DIR_B][0], arb_req[DIR_W][0], arb_req[DIR_S][0], arb_req[DIR_E][0]};
+    assign arb_qos_N = {pld_buf[DIR_A][QOS_POS], pld_buf[DIR_W][QOS_POS], pld_buf[DIR_S][QOS_POS], pld_buf[DIR_E][QOS_POS]};
 
     // 西仲裁器：4个输入，排除来自西方的输入 [A,N,S,E]
-    assign arb_req_W = {route_req_A[1], route_req_N[1], route_req_S[1], route_req_E[1]};
-    assign arb_qos_W = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_S[QOS_POS], route_pkt_E[QOS_POS]};
+    assign arb_req_W = {arb_req[DIR_B][1], arb_req[DIR_N][1], arb_req[DIR_S][1], arb_req[DIR_E][1]};
+    assign arb_qos_W = {pld_buf[DIR_A][QOS_POS], pld_buf[DIR_N][QOS_POS], pld_buf[DIR_S][QOS_POS], pld_buf[DIR_E][QOS_POS]};
 
     // 南仲裁器：4个输入，排除来自南方的输入 [A,N,W,E]
-    assign arb_req_S = {route_req_A[2], route_req_N[2], route_req_W[2], route_req_E[2]};
-    assign arb_qos_S = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_W[QOS_POS], route_pkt_E[QOS_POS]};
+    assign arb_req_S = {arb_req[DIR_B][2], arb_req[DIR_N][2], arb_req[DIR_W][2], arb_req[DIR_E][2]};
+    assign arb_qos_S = {pld_buf[DIR_A][QOS_POS], pld_buf[DIR_N][QOS_POS], pld_buf[DIR_W][QOS_POS], pld_buf[DIR_E][QOS_POS]};
 
     // 东仲裁器：4个输入，排除来自东方的输入 [A,N,W,S]
-    assign arb_req_E = {route_req_A[3], route_req_N[3], route_req_W[3], route_req_S[3]};
-    assign arb_qos_E = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_W[QOS_POS], route_pkt_S[QOS_POS]};
+    assign arb_req_E = {arb_req[DIR_B][3], arb_req[DIR_N][3], arb_req[DIR_W][3], arb_req[DIR_S][3]};
+    assign arb_qos_E = {pld_buf[DIR_A][QOS_POS], pld_buf[DIR_N][QOS_POS], pld_buf[DIR_W][QOS_POS], pld_buf[DIR_S][QOS_POS]};
 
     // B仲裁器：支持所有4个输入 [A,N,W,S,E]
-    assign arb_req_B = {route_req_A[4], route_req_N[4], route_req_W[4], route_req_S[4], route_req_E[4]};
-    assign arb_qos_B = {route_pkt_A[QOS_POS], route_pkt_N[QOS_POS], route_pkt_W[QOS_POS], route_pkt_S[QOS_POS], route_pkt_E[QOS_POS]};
+    assign arb_req_B = {arb_req[DIR_B][4], arb_req[DIR_N][4], arb_req[DIR_W][4], arb_req[DIR_S][4], arb_req[DIR_E][4]};
+    assign arb_qos_B = {pld_buf[DIR_A][QOS_POS], pld_buf[DIR_N][QOS_POS], pld_buf[DIR_W][QOS_POS], pld_buf[DIR_S][QOS_POS], pld_buf[DIR_E][QOS_POS]};
 
     // 实例化仲裁器 - 所有仲裁器都使用WIDTH=4
     // 北仲裁器：4输入仲裁器，排除北输入 [A,W,S,E]
@@ -380,39 +366,39 @@ module node #(
     // 注意：仲裁器输入映射 [A,W,S,E], [A,N,S,E], [A,N,W,E], [A,N,W,S], [A,N,W,S,E]
     always_comb begin
         // 北输出选择 - 映射：[A,W,S,E]
-        if (arb_gnt_N[3]) begin pkt_N = route_pkt_A; end    // bit3: A输入
-        else if (arb_gnt_N[2]) begin pkt_N = route_pkt_W; end  // bit2: W输入
-        else if (arb_gnt_N[1]) begin pkt_N = route_pkt_S; end  // bit1: S输入
-        else if (arb_gnt_N[0]) begin pkt_N = route_pkt_E; end  // bit0: E输入
+        if (arb_gnt_N[3]) begin pkt_N = pld_buf[DIR_A]; end    // bit3: A输入
+        else if (arb_gnt_N[2]) begin pkt_N = pld_buf[DIR_W]; end  // bit2: W输入
+        else if (arb_gnt_N[1]) begin pkt_N = pld_buf[DIR_S]; end  // bit1: S输入
+        else if (arb_gnt_N[0]) begin pkt_N = pld_buf[DIR_E]; end  // bit0: E输入
         else begin pkt_N = {PKT_W{1'b0}}; end
 
         // 西输出选择 - 映射：[A,N,S,E]
-        if (arb_gnt_W[3]) begin pkt_W = route_pkt_A; end    // bit3: A输入
-        else if (arb_gnt_W[2]) begin pkt_W = route_pkt_N; end  // bit2: N输入
-        else if (arb_gnt_W[1]) begin pkt_W = route_pkt_S; end  // bit1: S输入
-        else if (arb_gnt_W[0]) begin pkt_W = route_pkt_E; end  // bit0: E输入
+        if (arb_gnt_W[3]) begin pkt_W = pld_buf[DIR_A]; end    // bit3: A输入
+        else if (arb_gnt_W[2]) begin pkt_W = pld_buf[DIR_N]; end  // bit2: N输入
+        else if (arb_gnt_W[1]) begin pkt_W = pld_buf[DIR_S]; end  // bit1: S输入
+        else if (arb_gnt_W[0]) begin pkt_W = pld_buf[DIR_E]; end  // bit0: E输入
         else begin pkt_W = {PKT_W{1'b0}}; end
 
         // 南输出选择 - 映射：[A,N,W,E]
-        if (arb_gnt_S[3]) begin pkt_S = route_pkt_A; end    // bit3: A输入
-        else if (arb_gnt_S[2]) begin pkt_S = route_pkt_N; end  // bit2: N输入
-        else if (arb_gnt_S[1]) begin pkt_S = route_pkt_W; end  // bit1: W输入
-        else if (arb_gnt_S[0]) begin pkt_S = route_pkt_E; end  // bit0: E输入
+        if (arb_gnt_S[3]) begin pkt_S = pld_buf[DIR_A]; end    // bit3: A输入
+        else if (arb_gnt_S[2]) begin pkt_S = pld_buf[DIR_N]; end  // bit2: N输入
+        else if (arb_gnt_S[1]) begin pkt_S = pld_buf[DIR_W]; end  // bit1: W输入
+        else if (arb_gnt_S[0]) begin pkt_S = pld_buf[DIR_E]; end  // bit0: E输入
         else begin pkt_S = {PKT_W{1'b0}}; end
 
         // 东输出选择 - 映射：[A,N,W,S]
-        if (arb_gnt_E[3]) begin pkt_E = route_pkt_A; end    // bit3: A输入
-        else if (arb_gnt_E[2]) begin pkt_E = route_pkt_N; end  // bit2: N输入
-        else if (arb_gnt_E[1]) begin pkt_E = route_pkt_W; end  // bit1: W输入
-        else if (arb_gnt_E[0]) begin pkt_E = route_pkt_S; end  // bit0: S输入
+        if (arb_gnt_E[3]) begin pkt_E = pld_buf[DIR_A]; end    // bit3: A输入
+        else if (arb_gnt_E[2]) begin pkt_E = pld_buf[DIR_N]; end  // bit2: N输入
+        else if (arb_gnt_E[1]) begin pkt_E = pld_buf[DIR_W]; end  // bit1: W输入
+        else if (arb_gnt_E[0]) begin pkt_E = pld_buf[DIR_S]; end  // bit0: S输入
         else begin pkt_E = {PKT_W{1'b0}}; end
 
         // B输出选择（本地输出）- 映射：[A,N,W,S,E]
-        if (arb_gnt_B[4]) begin pkt_B = route_pkt_A; end    // bit4: A输入
-        else if (arb_gnt_B[3]) begin pkt_B = route_pkt_N; end  // bit3: N输入
-        else if (arb_gnt_B[2]) begin pkt_B = route_pkt_W; end  // bit2: W输入
-        else if (arb_gnt_B[1]) begin pkt_B = route_pkt_S; end  // bit1: S输入
-        else if (arb_gnt_B[0]) begin pkt_B = route_pkt_E; end  // bit0: E输入
+        if (arb_gnt_B[4]) begin pkt_B = pld_buf[DIR_A]; end    // bit4: A输入
+        else if (arb_gnt_B[3]) begin pkt_B = pld_buf[DIR_N]; end  // bit3: N输入
+        else if (arb_gnt_B[2]) begin pkt_B = pld_buf[DIR_W]; end  // bit2: W输入
+        else if (arb_gnt_B[1]) begin pkt_B = pld_buf[DIR_S]; end  // bit1: S输入
+        else if (arb_gnt_B[0]) begin pkt_B = pld_buf[DIR_E]; end  // bit0: E输入
         else begin pkt_B = {PKT_W{1'b0}}; end
     end
 
@@ -431,9 +417,9 @@ module node #(
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_N),
+        .ready_o(obuf_rdy[DIR_N]),      // 内部使用，告知上游是否ready
         .ready_i(pkt_con.no_rdy),   // 连接到C接口北输出端口的ready信号
         .valid_o(n_out_valid),
-        .ready_o(n_out_ready),      // 内部使用，告知上游是否ready
         .payload_i(pkt_N),
         .payload_o(n_out_pkt)
     );
@@ -450,7 +436,7 @@ module node #(
         .valid_i(|arb_gnt_W),
         .ready_i(pkt_con.wo_rdy),   // 连接到C接口西输出端口的ready信号
         .valid_o(w_out_valid),
-        .ready_o(w_out_ready),      // 内部使用，告知上游是否ready
+        .ready_o(obuf_rdy[DIR_W]),      // 内部使用，告知上游是否ready
         .payload_i(pkt_W),
         .payload_o(w_out_pkt)
     );
@@ -467,7 +453,7 @@ module node #(
         .valid_i(|arb_gnt_S),
         .ready_i(pkt_con.so_rdy),   // 连接到C接口南输出端口的ready信号
         .valid_o(s_out_valid),
-        .ready_o(s_out_ready),      // 内部使用，告知上游是否ready
+        .ready_o(obuf_rdy[DIR_S]),      // 内部使用，告知上游是否ready
         .payload_i(pkt_S),
         .payload_o(s_out_pkt)
     );
@@ -484,7 +470,7 @@ module node #(
         .valid_i(|arb_gnt_E),
         .ready_i(pkt_con.eo_rdy),   // 连接到C接口东输出端口的ready信号
         .valid_o(e_out_valid),
-        .ready_o(e_out_ready),      // 内部使用，告知上游是否ready
+        .ready_o(obuf_rdy[DIR_E]),      // 内部使用，告知上游是否ready
         .payload_i(pkt_E),
         .payload_o(e_out_pkt)
     );
@@ -501,7 +487,7 @@ module node #(
         .valid_i(|arb_gnt_B),
         .ready_i(pkt_o.pkt_out_rdy), // 连接到B接口输出端口的ready信号
         .valid_o(b_out_valid),
-        .ready_o(b_out_ready),       // 内部使用，告知上游是否ready
+        .ready_o(obuf_rdy[DIR_B]),       // 内部使用，告知上游是否ready
         .payload_i(pkt_B),
         .payload_o(b_out_pkt)
     );
