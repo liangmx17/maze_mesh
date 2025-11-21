@@ -213,6 +213,38 @@ router_unit#(
     .route_req          ( route_req_W          )
 );
 
+IBUF_A_CTRL#(
+    .PYLD_W    ( 23 )
+)u_IBUF_A_CTRL(
+    .clk       ( clk       ),
+    .rst_n     ( rst_n     ),
+    .ibuf_vld  ( ibuf_vld  ),
+    .pg_en     ( pg_en     ),
+    .cpy_mode  ( cpy_mode  ),
+    .ibuf_rdy  ( ibuf_rdy  ),
+    .route_req ( route_req ),
+    .payload_i ( payload_i ),
+    .arb_req   ( arb_req   ),
+    .arb_gnt   ( arb_gnt   ),
+    .obuf_rdy  ( obuf_rdy  ),
+    .payload_o  ( payload_o  )
+);
+
+IBUF_A_DATA#(
+    .PYLD_W    ( 23 )
+)u_IBUF_A_DATA(
+    .clk       ( clk       ),
+    .rst_n     ( rst_n     ),
+    .ibuf_vld  ( ibuf_vld  ),
+    .pg_en     ( pg_en     ),
+    .cpy_mode  ( cpy_mode  ),
+    .ibuf_rdy  ( ibuf_rdy  ),
+    .payload_i ( payload_i ),
+    .obuf_rdy  ( obuf_rdy  ),
+    .payload_o  ( payload_o  )
+);
+
+
 IBUF#(
     .PYLD_W    ( 23 )
 )u_IBUF_A(
