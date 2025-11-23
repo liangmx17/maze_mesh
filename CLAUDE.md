@@ -24,42 +24,42 @@ MAZE网络实现了**64节点(8×8网格)网格拓扑**，具有以下关键特�
 ### 核心组件
 
 #### 1. MAZE_TOP模块
-顶层模块，实例化整个64节点网络。参考实现见 `Provided_Code/MAZE_TOP.v`。
+顶层模块，实例化整个64节点网络。当前实现位置: `rtl/MAZE_TOP.v`。
 
 #### 2. 节点模块
 具有直接路由架构的单个网络节点。每个节点处理5个输入端口：1个A端口 + 1个C接口(包含4个NWSE方向输入)。每个节点输出5个端口：1个B端口 + 1个C接口(包含4个NWSE方向输出)。**关键说明：每个节点只例化一个C接口，该接口内部包含4个输入端口和4个输出端口**。在输入和输出端口都使用IRS_N缓冲器。
 
 **当前实现状态**: ✅ 已完成
 - 非流水线直接路由架构已实现
-- 5个独立路由单元已实现 (router_unit.v)
+- 5个独立路由单元已实现 (集成在node.v中)
 - 5个QoS仲裁器已实现 (arbiter.v)
 - IRS_N缓冲器已集成，提供寄存器功能，无需额外打拍
 - 故障感知XY路由算法已实现
-- 位置: `rtl/src/node/node.v`
+- 位置: `rtl/USER_DEFINE/node.v`
 
 #### 3. 拓扑模块
-管理节点间的网络连接。通过IRS_N模块连接64个节点形成8×8网格拓扑，处理边缘节点的tie-off和悬空端口。详细设计见 `docs/design/topo_architecture.md`，参考实现见 `Provided_Code/topo.v`。
+管理节点间的网络连接。通过IRS_N模块连接64个节点形成8×8网格拓扑，处理边缘节点的tie-off和悬空端口。详细设计见 `docs/design/topo_architecture.md`，当前实现位置: `rtl/USER_DEFINE/topo.v`。
 
 #### 4. IRS模块
-节点间连接的插入环形缓冲器模块。参考实现见 `Provided_Code/irs.v`。
+节点间连接的插入环形缓冲器模块。当前实现位置: `rtl/irs.v`。
 
 ### 接口定义
 
 #### A接口(pkt_in)
-接口定义见 `Provided_Code/interface_a.sv`。
+接口定义见 `rtl/interface_a.sv`。
 
 #### B接口(pkt_out)
-接口定义见 `Provided_Code/interface_b.sv`。
+接口定义见 `rtl/interface_b.sv`。
 
 #### C接口(pkt_con_if)
 **重要说明**: 每个节点只例化**一个C接口**，该C接口内部包含：
 - **4个输入端口**: C口_N (北方输入), C口_W (西方输入), C口_S (南方输入), C口_E (东方输入)
 - **4个输出端口**: C口_N (北方输出), C口_W (西方输出), C口_S (南方输出), C口_E (东方输出)
 
-接口定义见 `Provided_Code/interface_c.sv`。
+接口定义见 `rtl/USER_DEFINE/interface_c.sv`。
 
 #### 全局参数
-全局参数定义见 `Provided_Code/top_define.v`。
+全局参数定义见 `rtl/top_define.v`。
 
 ### 数据包格式和路由
 
@@ -274,8 +274,8 @@ make -f VMAZE_TOP.mk
 - ✅ **接口定义**: 完整的A/B/C接口实现
 - ✅ **节点架构**: 非流水线直接路由架构已完全实现
 - ✅ **IRS_N集成**: 输入输出缓冲器模块已集成，提供寄存器功能
-- ✅ **独立路由单元**: 5个独立路由单元已实现 (router_unit.v)
-- ✅ **QoS仲裁器**: 5个输出仲裁器已实现 (arbiter.v)
+- ✅ **独立路由单元**: 5个独立路由单元已实现 (集成在rtl/USER_DEFINE/node.v中)
+- ✅ **QoS仲裁器**: 5个输出仲裁器已实现 (rtl/USER_DEFINE/arbiter.v)
 - ✅ **容错能力**: 故障感知路由和REGISTER信号计算已实现
 - ⚠️ **拓扑模块**: 4方向网格连接需要完善
 - ⚠️ **顶层模块**: 64节点实例化和时钟门控需要完成
@@ -285,19 +285,19 @@ make -f VMAZE_TOP.mk
 1. **单元测试**:
    ```bash
    # 单个节点测试
-   verilator --top-module node --cc node.v interface_*.sv top_define.v -CFLAGS "-std=c++11"
+   verilator --top-module node --cc rtl/USER_DEFINE/node.v rtl/interface_*.sv rtl/top_define.v -CFLAGS "-std=c++11"
    ```
 
 2. **集成测试**:
    ```bash
    # 小型网络测试 (4x4网格)
-   verilator --top-module MAZE_TOP --cc MAZE_TOP.v node.v topo.v irs.v interface_*.sv top_define.v -CFLAGS "-std=c++11"
+   verilator --top-module MAZE_TOP --cc rtl/MAZE_TOP.v rtl/USER_DEFINE/node.v rtl/USER_DEFINE/topo.v rtl/irs.v rtl/interface_*.sv rtl/top_define.v -CFLAGS "-std=c++11"
    ```
 
 3. **系统测试**:
    ```bash
    # 完整64节点网络
-   verilator --top-module MAZE_TOP --cc rtl/src/* -CFLAGS "-std=c++11"
+   verilator --top-module MAZE_TOP --cc rtl/MAZE_TOP.v rtl/USER_DEFINE/*.v rtl/*.sv rtl/*.v -CFLAGS "-std=c++11"
    ```
 
 ### 已完成实现
@@ -336,10 +336,13 @@ MAZE项目使用结构化的文件架构来支持系统化的开发和验证。
 ### ✅ 可修改RTL代码
 
 **位置**: `rtl/`
-- **接口**: `rtl/include/interfaces/` - A/B/C接口定义
-- **全局定义**: `rtl/include/global_defines/` - 项目全局参数
-- **源代码**: `rtl/src/` - 按模块组织的核心RTL实现
-- **库文件**: `rtl/lib/irs/` - IRS和其他第三方IP
+- **接口**: `rtl/` - A/B/C接口定义 (interface_a.sv, interface_b.sv)
+- **C接口**: `rtl/USER_DEFINE/` - C接口定义 (interface_c.sv)
+- **全局定义**: `rtl/` - 项目全局参数 (top_define.v)
+- **源代码**: `rtl/USER_DEFINE/` - 按模块组织的核心RTL实现
+- **库文件**: `rtl/` - IRS模块 (irs.v)
+- **顶层模块**: `rtl/` - MAZE_TOP.v
+- **用户定义模块**: `rtl/USER_DEFINE/` - 包含所有核心组件
 
 ### ✅ 测试环境
 
@@ -369,15 +372,22 @@ MAZE项目使用结构化的文件架构来支持系统化的开发和验证。
 ```
 maze/
 ├── rtl/                        # ✅ 主要RTL开发
-│   ├── include/
-│   │   ├── interfaces/         # A/B/C接口定义
-│   │   └── global_defines/     # 全局参数
-│   ├── src/
-│   │   ├── node/node.v         # 节点模块 (4级流水线)
-│   │   ├── topo/topo.v         # 拓扑模块
-│   │   └── system/MAZE_TOP.v   # 顶层64节点模块
-│   └── lib/irs/irs.v          # IRS库
-├── testbench/                  # ✅ 测试环境
+│   ├── MAZE_TOP.v              # 顶层64节点模块
+│   ├── interface_a.sv          # A接口定义
+│   ├── interface_b.sv          # B接口定义
+│   ├── irs.v                   # IRS模块
+│   ├── top_define.v            # 全局参数
+│   └── USER_DEFINE/            # 用户定义模块目录
+│       ├── node.v              # 节点模块
+│       ├── topo.v              # 拓扑模块
+│       ├── interface_c.sv      # C接口定义
+│       ├── arbiter.v           # 仲裁器
+│       ├── buffer_in.v          # 输入缓冲器
+│       ├── buffer_in_A_ctrl.v   # 输入缓冲器A控制
+│       ├── buffer_in_A_data.v   # 输入缓冲器A数据
+│       ├── pre_router.v        # 预路由器
+│       ├── multi_packet_gen.v  # 多数据包生成器
+│       └── fault_relative_pos_detect.v  # 故障相对位置检测
 ├── verification/              # ✅ 完整验证环境
 │   ├── sim/                   # 🗂️ Verilator仿真文件和波形
 │   ├── testbench/             # ✅ 测试台代码
@@ -396,9 +406,9 @@ maze/
 ### 开发工作流命令
 
 ```bash
-# RTL开发 (在rtl/src/中工作)
-cd rtl/src/system/
-# 编辑MAZE_TOP.v或其他RTL文件
+# RTL开发 (在rtl/中工作)
+cd rtl/
+# 编辑MAZE_TOP.v、USER_DEFINE/目录下的模块或其他RTL文件
 
 # 验证 (必须使用标准化的verification环境)
 cd verification/

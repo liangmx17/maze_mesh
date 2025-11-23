@@ -9,8 +9,8 @@ set -e
 SIMULATOR="verilator"
 TEST_NODE_X=3
 TEST_NODE_Y=3
-BUILD_DIR="/home/liangmx/maze_mesh/verification/sim/work/build"
-WAVE_FILE="/home/liangmx/maze_mesh/verification/sim/wave/fst/simple_test_3_3.fst"
+BUILD_DIR="/Users/liangmx17/Documents/maze_mesh/verification/sim/work/build"
+WAVE_FILE="/Users/liangmx17/Documents/maze_mesh/verification/sim/wave/fst/simple_test_3_3.fst"
 
 echo "=============================================="
 echo "MAZE节点基本路由功能简化测试"

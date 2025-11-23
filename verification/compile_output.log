@@ -1,0 +1,29 @@
+==============================================
+MAZE节点基本路由功能测试编译脚本
+==============================================
+仿真器: verilator
+测试节点: (3, 3)
+项目根目录: /Users/liangmx17/Documents/maze_mesh
+验证目录: /Users/liangmx17/Documents/maze_mesh/verification
+RTL目录: /Users/liangmx17/Documents/maze_mesh/rtl
+脚本目录: /Users/liangmx17/Documents/maze_mesh/verification/scripts/build
+==============================================
+
+检查仿真器依赖...
+✓ Verilator 检查通过
+检查源文件...
+✓ 源文件检查通过
+清理旧文件...
+✓ 清理完成
+使用Verilator编译...
+%Error: /Users/liangmx17/Documents/maze_mesh/rtl/USER_DEFINE/multi_packet_gen.v:55:40: syntax error, unexpected ';'
+   55 |                                 tgt_raw;
+      |                                        ^
+        /Users/liangmx17/Documents/maze_mesh/rtl/USER_DEFINE/node.v:75:1: ... note: In file included from 'node.v'
+        ... See the manual at https://verilator.org/verilator_doc.html?v=5.042 for more assistance.
+%Error: /Users/liangmx17/Documents/maze_mesh/rtl/USER_DEFINE/multi_packet_gen.v:71:9: syntax error, unexpected end
+   71 |         end
+      |         ^~~
+        /Users/liangmx17/Documents/maze_mesh/rtl/USER_DEFINE/node.v:75:1: ... note: In file included from 'node.v'
+%Error: Cannot continue
+        ... This fatal error may be caused by the earlier error(s); resolve those first.

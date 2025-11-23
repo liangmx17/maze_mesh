@@ -26,7 +26,7 @@ module IBUF_A_DATA #(
 
 always@(posedge clk or negedge rst_n) begin
     if(!rst_n) begin
-        ibuf_rdy <= 'b0;
+        ibuf_rdy <= 'b1;
         payload_o <= 'b0;
     end
     else begin
