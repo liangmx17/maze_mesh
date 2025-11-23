@@ -12,7 +12,7 @@
 #include <cstdlib>
 #include <verilated.h>
 #include <verilated_vcd_c.h>
-#include "Vnode.h"  // Verilator生成的节点模块头文件
+#include "Vsimple_test.h"  // Verilator生成的测试模块头文件
 #include "packet_generator.h"
 #include "result_checker.h"
 
@@ -24,7 +24,7 @@
 
 class NodeBasicRoutingTestbench {
 private:
-    Vnode* dut;                         // Device Under Test (DUT)
+    Vsimple_test* dut;                         // Device Under Test (DUT)
     VerilatedVcdC* tfp;                 // 波形文件指针
     MazePacketGenerator packet_gen;     // 数据包生成器
     MazeResultChecker result_checker;   // 结果检查器
@@ -44,7 +44,7 @@ public:
           node_x(x), node_y(y), fault_enabled(false), fault_node_id(0xFF) {
 
         // 初始化DUT
-        dut = new Vnode;
+        dut = new Vsimple_test;
 
         // 设置DUT参数（通过参数重载或构造函数参数）
         // 注意：这需要在编译时设置参数，或者使用可配置的包装器

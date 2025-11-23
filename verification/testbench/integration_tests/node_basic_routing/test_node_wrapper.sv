@@ -10,7 +10,7 @@
 `timescale 1ns/1ps
 
 // 包含必要的定义文件
-`include "../../../rtl/include/global_defines/top_define.v"
+`include "rtl/top_define.v"
 
 module test_node_wrapper #(
     parameter HP = 3,                    // 水平坐标 (0-7)

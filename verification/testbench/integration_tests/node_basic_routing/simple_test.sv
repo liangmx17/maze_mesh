@@ -10,7 +10,7 @@
 `timescale 1ns/1ps
 
 // 包含必要的定义文件
-`include "rtl/include/global_defines/top_define.v"
+`include "rtl/top_define.v"
 
 module simple_test;
 
@@ -362,79 +362,62 @@ module simple_test;
                 // 1. 监控5个输入口的IRS_N信号
                 $display("=== IRS_N Input Signals ===");
 
-                // A口输入IRS_N
-                if (u_dut.u_node.irs_input_A.valid_i !== 'x) begin
-                    $display("  irs_input_A: valid_i=%d, ready_i=%d, valid_o=%d, ready_o=%d",
-                             u_dut.u_node.irs_input_A.valid_i, u_dut.u_node.irs_input_A.ready_i,
-                             u_dut.u_node.irs_input_A.valid_o, u_dut.u_node.irs_input_A.ready_o);
-                    $display("    payload_i=0x%h, payload_o=0x%h",
-                             u_dut.u_node.irs_input_A.payload_i, u_dut.u_node.irs_input_A.payload_o);
-                    // $display("    payload0_r=0x%h, payload1_r=0x%h",
-                    //          u_dut.u_node.irs_input_A.payload0_r, u_dut.u_node.irs_input_A.payload1_r);
-                end else $display("  irs_input_A: Signal not accessible");
+                // A口输入IBUF (分为CTRL和DATA两个模块)
+                if (u_dut.u_node.u_IBUF_A_CTRL.ibuf_vld !== 'x) begin
+                    $display("  IBUF_A_CTRL: ibuf_vld=%d, ibuf_rdy=%d",
+                             u_dut.u_node.u_IBUF_A_CTRL.ibuf_vld, u_dut.u_node.u_IBUF_A_CTRL.ibuf_rdy);
+                end else $display("  IBUF_A_CTRL: Signal not accessible");
 
-                // N口输入IRS_N
-                if (u_dut.u_node.irs_input_N.valid_i !== 'x) begin
-                    $display("  irs_input_N: valid_i=%d, ready_i=%d, valid_o=%d, ready_o=%d",
-                             u_dut.u_node.irs_input_N.valid_i, u_dut.u_node.irs_input_N.ready_i,
-                             u_dut.u_node.irs_input_N.valid_o, u_dut.u_node.irs_input_N.ready_o);
-                    $display("    payload_i=0x%h, payload_o=0x%h",
-                             u_dut.u_node.irs_input_N.payload_i, u_dut.u_node.irs_input_N.payload_o);
-                end else $display("  irs_input_N: Signal not accessible");
+                // N口输入IBUF
+                if (u_dut.u_node.u_IBUF_N.ibuf_vld !== 'x) begin
+                    $display("  IBUF_N: ibuf_vld=%d, ibuf_rdy=%d",
+                             u_dut.u_node.u_IBUF_N.ibuf_vld, u_dut.u_node.u_IBUF_N.ibuf_rdy);
+                end else $display("  IBUF_N: Signal not accessible");
 
-                // W口输入IRS_N
-                if (u_dut.u_node.irs_input_W.valid_i !== 'x) begin
-                    $display("  irs_input_W: valid_i=%d, ready_i=%d, valid_o=%d, ready_o=%d",
-                             u_dut.u_node.irs_input_W.valid_i, u_dut.u_node.irs_input_W.ready_i,
-                             u_dut.u_node.irs_input_W.valid_o, u_dut.u_node.irs_input_W.ready_o);
-                    $display("    payload_i=0x%h, payload_o=0x%h",
-                             u_dut.u_node.irs_input_W.payload_i, u_dut.u_node.irs_input_W.payload_o);
-                end else $display("  irs_input_W: Signal not accessible");
+                // W口输入IBUF
+                if (u_dut.u_node.u_IBUF_W.ibuf_vld !== 'x) begin
+                    $display("  IBUF_W: ibuf_vld=%d, ibuf_rdy=%d",
+                             u_dut.u_node.u_IBUF_W.ibuf_vld, u_dut.u_node.u_IBUF_W.ibuf_rdy);
+                end else $display("  IBUF_W: Signal not accessible");
 
-                // S口输入IRS_N
-                if (u_dut.u_node.irs_input_S.valid_i !== 'x) begin
-                    $display("  irs_input_S: valid_i=%d, ready_i=%d, valid_o=%d, ready_o=%d",
-                             u_dut.u_node.irs_input_S.valid_i, u_dut.u_node.irs_input_S.ready_i,
-                             u_dut.u_node.irs_input_S.valid_o, u_dut.u_node.irs_input_S.ready_o);
-                    $display("    payload_i=0x%h, payload_o=0x%h",
-                             u_dut.u_node.irs_input_S.payload_i, u_dut.u_node.irs_input_S.payload_o);
-                end else $display("  irs_input_S: Signal not accessible");
+                // S口输入IBUF
+                if (u_dut.u_node.u_IBUF_S.ibuf_vld !== 'x) begin
+                    $display("  IBUF_S: ibuf_vld=%d, ibuf_rdy=%d",
+                             u_dut.u_node.u_IBUF_S.ibuf_vld, u_dut.u_node.u_IBUF_S.ibuf_rdy);
+                end else $display("  IBUF_S: Signal not accessible");
 
-                // E口输入IRS_N
-                if (u_dut.u_node.irs_input_E.valid_i !== 'x) begin
-                    $display("  irs_input_E: valid_i=%d, ready_i=%d, valid_o=%d, ready_o=%d",
-                             u_dut.u_node.irs_input_E.valid_i, u_dut.u_node.irs_input_E.ready_i,
-                             u_dut.u_node.irs_input_E.valid_o, u_dut.u_node.irs_input_E.ready_o);
-                    $display("    payload_i=0x%h, payload_o=0x%h",
-                             u_dut.u_node.irs_input_E.payload_i, u_dut.u_node.irs_input_E.payload_o);
-                end else $display("  irs_input_E: Signal not accessible");
+                // E口输入IBUF
+                if (u_dut.u_node.u_IBUF_E.ibuf_vld !== 'x) begin
+                    $display("  IBUF_E: ibuf_vld=%d, ibuf_rdy=%d",
+                             u_dut.u_node.u_IBUF_E.ibuf_vld, u_dut.u_node.u_IBUF_E.ibuf_rdy);
+                end else $display("  IBUF_E: Signal not accessible");
 
                 // 2. 监控所有Router输出信号
                 $display("=== Router Output Signals ===");
 
                 if (u_dut.u_node.route_req_A !== 'x) begin
-                    $display("  route_req_A=0b%05b (N,W,S,E,B), route_pkt_A=0x%h",
-                             u_dut.u_node.route_req_A, u_dut.u_node.route_pkt_A);
+                    $display("  route_req_A=0b%05b (N,W,S,E,B)",
+                             u_dut.u_node.route_req_A);
                 end else $display("  Router A signals: not accessible");
 
                 if (u_dut.u_node.route_req_N !== 'x) begin
-                    $display("  route_req_N=0b%05b, route_pkt_N=0x%h",
-                             u_dut.u_node.route_req_N, u_dut.u_node.route_pkt_N);
+                    $display("  route_req_N=0b%05b",
+                             u_dut.u_node.route_req_N);
                 end else $display("  Router N signals: not accessible");
 
                 if (u_dut.u_node.route_req_W !== 'x) begin
-                    $display("  route_req_W=0b%05b, route_pkt_W=0x%h",
-                             u_dut.u_node.route_req_W, u_dut.u_node.route_pkt_W);
+                    $display("  route_req_W=0b%05b",
+                             u_dut.u_node.route_req_W);
                 end else $display("  Router W signals: not accessible");
 
                 if (u_dut.u_node.route_req_S !== 'x) begin
-                    $display("  route_req_S=0b%05b, route_pkt_S=0x%h",
-                             u_dut.u_node.route_req_S, u_dut.u_node.route_pkt_S);
+                    $display("  route_req_S=0b%05b",
+                             u_dut.u_node.route_req_S);
                 end else $display("  Router S signals: not accessible");
 
                 if (u_dut.u_node.route_req_E !== 'x) begin
-                    $display("  route_req_E=0b%05b, route_pkt_E=0x%h",
-                             u_dut.u_node.route_req_E, u_dut.u_node.route_pkt_E);
+                    $display("  route_req_E=0b%05b",
+                             u_dut.u_node.route_req_E);
                 end else $display("  Router E signals: not accessible");
 
                 // 3. 监控所有Arbiter输入输出信号
