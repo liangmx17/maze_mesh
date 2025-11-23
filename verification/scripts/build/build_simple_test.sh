@@ -17,7 +17,7 @@ PROJECT_ROOT="${PROJECT_ROOT:-$(cd "$SCRIPT_DIR/../../../" && pwd)}"
 VERIFICATION_DIR="${VERIFICATION_DIR:-$(cd "$SCRIPT_DIR/../.." && pwd)}"
 RTL_DIR="${RTL_DIR:-$PROJECT_ROOT/rtl}"
 
-TESTBENCH_DIR="$VERIFICATION_DIR/testbench/integration_tests/node_basic_routing"
+TESTBENCH_DIR="$VERIFICATION_DIR/testbench/node_testbench"
 BUILD_DIR="$VERIFICATION_DIR/sim/work/build"
 WAVE_DIR="$VERIFICATION_DIR/sim/wave/fst"
 
@@ -114,14 +114,14 @@ $RTL_DIR/irs.v
 $RTL_DIR/USER_DEFINE/param.v
 $RTL_DIR/USER_DEFINE/interface_c.sv
 $RTL_DIR/USER_DEFINE/node.v
-$TESTBENCH_DIR/basic_test.sv
+$TESTBENCH_DIR/minimal_node_test.sv
 EOF
 
     # Verilator编译命令 - 使用C++主函数，不启用的波形
     cat > run_test.cpp << 'EOF'
 #include <iostream>
 #include "verilated.h"
-#include "Vbasic_test.h"
+#include "Vminimal_node_test.h"
 #include "Vbasic_test___024root.h"
 
 int main(int argc, char** argv) {
@@ -180,8 +180,7 @@ EOF
         run_test.cpp \
         -CFLAGS "-std=c++14" \
         --Mdir . \
-        --exe \
-        --no-timing
+        --exe
 
     # 编译C++代码
     if command -v nproc &> /dev/null; then
