@@ -102,7 +102,10 @@
       "Bash(./Vbasic_test:*)",
       "Bash(mkdir:*)",
       "Bash(./Vminimal_node_test)",
-      "Bash(output.log)"
+      "Bash(output.log)",
+      "Bash(./verification/scripts/build/build_simple_test.sh:*)",
+      "Bash(git checkout:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []

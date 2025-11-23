@@ -32,7 +32,7 @@ always@(posedge clk or negedge rst_n) begin
     else begin
         ibuf_rdy <= (pg_en & cpy_mode) ? 
                     'b0:
-                    ~|(arb_req & clr);
+                    ~|(arb_req & ~clr);
         payload_o <= set ? payload_i : payload_o;
     end
 end

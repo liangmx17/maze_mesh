@@ -2,6 +2,8 @@
 // 有坏点且进入了cpy mode的时候，ibuf_rdy拉低，直到离开cpy_mode下一拍再拉高
 // （外部实现），在cpy mode的时候，如果目标节点是坏点，就在劫持route_req信号，让下游arbiter和buffer看到的是0，
 //  同时劫持obuf_rdy和arb_gnt信号，让ibuf以为握手成功
+// 正常情况下，rdy拉高，是因为arb_req都为0，不为0的那些，clr为1，即arb_req == 0 | (arb_req==1 & clr ==1)  arb_req^5'b0 | arb_req & clr 
+// arb_req == 1 & clr == 0 有一个那就rdy拉低， ~|(arb_req & ~clr)
 `timescale 1ns/1ps
 module IBUF_A_CTRL #(
     parameter PYLD_W = 23
@@ -54,7 +56,7 @@ always@(posedge clk or negedge rst_n) begin
     else begin
         ibuf_rdy <= (pg_en & cpy_mode) ? 
                     'b0:
-                    ~|(arb_req & clr);
+                     ~|(arb_req & ~clr);
         payload_o <= set ? payload_i : payload_o;
     end
 end

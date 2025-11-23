@@ -12,6 +12,7 @@ void Vminimal_node_test___024root___eval_initial(Vminimal_node_test___024root* v
     Vminimal_node_test__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Body
+    vlSelfRef.__Vm_traceActivity[1U] = 1U;
     Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(vlSelf);
     Vminimal_node_test_pkt_in___eval_initial__TOP__minimal_node_test__DOT__pkt_i((&vlSymsp->TOP__minimal_node_test__DOT__pkt_i));
 }
@@ -21,12 +22,6 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
     Vminimal_node_test__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Locals
-    IData/*31:0*/ minimal_node_test__DOT__timeout_counter;
-    minimal_node_test__DOT__timeout_counter = 0;
-    IData/*22:0*/ minimal_node_test__DOT__test_packet_data;
-    minimal_node_test__DOT__test_packet_data = 0;
-    CData/*0:0*/ minimal_node_test__DOT__test_packet_valid;
-    minimal_node_test__DOT__test_packet_valid = 0;
     IData/*31:0*/ minimal_node_test__DOT__unnamedblk1_1__DOT____Vrepeat0;
     minimal_node_test__DOT__unnamedblk1_1__DOT____Vrepeat0 = 0;
     IData/*31:0*/ minimal_node_test__DOT__unnamedblk1_2__DOT____Vrepeat1;
@@ -45,8 +40,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
         co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge clk)", 
-                                                             "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                             "minimal_node_test.sv", 
                                                              132);
+        vlSelfRef.__Vm_traceActivity[2U] = 1U;
         minimal_node_test__DOT__unnamedblk1_1__DOT____Vrepeat0 
             = (minimal_node_test__DOT__unnamedblk1_1__DOT____Vrepeat0 
                - (IData)(1U));
@@ -64,8 +60,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
         co_await vlSelfRef.__VtrigSched_hef7d95d9__0.trigger(1U, 
                                                              nullptr, 
                                                              "@( (~ rst_n))", 
-                                                             "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                             "minimal_node_test.sv", 
                                                              142);
+        vlSelfRef.__Vm_traceActivity[2U] = 1U;
     }
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \346\243\200\346\265\213\345\210\260\345\244\215\344\275\215\345\274\200\345\247\213 rst_n=%b\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter,
@@ -75,8 +72,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
         co_await vlSelfRef.__VtrigSched_h5a906ece__0.trigger(1U, 
                                                              nullptr, 
                                                              "@( rst_n)", 
-                                                             "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                             "minimal_node_test.sv", 
                                                              146);
+        vlSelfRef.__Vm_traceActivity[2U] = 1U;
     }
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \346\243\200\346\265\213\345\210\260\345\244\215\344\275\215\347\273\223\346\235\237 rst_n=%b\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter,
@@ -87,8 +85,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
         co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge clk)", 
-                                                             "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                             "minimal_node_test.sv", 
                                                              150);
+        vlSelfRef.__Vm_traceActivity[2U] = 1U;
         minimal_node_test__DOT__unnamedblk1_2__DOT____Vrepeat1 
             = (minimal_node_test__DOT__unnamedblk1_2__DOT____Vrepeat1 
                - (IData)(1U));
@@ -106,8 +105,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
     co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge clk)", 
-                                                         "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                         "minimal_node_test.sv", 
                                                          160);
+    vlSelfRef.__Vm_traceActivity[2U] = 1U;
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \345\274\200\345\247\213\346\243\200\346\237\245\350\276\223\345\207\272\347\253\257\345\217\243\347\212\266\346\200\201\nB\346\216\245\345\217\243\347\212\266\346\200\201:\n  vld: %b, rdy: %b, qos: %b\n  type: %b, src: %0#, tgt: %0#, data: 0x%x\nC\346\216\245\345\217\243\350\276\223\345\207\272\347\212\266\346\200\201:\n  N: vld=%b, rdy=%b, type=%b, src=%0#, tgt=%0#, data=0x%x\n  W: vld=%b, rdy=%b, type=%b, src=%0#, tgt=%0#, data=0x%x\n  S: vld=%b, rdy=%b, type=%b, src=%0#, tgt=%0#, data=0x%x\n  E: vld=%b, rdy=%b, type=%b, src=%0#, tgt=%0#, data=0x%x\nA\346\216\245\345\217\243\350\276\223\345\205\245\347\212\266\346\200\201:\n  rdy: %b\n\342\234\223 [TEST-001] \350\276\223\345\207\272\347\253\257\345\217\243\347\212\266\346\200\201\346\243\200\346\237\245\345\256\214\346\210\220 (\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d)\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter,
                  1,(IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__valid0_r),
@@ -176,60 +176,62 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
     co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge clk)", 
-                                                         "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                         "minimal_node_test.sv", 
                                                          202);
+    vlSelfRef.__Vm_traceActivity[2U] = 1U;
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: PKT_W=23\344\275\215\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter);
     Verilated::runFlushCallbacks();
-    minimal_node_test__DOT__test_packet_data = 0x000001aaU;
-    minimal_node_test__DOT__test_packet_valid = 1U;
+    vlSelfRef.minimal_node_test__DOT__test_packet_data = 0x000001aaU;
+    vlSelfRef.minimal_node_test__DOT__test_packet_valid = 1U;
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \347\224\237\346\210\220\346\265\213\350\257\225\346\225\260\346\215\256\345\214\205: 0x%x\n  \345\214\205\346\240\274\345\274\217\357\274\232[\347\261\273\345\236\213=%b, QoS=%b, \346\272\220=%0#, \347\233\256\346\240\207=%0#, \346\225\260\346\215\256=0x%x]\n  \345\214\205\347\261\273\345\236\213\357\274\232\345\215\225\346\222\255\357\274\214\346\272\220\350\212\202\347\202\271\357\274\2320\357\274\214\347\233\256\346\240\207\350\212\202\347\202\271\357\274\2321\357\274\214\346\225\260\346\215\256\357\274\2320xAA\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter,
-                 23,minimal_node_test__DOT__test_packet_data,
-                 2,(3U & (minimal_node_test__DOT__test_packet_data 
-                          >> 0x15U)),1,(1U & (minimal_node_test__DOT__test_packet_data 
+                 23,vlSelfRef.minimal_node_test__DOT__test_packet_data,
+                 2,(3U & (vlSelfRef.minimal_node_test__DOT__test_packet_data 
+                          >> 0x15U)),1,(1U & (vlSelfRef.minimal_node_test__DOT__test_packet_data 
                                               >> 0x14U)),
-                 6,(0x0000003fU & (minimal_node_test__DOT__test_packet_data 
+                 6,(0x0000003fU & (vlSelfRef.minimal_node_test__DOT__test_packet_data 
                                    >> 0x0eU)),6,(0x0000003fU 
-                                                 & (minimal_node_test__DOT__test_packet_data 
+                                                 & (vlSelfRef.minimal_node_test__DOT__test_packet_data 
                                                     >> 8U)),
-                 8,(0x000000ffU & minimal_node_test__DOT__test_packet_data));
+                 8,(0x000000ffU & vlSelfRef.minimal_node_test__DOT__test_packet_data));
     Verilated::runFlushCallbacks();
     vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_vld 
-        = minimal_node_test__DOT__test_packet_valid;
+        = vlSelfRef.minimal_node_test__DOT__test_packet_valid;
     vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_qos 
-        = (1U & (minimal_node_test__DOT__test_packet_data 
+        = (1U & (vlSelfRef.minimal_node_test__DOT__test_packet_data 
                  >> 0x14U));
     vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_type 
-        = (3U & (minimal_node_test__DOT__test_packet_data 
+        = (3U & (vlSelfRef.minimal_node_test__DOT__test_packet_data 
                  >> 0x15U));
     vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_src 
-        = (0x0000003fU & (minimal_node_test__DOT__test_packet_data 
+        = (0x0000003fU & (vlSelfRef.minimal_node_test__DOT__test_packet_data 
                           >> 0x0eU));
     vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_tgt 
-        = (0x0000003fU & (minimal_node_test__DOT__test_packet_data 
+        = (0x0000003fU & (vlSelfRef.minimal_node_test__DOT__test_packet_data 
                           >> 8U));
     vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_data 
-        = (0x000000ffU & minimal_node_test__DOT__test_packet_data);
-    minimal_node_test__DOT__timeout_counter = 0U;
+        = (0x000000ffU & vlSelfRef.minimal_node_test__DOT__test_packet_data);
+    vlSelfRef.minimal_node_test__DOT__timeout_counter = 0U;
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \347\255\211\345\276\205A\346\216\245\345\217\243ready\344\277\241\345\217\267...\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter);
     Verilated::runFlushCallbacks();
     while (((~ ((IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_vld) 
                 & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_ctrl_rdy) 
                    & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_data_rdy)))) 
-            & VL_GTS_III(32, 0x00000064U, minimal_node_test__DOT__timeout_counter))) {
+            & VL_GTS_III(32, 0x00000064U, vlSelfRef.minimal_node_test__DOT__timeout_counter))) {
         co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge clk)", 
-                                                             "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                             "minimal_node_test.sv", 
                                                              229);
-        minimal_node_test__DOT__timeout_counter = ((IData)(1U) 
-                                                   + minimal_node_test__DOT__timeout_counter);
-        if (VL_UNLIKELY(((0U == VL_MODDIVS_III(32, minimal_node_test__DOT__timeout_counter, (IData)(0x0000000aU)))))) {
+        vlSelfRef.__Vm_traceActivity[2U] = 1U;
+        vlSelfRef.minimal_node_test__DOT__timeout_counter 
+            = ((IData)(1U) + vlSelfRef.minimal_node_test__DOT__timeout_counter);
+        if (VL_UNLIKELY(((0U == VL_MODDIVS_III(32, vlSelfRef.minimal_node_test__DOT__timeout_counter, (IData)(0x0000000aU)))))) {
             VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \347\255\211\345\276\205\344\270\255... timeout_counter=%0d, valid=%b, rdy=%b\n",0,
                          32,vlSelfRef.minimal_node_test__DOT__clk_counter,
-                         32,minimal_node_test__DOT__timeout_counter,
+                         32,vlSelfRef.minimal_node_test__DOT__timeout_counter,
                          1,(IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_vld),
                          1,((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_ctrl_rdy) 
                             & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_data_rdy)));
@@ -250,8 +252,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
     co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge clk)", 
-                                                         "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                         "minimal_node_test.sv", 
                                                          244);
+    vlSelfRef.__Vm_traceActivity[2U] = 1U;
     vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_vld = 0U;
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \346\225\260\346\215\256\345\214\205\345\217\221\351\200\201\345\256\214\346\210\220\357\274\214\346\222\244\351\224\200valid\344\277\241\345\217\267\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter);
@@ -263,23 +266,24 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
     VL_WRITEF_NX("\n=== [TEST-003] \350\276\223\345\207\272\351\252\214\350\257\201\346\265\213\350\257\225 ===\n\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \347\233\221\346\216\247\350\276\223\345\207\272\347\253\257\345\217\243\346\230\257\345\220\246\346\234\211\346\225\260\346\215\256\350\276\223\345\207\272\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter);
     Verilated::runFlushCallbacks();
-    minimal_node_test__DOT__timeout_counter = 0U;
+    vlSelfRef.minimal_node_test__DOT__timeout_counter = 0U;
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \345\274\200\345\247\213\347\233\221\346\216\247\350\276\223\345\207\272...\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter);
     Verilated::runFlushCallbacks();
     while (((~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__valid0_r)) 
-            & VL_GTS_III(32, 0x00000064U, minimal_node_test__DOT__timeout_counter))) {
+            & VL_GTS_III(32, 0x00000064U, vlSelfRef.minimal_node_test__DOT__timeout_counter))) {
         co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge clk)", 
-                                                             "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                             "minimal_node_test.sv", 
                                                              259);
-        minimal_node_test__DOT__timeout_counter = ((IData)(1U) 
-                                                   + minimal_node_test__DOT__timeout_counter);
-        if (VL_UNLIKELY(((0U == VL_MODDIVS_III(32, minimal_node_test__DOT__timeout_counter, (IData)(0x0000000aU)))))) {
+        vlSelfRef.__Vm_traceActivity[2U] = 1U;
+        vlSelfRef.minimal_node_test__DOT__timeout_counter 
+            = ((IData)(1U) + vlSelfRef.minimal_node_test__DOT__timeout_counter);
+        if (VL_UNLIKELY(((0U == VL_MODDIVS_III(32, vlSelfRef.minimal_node_test__DOT__timeout_counter, (IData)(0x0000000aU)))))) {
             VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \347\233\221\346\216\247\344\270\255... timeout_counter=%0d\n  B\346\216\245\345\217\243: vld=%b, data=0x%x, src=%0#, tgt=%0#\n  N\346\216\245\345\217\243: vld=%b\n  W\346\216\245\345\217\243: vld=%b\n  S\346\216\245\345\217\243: vld=%b\n  E\346\216\245\345\217\243: vld=%b\n",0,
                          32,vlSelfRef.minimal_node_test__DOT__clk_counter,
-                         32,minimal_node_test__DOT__timeout_counter,
+                         32,vlSelfRef.minimal_node_test__DOT__timeout_counter,
                          1,(IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__valid0_r),
                          8,(0x000000ffU & vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__payload0_r),
                          6,(0x0000003fU & (vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__payload0_r 
@@ -319,8 +323,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
         co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge clk)", 
-                                                             "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                             "minimal_node_test.sv", 
                                                              288);
+        vlSelfRef.__Vm_traceActivity[2U] = 1U;
         VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \347\273\247\347\273\255\347\233\221\346\216\247 - B:%b N:%b W:%b S:%b E:%b\n",0,
                      32,vlSelfRef.minimal_node_test__DOT__clk_counter,
                      1,(IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__valid0_r),
@@ -345,8 +350,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
         co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                              nullptr, 
                                                              "@(posedge clk)", 
-                                                             "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                             "minimal_node_test.sv", 
                                                              301);
+        vlSelfRef.__Vm_traceActivity[2U] = 1U;
         minimal_node_test__DOT__unnamedblk1_4__DOT____Vrepeat3 
             = (minimal_node_test__DOT__unnamedblk1_4__DOT____Vrepeat3 
                - (IData)(1U));
@@ -359,8 +365,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
     co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge clk)", 
-                                                         "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                         "minimal_node_test.sv", 
                                                          307);
+    vlSelfRef.__Vm_traceActivity[2U] = 1U;
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: pg_en\350\256\276\344\270\272%b\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter,
                  1,(IData)(vlSelfRef.minimal_node_test__DOT__pg_en));
@@ -369,8 +376,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
     co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge clk)", 
-                                                         "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                         "minimal_node_test.sv", 
                                                          311);
+    vlSelfRef.__Vm_traceActivity[2U] = 1U;
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: pg_node\350\256\276\344\270\272%0#\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter,
                  6,(IData)(vlSelfRef.minimal_node_test__DOT__pg_node));
@@ -380,8 +388,9 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
     co_await vlSelfRef.__VtrigSched_ha1013b2d__0.trigger(0U, 
                                                          nullptr, 
                                                          "@(posedge clk)", 
-                                                         "/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 
+                                                         "minimal_node_test.sv", 
                                                          317);
+    vlSelfRef.__Vm_traceActivity[2U] = 1U;
     VL_WRITEF_NX("\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d: \346\201\242\345\244\215\351\273\230\350\256\244\350\256\276\347\275\256 pg_en=%b, pg_node=%0#\n\342\234\223 [TEST-002] \344\273\277\347\234\237\347\216\257\345\242\203\347\250\263\345\256\232\346\200\247\351\252\214\350\257\201\345\256\214\346\210\220 (\346\227\266\351\222\237\350\256\241\346\225\260\345\231\250=%0d)\n",0,
                  32,vlSelfRef.minimal_node_test__DOT__clk_counter,
                  1,(IData)(vlSelfRef.minimal_node_test__DOT__pg_en),
@@ -402,7 +411,8 @@ VlCoroutine Vminimal_node_test___024root___eval_initial__TOP__Vtiming__0(Vminima
                  64,((100.0 * VL_ISTOR_D_I(32, vlSelfRef.minimal_node_test__DOT__passed_count)) 
                      / VL_ISTOR_D_I(32, vlSelfRef.minimal_node_test__DOT__test_count)));
     Verilated::runFlushCallbacks();
-    VL_FINISH_MT("/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 341, "");
+    VL_FINISH_MT("minimal_node_test.sv", 341, "");
+    vlSelfRef.__Vm_traceActivity[2U] = 1U;
 }
 
 #ifdef VL_DEBUG
@@ -469,113 +479,109 @@ void Vminimal_node_test___024root___act_comb__TOP__0(Vminimal_node_test___024roo
     Vminimal_node_test__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Locals
-    CData/*5:0*/ minimal_node_test__DOT__dut__DOT__new_tgt;
-    minimal_node_test__DOT__dut__DOT__new_tgt = 0;
-    CData/*0:0*/ minimal_node_test__DOT__dut__DOT__tgt_is_pg;
-    minimal_node_test__DOT__dut__DOT__tgt_is_pg = 0;
-    CData/*4:0*/ minimal_node_test__DOT__dut__DOT__route_req_N;
-    minimal_node_test__DOT__dut__DOT__route_req_N = 0;
-    CData/*4:0*/ minimal_node_test__DOT__dut__DOT__route_req_S;
-    minimal_node_test__DOT__dut__DOT__route_req_S = 0;
-    CData/*4:0*/ minimal_node_test__DOT__dut__DOT__route_req_E;
-    minimal_node_test__DOT__dut__DOT__route_req_E = 0;
-    CData/*4:0*/ minimal_node_test__DOT__dut__DOT__route_req_W;
-    minimal_node_test__DOT__dut__DOT__route_req_W = 0;
-    CData/*2:0*/ minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x;
-    minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x = 0;
-    CData/*1:0*/ minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type;
-    minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type = 0;
-    CData/*5:0*/ minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw;
-    minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw = 0;
-    CData/*0:0*/ minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr;
-    minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr = 0;
     SData/*9:0*/ __Vtableidx6;
     __Vtableidx6 = 0;
     // Body
-    minimal_node_test__DOT__dut__DOT__route_req_N = 0U;
-    minimal_node_test__DOT__dut__DOT__route_req_S = 0U;
-    minimal_node_test__DOT__dut__DOT__route_req_E = 0U;
-    minimal_node_test__DOT__dut__DOT__route_req_W = 0U;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_N = 0U;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_S = 0U;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_E = 0U;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_W = 0U;
     vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_A = 0U;
-    minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr 
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr 
         = (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_ctrl_rdy) 
             & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_data_rdy)) 
            & (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_vld));
-    if (minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr) {
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x = 0U;
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw 
+    if (vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr) {
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x = 0U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw 
             = vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_tgt;
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type 
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type 
             = (3U & (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_type));
     } else {
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x 
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x 
             = (7U & ((IData)(1U) + (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered)));
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw 
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw 
             = vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered;
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type 
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type 
             = (3U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
                      >> 0x0000000eU));
     }
     if (vlSelfRef.minimal_node_test__DOT__pg_en) {
-        minimal_node_test__DOT__dut__DOT__route_req_N 
-            = (0x00000010U | (IData)(minimal_node_test__DOT__dut__DOT__route_req_N));
-        minimal_node_test__DOT__dut__DOT__route_req_S 
-            = (0x00000010U | (IData)(minimal_node_test__DOT__dut__DOT__route_req_S));
-        minimal_node_test__DOT__dut__DOT__route_req_E 
-            = (0x00000010U | (IData)(minimal_node_test__DOT__dut__DOT__route_req_E));
-        minimal_node_test__DOT__dut__DOT__route_req_W 
-            = (0x00000010U | (IData)(minimal_node_test__DOT__dut__DOT__route_req_W));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_N 
+            = (0x00000010U | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_N));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_S 
+            = (0x00000010U | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_S));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_E 
+            = (0x00000010U | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_E));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_W 
+            = (0x00000010U | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_W));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__fault_relative_pos 
+            = ((IData)((0U == (IData)(vlSelfRef.minimal_node_test__DOT__pg_node)))
+                ? 0U : ((0U == (7U & ((IData)(vlSelfRef.minimal_node_test__DOT__pg_node) 
+                                      >> 3U))) ? ((0U 
+                                                   < 
+                                                   (7U 
+                                                    & (IData)(vlSelfRef.minimal_node_test__DOT__pg_node)))
+                                                   ? 7U
+                                                   : 3U)
+                         : ((0U < (7U & (IData)(vlSelfRef.minimal_node_test__DOT__pg_node)))
+                             ? 6U : ((0U == (7U & (IData)(vlSelfRef.minimal_node_test__DOT__pg_node)))
+                                      ? 5U : 4U))));
         vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_A 
             = (0x00000010U | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_A));
-        minimal_node_test__DOT__dut__DOT__new_tgt = 
-            ((3U == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
-              ? ((((IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr)
-                    ? 0U : (7U & (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered) 
-                                   >> 3U) + (7U == 
-                                             (7U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered)))))) 
-                  << 3U) | (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x))
-              : ((1U == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
-                  ? ((((IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr)
-                        ? 0U : (7U & ((IData)(1U) + 
-                                      ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered) 
-                                       >> 3U)))) << 3U) 
-                     | (7U & (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw)))
-                  : ((2U == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
-                      ? ((0x00000038U & (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw)) 
-                         | (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x))
-                      : (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw))));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__new_tgt 
+            = ((3U == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
+                ? ((((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr)
+                      ? 0U : (7U & (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered) 
+                                     >> 3U) + (7U == 
+                                               (7U 
+                                                & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered)))))) 
+                    << 3U) | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x))
+                : ((1U == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
+                    ? ((((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr)
+                          ? 0U : (7U & ((IData)(1U) 
+                                        + ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered) 
+                                           >> 3U)))) 
+                        << 3U) | (7U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw)))
+                    : ((2U == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
+                        ? ((0x00000038U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw)) 
+                           | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x))
+                        : (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw))));
     } else {
-        minimal_node_test__DOT__dut__DOT__route_req_N = 0x10U;
-        minimal_node_test__DOT__dut__DOT__route_req_S = 0x10U;
-        minimal_node_test__DOT__dut__DOT__route_req_E = 0x10U;
-        minimal_node_test__DOT__dut__DOT__route_req_W = 0x10U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_N = 0x10U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_S = 0x10U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_E = 0x10U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_W = 0x10U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__fault_relative_pos = 0U;
         vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_A = 0x10U;
-        minimal_node_test__DOT__dut__DOT__new_tgt = minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__new_tgt 
+            = vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw;
     }
-    __Vtableidx6 = ((((3U == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
-                      << 9U) | ((2U == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
-                                << 8U)) | (((IData)(minimal_node_test__DOT__dut__DOT__new_tgt) 
+    __Vtableidx6 = ((((3U == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
+                      << 9U) | ((2U == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
+                                << 8U)) | (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__new_tgt) 
                                             << 2U) 
                                            | (((1U 
-                                                == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
+                                                == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
                                                << 1U) 
                                               | (IData)(vlSelfRef.minimal_node_test__DOT__pg_en))));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__cpy_mode 
         = Vminimal_node_test__ConstPool__TABLE_h14c994e7_0
         [__Vtableidx6];
-    minimal_node_test__DOT__dut__DOT__tgt_is_pg = ((IData)(minimal_node_test__DOT__dut__DOT__new_tgt) 
-                                                   == (IData)(vlSelfRef.minimal_node_test__DOT__pg_node));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__tgt_is_pg 
+        = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__new_tgt) 
+           == (IData)(vlSelfRef.minimal_node_test__DOT__pg_node));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_A_CTRL__DOT__set 
         = ((IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_vld) 
            & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__cpy_mode) 
               | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_ctrl_rdy)));
     vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellinp__u_IBUF_A_CTRL__route_req 
         = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_A) 
-           & (- (IData)((1U & (~ (IData)(minimal_node_test__DOT__dut__DOT__tgt_is_pg))))));
+           & (- (IData)((1U & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__tgt_is_pg))))));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_A_CTRL__DOT__clr 
         = (vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt
            [4U] & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__obuf_rdy) 
-                   | (- (IData)((IData)(minimal_node_test__DOT__dut__DOT__tgt_is_pg)))));
+                   | (- (IData)((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__tgt_is_pg)))));
 }
 
 void Vminimal_node_test___024root___eval_act(Vminimal_node_test___024root* vlSelf) {
@@ -586,6 +592,7 @@ void Vminimal_node_test___024root___eval_act(Vminimal_node_test___024root* vlSel
     if ((0x000000000000000dULL & vlSelfRef.__VactTriggered
          [0U])) {
         Vminimal_node_test___024root___act_comb__TOP__0(vlSelf);
+        vlSelfRef.__Vm_traceActivity[3U] = 1U;
     }
 }
 
@@ -657,40 +664,10 @@ void Vminimal_node_test___024root___nba_sequent__TOP__1(Vminimal_node_test___024
     Vminimal_node_test__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Locals
-    CData/*3:0*/ minimal_node_test__DOT__dut__DOT__arb_qos_N;
-    minimal_node_test__DOT__dut__DOT__arb_qos_N = 0;
-    CData/*3:0*/ minimal_node_test__DOT__dut__DOT__arb_gnt_N;
-    minimal_node_test__DOT__dut__DOT__arb_gnt_N = 0;
-    CData/*3:0*/ minimal_node_test__DOT__dut__DOT__arb_qos_W;
-    minimal_node_test__DOT__dut__DOT__arb_qos_W = 0;
-    CData/*3:0*/ minimal_node_test__DOT__dut__DOT__arb_gnt_W;
-    minimal_node_test__DOT__dut__DOT__arb_gnt_W = 0;
-    CData/*3:0*/ minimal_node_test__DOT__dut__DOT__arb_qos_S;
-    minimal_node_test__DOT__dut__DOT__arb_qos_S = 0;
-    CData/*3:0*/ minimal_node_test__DOT__dut__DOT__arb_gnt_S;
-    minimal_node_test__DOT__dut__DOT__arb_gnt_S = 0;
-    CData/*3:0*/ minimal_node_test__DOT__dut__DOT__arb_qos_E;
-    minimal_node_test__DOT__dut__DOT__arb_qos_E = 0;
-    CData/*3:0*/ minimal_node_test__DOT__dut__DOT__arb_gnt_E;
-    minimal_node_test__DOT__dut__DOT__arb_gnt_E = 0;
-    CData/*4:0*/ minimal_node_test__DOT__dut__DOT__arb_qos_B;
-    minimal_node_test__DOT__dut__DOT__arb_qos_B = 0;
-    CData/*4:0*/ minimal_node_test__DOT__dut__DOT__arb_gnt_B;
-    minimal_node_test__DOT__dut__DOT__arb_gnt_B = 0;
     CData/*1:0*/ minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_0;
     minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_0 = 0;
     CData/*2:0*/ minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_1;
     minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_1 = 0;
-    IData/*31:0*/ minimal_node_test__DOT__dut__DOT__u_arbiter_N__DOT____VdfgRegularize_h126768f7_0_0;
-    minimal_node_test__DOT__dut__DOT__u_arbiter_N__DOT____VdfgRegularize_h126768f7_0_0 = 0;
-    IData/*31:0*/ minimal_node_test__DOT__dut__DOT__u_arbiter_W__DOT____VdfgRegularize_h126768f7_0_0;
-    minimal_node_test__DOT__dut__DOT__u_arbiter_W__DOT____VdfgRegularize_h126768f7_0_0 = 0;
-    IData/*31:0*/ minimal_node_test__DOT__dut__DOT__u_arbiter_S__DOT____VdfgRegularize_h126768f7_0_0;
-    minimal_node_test__DOT__dut__DOT__u_arbiter_S__DOT____VdfgRegularize_h126768f7_0_0 = 0;
-    IData/*31:0*/ minimal_node_test__DOT__dut__DOT__u_arbiter_E__DOT____VdfgRegularize_h126768f7_0_0;
-    minimal_node_test__DOT__dut__DOT__u_arbiter_E__DOT____VdfgRegularize_h126768f7_0_0 = 0;
-    IData/*31:0*/ minimal_node_test__DOT__dut__DOT__u_arbiter_B__DOT____VdfgRegularize_hbb8a5493_0_0;
-    minimal_node_test__DOT__dut__DOT__u_arbiter_B__DOT____VdfgRegularize_hbb8a5493_0_0 = 0;
     CData/*0:0*/ minimal_node_test__DOT__dut__DOT__irs_output_N__DOT__proc_insert_irs__DOT__irs_gen__BRA__0__KET____DOT__irs_ro_en__DOT__U_LOOP_IRS__DOT____VdfgRegularize_h8f1dd18b_0_0;
     minimal_node_test__DOT__dut__DOT__irs_output_N__DOT__proc_insert_irs__DOT__irs_gen__BRA__0__KET____DOT__irs_ro_en__DOT__U_LOOP_IRS__DOT____VdfgRegularize_h8f1dd18b_0_0 = 0;
     CData/*0:0*/ minimal_node_test__DOT__dut__DOT__irs_output_W__DOT____VdfgRegularize_h8f1dd18b_0_0;
@@ -829,14 +806,6 @@ void Vminimal_node_test___024root___nba_sequent__TOP__1(Vminimal_node_test___024
                | (((0x00000010U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_N__DOT__clr))
                     ? 0U : (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
                                   >> 4U))) << 4U));
-        vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__payload_o 
-            = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__payload_o;
-        vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o 
-            = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o;
-        vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__payload_o 
-            = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__payload_o;
-        vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__payload_o 
-            = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__payload_o;
         __Vdly__minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req 
             = ((0x1eU & (IData)(__Vdly__minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req)) 
                | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_A_CTRL__DOT__set)
@@ -884,6 +853,14 @@ void Vminimal_node_test___024root___nba_sequent__TOP__1(Vminimal_node_test___024
                                                ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
                                                 >> 4U)))) 
                                  << 4U)));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__payload_o 
+            = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__payload_o;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o 
+            = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__payload_o 
+            = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__payload_o;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__payload_o 
+            = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__payload_o;
         vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered 
             = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_A_CTRL__DOT__set)
                 ? (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_tgt)
@@ -906,6 +883,34 @@ void Vminimal_node_test___024root___nba_sequent__TOP__1(Vminimal_node_test___024
         vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered = 0U;
         vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o = 0U;
     }
+    vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__ibuf_rdy 
+        = ((1U & (~ (IData)(vlSelfRef.rst_n))) || (1U 
+                                                   & (~ 
+                                                      (0U 
+                                                       != 
+                                                       ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req) 
+                                                        & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_W__DOT__clr)))))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__ibuf_rdy 
+        = ((1U & (~ (IData)(vlSelfRef.rst_n))) || (1U 
+                                                   & (~ 
+                                                      (0U 
+                                                       != 
+                                                       ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req) 
+                                                        & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_S__DOT__clr)))))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__ibuf_rdy 
+        = ((1U & (~ (IData)(vlSelfRef.rst_n))) || (1U 
+                                                   & (~ 
+                                                      (0U 
+                                                       != 
+                                                       ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req) 
+                                                        & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_E__DOT__clr)))))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__ibuf_rdy 
+        = ((1U & (~ (IData)(vlSelfRef.rst_n))) || (1U 
+                                                   & (~ 
+                                                      (0U 
+                                                       != 
+                                                       ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
+                                                        & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_N__DOT__clr)))))));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_ctrl_rdy 
         = ((1U & (~ (IData)(vlSelfRef.rst_n))) || (
                                                    ((IData)(vlSelfRef.minimal_node_test__DOT__pg_en) 
@@ -1033,34 +1038,22 @@ void Vminimal_node_test___024root___nba_sequent__TOP__1(Vminimal_node_test___024
                            << 6U)) | (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered) 
                                        << 8U) | (0x000000ffU 
                                                  & vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o)));
-    minimal_node_test__DOT__dut__DOT__arb_qos_S = (
-                                                   (((2U 
-                                                      & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
-                                                         >> 0x0000000dU)) 
-                                                     | (1U 
-                                                        & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o 
-                                                           >> 0x00000014U))) 
-                                                    << 2U) 
-                                                   | ((2U 
-                                                       & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__payload_o 
-                                                          >> 0x00000013U)) 
-                                                      | (1U 
-                                                         & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__payload_o 
-                                                            >> 0x00000014U))));
-    minimal_node_test__DOT__dut__DOT__arb_qos_E = (
-                                                   (((2U 
-                                                      & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
-                                                         >> 0x0000000dU)) 
-                                                     | (1U 
-                                                        & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o 
-                                                           >> 0x00000014U))) 
-                                                    << 2U) 
-                                                   | ((2U 
-                                                       & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__payload_o 
-                                                          >> 0x00000013U)) 
-                                                      | (1U 
-                                                         & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__payload_o 
-                                                            >> 0x00000014U))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_S 
+        = ((((2U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
+                    >> 0x0000000dU)) | (1U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o 
+                                              >> 0x00000014U))) 
+            << 2U) | ((2U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__payload_o 
+                             >> 0x00000013U)) | (1U 
+                                                 & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__payload_o 
+                                                    >> 0x00000014U))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_E 
+        = ((((2U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
+                    >> 0x0000000dU)) | (1U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o 
+                                              >> 0x00000014U))) 
+            << 2U) | ((2U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__payload_o 
+                             >> 0x00000013U)) | (1U 
+                                                 & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__payload_o 
+                                                    >> 0x00000014U))));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_data_rdy 
         = ((1U & (~ (IData)(vlSelfRef.rst_n))) || (
                                                    ((IData)(vlSelfRef.minimal_node_test__DOT__pg_en) 
@@ -1078,6 +1071,14 @@ void Vminimal_node_test___024root___nba_sequent__TOP__1(Vminimal_node_test___024
                                                              & ((~ 
                                                                  (- (IData)((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__cpy_mode)))) 
                                                                 & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__obuf_rdy))))))))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_req[1U] 
+        = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_req[2U] 
+        = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_req[3U] 
+        = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_req[0U] 
+        = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req;
     vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_N__DOT__proc_insert_irs__DOT__irs_gen__BRA__0__KET____DOT__irs_ro_en__DOT__U_LOOP_IRS__DOT__clr__BRA__0__KET__ 
         = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_N__DOT__proc_insert_irs__DOT__irs_gen__BRA__0__KET____DOT__irs_ro_en__DOT__U_LOOP_IRS__DOT__valid0_r) 
            & (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_con.no_rdy));
@@ -1108,14 +1109,11 @@ void Vminimal_node_test___024root___nba_sequent__TOP__1(Vminimal_node_test___024
     minimal_node_test__DOT__dut__DOT__irs_output_B__DOT____VdfgRegularize_h8f1dd18b_0_0 
         = (1U & ((~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__valid0_r)) 
                  | (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_o.pkt_out_rdy)));
-    minimal_node_test__DOT__dut__DOT__arb_qos_W = (
-                                                   (8U 
-                                                    & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
-                                                       >> 0x0000000bU)) 
-                                                   | ((4U 
-                                                       & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o 
-                                                          >> 0x00000012U)) 
-                                                      | (IData)(minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_0)));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_W 
+        = ((8U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
+                  >> 0x0000000bU)) | ((4U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o 
+                                             >> 0x00000012U)) 
+                                      | (IData)(minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_0)));
     minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_1 
         = ((4U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__payload_o 
                   >> 0x00000012U)) | (IData)(minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_0));
@@ -1143,19 +1141,15 @@ void Vminimal_node_test___024root___nba_sequent__TOP__1(Vminimal_node_test___024
     vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__clr__BRA__1__KET__ 
         = ((IData)(minimal_node_test__DOT__dut__DOT__irs_output_B__DOT____VdfgRegularize_h8f1dd18b_0_0) 
            & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__valid1_r));
-    minimal_node_test__DOT__dut__DOT__arb_qos_N = (
-                                                   (8U 
-                                                    & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
-                                                       >> 0x0000000bU)) 
-                                                   | (IData)(minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_1));
-    minimal_node_test__DOT__dut__DOT__arb_qos_B = (
-                                                   (0x00000010U 
-                                                    & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
-                                                       >> 0x0000000aU)) 
-                                                   | ((8U 
-                                                       & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o 
-                                                          >> 0x00000011U)) 
-                                                      | (IData)(minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_1)));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_N 
+        = ((8U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
+                  >> 0x0000000bU)) | (IData)(minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_1));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_B 
+        = ((0x00000010U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
+                           >> 0x0000000aU)) | ((8U 
+                                                & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__payload_o 
+                                                   >> 0x00000011U)) 
+                                               | (IData)(minimal_node_test__DOT__dut__DOT____VdfgRegularize_hdeb9a56a_0_1)));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_N__DOT__clr 
         = (vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt
            [0U] & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__obuf_rdy));
@@ -1168,190 +1162,205 @@ void Vminimal_node_test___024root___nba_sequent__TOP__1(Vminimal_node_test___024
     vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_E__DOT__clr 
         = (vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt
            [3U] & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__obuf_rdy));
-    minimal_node_test__DOT__dut__DOT__u_arbiter_N__DOT____VdfgRegularize_h126768f7_0_0 
-        = ((((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
-                    << 1U)) | (1U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req))) 
-            << 2U) | ((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req) 
-                             << 1U)) | (1U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req))));
-    minimal_node_test__DOT__dut__DOT__u_arbiter_W__DOT____VdfgRegularize_h126768f7_0_0 
-        = ((((2U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req)) 
-             | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
-                      >> 1U))) << 2U) | ((2U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req)) 
-                                         | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req) 
-                                                  >> 1U))));
-    minimal_node_test__DOT__dut__DOT__u_arbiter_S__DOT____VdfgRegularize_h126768f7_0_0 
-        = ((((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
-                    >> 1U)) | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
-                                     >> 2U))) << 2U) 
-           | ((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req) 
-                     >> 1U)) | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req) 
-                                      >> 2U))));
-    minimal_node_test__DOT__dut__DOT__u_arbiter_E__DOT____VdfgRegularize_h126768f7_0_0 
-        = ((((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
-                    >> 2U)) | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
-                                     >> 3U))) << 2U) 
-           | ((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req) 
-                     >> 2U)) | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req) 
-                                      >> 3U))));
-    minimal_node_test__DOT__dut__DOT__u_arbiter_B__DOT____VdfgRegularize_hbb8a5493_0_0 
-        = ((((4U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
-                    >> 2U)) | ((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
-                                      >> 3U)) | (1U 
-                                                 & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req) 
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_req[4U] 
+        = vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_W 
+        = (0x0000000fU & ((0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_W))
+                           ? ((~ ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_W) 
+                                  - (IData)(1U))) & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_W))
+                           : ((~ (((((2U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req)) 
+                                     | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
+                                              >> 1U))) 
+                                    << 2U) | ((2U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req)) 
+                                              | (1U 
+                                                 & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req) 
+                                                    >> 1U)))) 
+                                  - (IData)(1U))) & 
+                              ((((2U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req)) 
+                                 | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
+                                          >> 1U))) 
+                                << 2U) | ((2U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req)) 
+                                          | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req) 
+                                                   >> 1U)))))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_S 
+        = (0x0000000fU & ((0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_S))
+                           ? ((~ ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_S) 
+                                  - (IData)(1U))) & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_S))
+                           : ((~ (((((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
+                                            >> 1U)) 
+                                     | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
+                                              >> 2U))) 
+                                    << 2U) | ((2U & 
+                                               ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req) 
+                                                >> 1U)) 
+                                              | (1U 
+                                                 & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req) 
+                                                    >> 2U)))) 
+                                  - (IData)(1U))) & 
+                              ((((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
+                                        >> 1U)) | (1U 
+                                                   & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
+                                                      >> 2U))) 
+                                << 2U) | ((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req) 
+                                                 >> 1U)) 
+                                          | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req) 
+                                                   >> 2U)))))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_E 
+        = (0x0000000fU & ((0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_E))
+                           ? ((~ ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_E) 
+                                  - (IData)(1U))) & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_E))
+                           : ((~ (((((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
+                                            >> 2U)) 
+                                     | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
+                                              >> 3U))) 
+                                    << 2U) | ((2U & 
+                                               ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req) 
+                                                >> 2U)) 
+                                              | (1U 
+                                                 & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req) 
+                                                    >> 3U)))) 
+                                  - (IData)(1U))) & 
+                              ((((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
+                                        >> 2U)) | (1U 
+                                                   & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
+                                                      >> 3U))) 
+                                << 2U) | ((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req) 
+                                                 >> 2U)) 
+                                          | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req) 
+                                                   >> 3U)))))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_N 
+        = (0x0000000fU & ((0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_N))
+                           ? ((~ ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_N) 
+                                  - (IData)(1U))) & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_N))
+                           : ((~ (((((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
+                                            << 1U)) 
+                                     | (1U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req))) 
+                                    << 2U) | ((2U & 
+                                               ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req) 
+                                                << 1U)) 
+                                              | (1U 
+                                                 & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req)))) 
+                                  - (IData)(1U))) & 
+                              ((((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
+                                        << 1U)) | (1U 
+                                                   & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req))) 
+                                << 2U) | ((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req) 
+                                                 << 1U)) 
+                                          | (1U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req)))))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_B 
+        = (0x0000001fU & ((0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_B))
+                           ? ((~ ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_B) 
+                                  - (IData)(1U))) & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_qos_B))
+                           : ((~ (((((4U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
+                                            >> 2U)) 
+                                     | ((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
+                                               >> 3U)) 
+                                        | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req) 
+                                                 >> 4U)))) 
+                                    << 2U) | ((2U & 
+                                               ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req) 
+                                                >> 3U)) 
+                                              | (1U 
+                                                 & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req) 
                                                     >> 4U)))) 
-            << 2U) | ((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req) 
-                             >> 3U)) | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req) 
-                                              >> 4U))));
-    minimal_node_test__DOT__dut__DOT__arb_gnt_N = (0x0000000fU 
-                                                   & ((0U 
-                                                       != (IData)(minimal_node_test__DOT__dut__DOT__arb_qos_N))
-                                                       ? 
-                                                      ((~ 
-                                                        ((IData)(minimal_node_test__DOT__dut__DOT__arb_qos_N) 
-                                                         - (IData)(1U))) 
-                                                       & (IData)(minimal_node_test__DOT__dut__DOT__arb_qos_N))
-                                                       : 
-                                                      ((~ 
-                                                        (minimal_node_test__DOT__dut__DOT__u_arbiter_N__DOT____VdfgRegularize_h126768f7_0_0 
-                                                         - (IData)(1U))) 
-                                                       & minimal_node_test__DOT__dut__DOT__u_arbiter_N__DOT____VdfgRegularize_h126768f7_0_0)));
-    minimal_node_test__DOT__dut__DOT__arb_gnt_W = (0x0000000fU 
-                                                   & ((0U 
-                                                       != (IData)(minimal_node_test__DOT__dut__DOT__arb_qos_W))
-                                                       ? 
-                                                      ((~ 
-                                                        ((IData)(minimal_node_test__DOT__dut__DOT__arb_qos_W) 
-                                                         - (IData)(1U))) 
-                                                       & (IData)(minimal_node_test__DOT__dut__DOT__arb_qos_W))
-                                                       : 
-                                                      ((~ 
-                                                        (minimal_node_test__DOT__dut__DOT__u_arbiter_W__DOT____VdfgRegularize_h126768f7_0_0 
-                                                         - (IData)(1U))) 
-                                                       & minimal_node_test__DOT__dut__DOT__u_arbiter_W__DOT____VdfgRegularize_h126768f7_0_0)));
-    minimal_node_test__DOT__dut__DOT__arb_gnt_S = (0x0000000fU 
-                                                   & ((0U 
-                                                       != (IData)(minimal_node_test__DOT__dut__DOT__arb_qos_S))
-                                                       ? 
-                                                      ((~ 
-                                                        ((IData)(minimal_node_test__DOT__dut__DOT__arb_qos_S) 
-                                                         - (IData)(1U))) 
-                                                       & (IData)(minimal_node_test__DOT__dut__DOT__arb_qos_S))
-                                                       : 
-                                                      ((~ 
-                                                        (minimal_node_test__DOT__dut__DOT__u_arbiter_S__DOT____VdfgRegularize_h126768f7_0_0 
-                                                         - (IData)(1U))) 
-                                                       & minimal_node_test__DOT__dut__DOT__u_arbiter_S__DOT____VdfgRegularize_h126768f7_0_0)));
-    minimal_node_test__DOT__dut__DOT__arb_gnt_E = (0x0000000fU 
-                                                   & ((0U 
-                                                       != (IData)(minimal_node_test__DOT__dut__DOT__arb_qos_E))
-                                                       ? 
-                                                      ((~ 
-                                                        ((IData)(minimal_node_test__DOT__dut__DOT__arb_qos_E) 
-                                                         - (IData)(1U))) 
-                                                       & (IData)(minimal_node_test__DOT__dut__DOT__arb_qos_E))
-                                                       : 
-                                                      ((~ 
-                                                        (minimal_node_test__DOT__dut__DOT__u_arbiter_E__DOT____VdfgRegularize_h126768f7_0_0 
-                                                         - (IData)(1U))) 
-                                                       & minimal_node_test__DOT__dut__DOT__u_arbiter_E__DOT____VdfgRegularize_h126768f7_0_0)));
-    minimal_node_test__DOT__dut__DOT__arb_gnt_B = (0x0000001fU 
-                                                   & ((0U 
-                                                       != (IData)(minimal_node_test__DOT__dut__DOT__arb_qos_B))
-                                                       ? 
-                                                      ((~ 
-                                                        ((IData)(minimal_node_test__DOT__dut__DOT__arb_qos_B) 
-                                                         - (IData)(1U))) 
-                                                       & (IData)(minimal_node_test__DOT__dut__DOT__arb_qos_B))
-                                                       : 
-                                                      ((~ 
-                                                        (minimal_node_test__DOT__dut__DOT__u_arbiter_B__DOT____VdfgRegularize_hbb8a5493_0_0 
-                                                         - (IData)(1U))) 
-                                                       & minimal_node_test__DOT__dut__DOT__u_arbiter_B__DOT____VdfgRegularize_hbb8a5493_0_0)));
+                                  - (IData)(1U))) & 
+                              ((((4U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_CTRL__arb_req) 
+                                        >> 2U)) | (
+                                                   (2U 
+                                                    & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_N__arb_req) 
+                                                       >> 3U)) 
+                                                   | (1U 
+                                                      & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_W__arb_req) 
+                                                         >> 4U)))) 
+                                << 2U) | ((2U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_S__arb_req) 
+                                                 >> 3U)) 
+                                          | (1U & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_E__arb_req) 
+                                                   >> 4U)))))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_W 
+        = ((8U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_W))
+            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+           [4U] : ((4U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_W))
+                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+                   [0U] : ((2U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_W))
+                            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+                           [2U] : ((1U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_W))
+                                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+                                   [3U] : 0U))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_W__DOT__set__BRA__1__KET__ 
+        = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_W__DOT__valid0_r) 
+           & ((0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_W)) 
+              & ((~ (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_con.wo_rdy)) 
+                 & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_W__DOT__valid1_r)))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_W__DOT__set__BRA__0__KET__ 
+        = (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_W__DOT__valid1_r) 
+            | (0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_W))) 
+           & (IData)(minimal_node_test__DOT__dut__DOT__irs_output_W__DOT____VdfgRegularize_h8f1dd18b_0_0));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_S 
+        = ((8U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_S))
+            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+           [4U] : ((4U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_S))
+                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+                   [0U] : ((2U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_S))
+                            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+                           [1U] : ((1U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_S))
+                                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+                                   [3U] : 0U))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_S__DOT__set__BRA__1__KET__ 
+        = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_S__DOT__valid0_r) 
+           & ((0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_S)) 
+              & ((~ (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_con.so_rdy)) 
+                 & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_S__DOT__valid1_r)))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_S__DOT__set__BRA__0__KET__ 
+        = (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_S__DOT__valid1_r) 
+            | (0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_S))) 
+           & (IData)(minimal_node_test__DOT__dut__DOT__irs_output_S__DOT____VdfgRegularize_h8f1dd18b_0_0));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_E 
+        = ((8U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_E))
+            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+           [4U] : ((4U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_E))
+                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+                   [0U] : ((2U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_E))
+                            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+                           [1U] : ((1U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_E))
+                                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
+                                   [2U] : 0U))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_E__DOT__set__BRA__1__KET__ 
+        = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_E__DOT__valid0_r) 
+           & ((0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_E)) 
+              & ((~ (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_con.eo_rdy)) 
+                 & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_E__DOT__valid1_r)))));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_E__DOT__set__BRA__0__KET__ 
+        = (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_E__DOT__valid1_r) 
+            | (0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_E))) 
+           & (IData)(minimal_node_test__DOT__dut__DOT__irs_output_E__DOT____VdfgRegularize_h8f1dd18b_0_0));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_N__DOT__proc_insert_irs__DOT__irs_gen__BRA__0__KET____DOT__irs_ro_en__DOT__U_LOOP_IRS__DOT__set__BRA__0__KET__ 
         = (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_N__DOT__proc_insert_irs__DOT__irs_gen__BRA__0__KET____DOT__irs_ro_en__DOT__U_LOOP_IRS__DOT__valid1_r) 
-            | (0U != (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_N))) 
+            | (0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_N))) 
            & (IData)(minimal_node_test__DOT__dut__DOT__irs_output_N__DOT__proc_insert_irs__DOT__irs_gen__BRA__0__KET____DOT__irs_ro_en__DOT__U_LOOP_IRS__DOT____VdfgRegularize_h8f1dd18b_0_0));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_N__DOT__proc_insert_irs__DOT__irs_gen__BRA__0__KET____DOT__irs_ro_en__DOT__U_LOOP_IRS__DOT__set__BRA__1__KET__ 
         = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_N__DOT__proc_insert_irs__DOT__irs_gen__BRA__0__KET____DOT__irs_ro_en__DOT__U_LOOP_IRS__DOT__valid0_r) 
-           & ((0U != (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_N)) 
+           & ((0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_N)) 
               & ((~ (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_con.no_rdy)) 
                  & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_N__DOT__proc_insert_irs__DOT__irs_gen__BRA__0__KET____DOT__irs_ro_en__DOT__U_LOOP_IRS__DOT__valid1_r)))));
-    vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_W 
-        = ((8U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_W))
-            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-           [4U] : ((4U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_W))
-                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                   [0U] : ((2U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_W))
-                            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                           [2U] : ((1U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_W))
-                                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                                   [3U] : 0U))));
-    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_W__DOT__set__BRA__0__KET__ 
-        = (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_W__DOT__valid1_r) 
-            | (0U != (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_W))) 
-           & (IData)(minimal_node_test__DOT__dut__DOT__irs_output_W__DOT____VdfgRegularize_h8f1dd18b_0_0));
-    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_W__DOT__set__BRA__1__KET__ 
-        = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_W__DOT__valid0_r) 
-           & ((0U != (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_W)) 
-              & ((~ (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_con.wo_rdy)) 
-                 & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_W__DOT__valid1_r)))));
-    vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_S 
-        = ((8U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_S))
-            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-           [4U] : ((4U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_S))
-                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                   [0U] : ((2U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_S))
-                            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                           [1U] : ((1U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_S))
-                                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                                   [3U] : 0U))));
-    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_S__DOT__set__BRA__0__KET__ 
-        = (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_S__DOT__valid1_r) 
-            | (0U != (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_S))) 
-           & (IData)(minimal_node_test__DOT__dut__DOT__irs_output_S__DOT____VdfgRegularize_h8f1dd18b_0_0));
-    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_S__DOT__set__BRA__1__KET__ 
-        = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_S__DOT__valid0_r) 
-           & ((0U != (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_S)) 
-              & ((~ (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_con.so_rdy)) 
-                 & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_S__DOT__valid1_r)))));
-    vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_E 
-        = ((8U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_E))
-            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-           [4U] : ((4U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_E))
-                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                   [0U] : ((2U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_E))
-                            ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                           [1U] : ((1U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_E))
-                                    ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                                   [2U] : 0U))));
-    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_E__DOT__set__BRA__0__KET__ 
-        = (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_E__DOT__valid1_r) 
-            | (0U != (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_E))) 
-           & (IData)(minimal_node_test__DOT__dut__DOT__irs_output_E__DOT____VdfgRegularize_h8f1dd18b_0_0));
-    vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_E__DOT__set__BRA__1__KET__ 
-        = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_E__DOT__valid0_r) 
-           & ((0U != (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_E)) 
-              & ((~ (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_con.eo_rdy)) 
-                 & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_E__DOT__valid1_r)))));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_B 
-        = ((0x00000010U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_B))
+        = ((0x00000010U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_B))
             ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-           [4U] : ((8U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_B))
+           [4U] : ((8U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_B))
                     ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                   [0U] : ((4U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_B))
+                   [0U] : ((4U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_B))
                             ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                           [1U] : ((2U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_B))
+                           [1U] : ((2U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_B))
                                     ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
-                                   [2U] : ((1U & (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_B))
+                                   [2U] : ((1U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_B))
                                             ? vlSelfRef.minimal_node_test__DOT__dut__DOT__pld_buf
                                            [3U] : 0U)))));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__set__BRA__0__KET__ 
         = (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__valid1_r) 
-            | (0U != (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_B))) 
+            | (0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_B))) 
            & (IData)(minimal_node_test__DOT__dut__DOT__irs_output_B__DOT____VdfgRegularize_h8f1dd18b_0_0));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__set__BRA__1__KET__ 
         = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__valid0_r) 
-           & ((0U != (IData)(minimal_node_test__DOT__dut__DOT__arb_gnt_B)) 
+           & ((0U != (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt_B)) 
               & ((~ (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_o.pkt_out_rdy)) 
                  & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__irs_output_B__DOT__valid1_r)))));
 }
@@ -1360,37 +1369,41 @@ void Vminimal_node_test___024root___nba_comb__TOP__0(Vminimal_node_test___024roo
     VL_DEBUG_IF(VL_DBG_MSGF("+    Vminimal_node_test___024root___nba_comb__TOP__0\n"); );
     Vminimal_node_test__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
-    // Locals
-    CData/*4:0*/ minimal_node_test__DOT__dut__DOT__route_req_N;
-    minimal_node_test__DOT__dut__DOT__route_req_N = 0;
-    CData/*4:0*/ minimal_node_test__DOT__dut__DOT__route_req_S;
-    minimal_node_test__DOT__dut__DOT__route_req_S = 0;
-    CData/*4:0*/ minimal_node_test__DOT__dut__DOT__route_req_E;
-    minimal_node_test__DOT__dut__DOT__route_req_E = 0;
-    CData/*4:0*/ minimal_node_test__DOT__dut__DOT__route_req_W;
-    minimal_node_test__DOT__dut__DOT__route_req_W = 0;
     // Body
-    minimal_node_test__DOT__dut__DOT__route_req_N = 0U;
-    minimal_node_test__DOT__dut__DOT__route_req_S = 0U;
-    minimal_node_test__DOT__dut__DOT__route_req_E = 0U;
-    minimal_node_test__DOT__dut__DOT__route_req_W = 0U;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_N = 0U;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_S = 0U;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_E = 0U;
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_W = 0U;
     vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_A = 0U;
     if (vlSelfRef.minimal_node_test__DOT__pg_en) {
-        minimal_node_test__DOT__dut__DOT__route_req_N 
-            = (0x00000010U | (IData)(minimal_node_test__DOT__dut__DOT__route_req_N));
-        minimal_node_test__DOT__dut__DOT__route_req_S 
-            = (0x00000010U | (IData)(minimal_node_test__DOT__dut__DOT__route_req_S));
-        minimal_node_test__DOT__dut__DOT__route_req_E 
-            = (0x00000010U | (IData)(minimal_node_test__DOT__dut__DOT__route_req_E));
-        minimal_node_test__DOT__dut__DOT__route_req_W 
-            = (0x00000010U | (IData)(minimal_node_test__DOT__dut__DOT__route_req_W));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_N 
+            = (0x00000010U | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_N));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_S 
+            = (0x00000010U | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_S));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_E 
+            = (0x00000010U | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_E));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_W 
+            = (0x00000010U | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_W));
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__fault_relative_pos 
+            = ((IData)((0U == (IData)(vlSelfRef.minimal_node_test__DOT__pg_node)))
+                ? 0U : ((0U == (7U & ((IData)(vlSelfRef.minimal_node_test__DOT__pg_node) 
+                                      >> 3U))) ? ((0U 
+                                                   < 
+                                                   (7U 
+                                                    & (IData)(vlSelfRef.minimal_node_test__DOT__pg_node)))
+                                                   ? 7U
+                                                   : 3U)
+                         : ((0U < (7U & (IData)(vlSelfRef.minimal_node_test__DOT__pg_node)))
+                             ? 6U : ((0U == (7U & (IData)(vlSelfRef.minimal_node_test__DOT__pg_node)))
+                                      ? 5U : 4U))));
         vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_A 
             = (0x00000010U | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_A));
     } else {
-        minimal_node_test__DOT__dut__DOT__route_req_N = 0x10U;
-        minimal_node_test__DOT__dut__DOT__route_req_S = 0x10U;
-        minimal_node_test__DOT__dut__DOT__route_req_E = 0x10U;
-        minimal_node_test__DOT__dut__DOT__route_req_W = 0x10U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_N = 0x10U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_S = 0x10U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_E = 0x10U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_W = 0x10U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__fault_relative_pos = 0U;
         vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_A = 0x10U;
     }
 }
@@ -1400,106 +1413,73 @@ void Vminimal_node_test___024root___nba_comb__TOP__1(Vminimal_node_test___024roo
     Vminimal_node_test__Syms* const __restrict vlSymsp VL_ATTR_UNUSED = vlSelf->vlSymsp;
     auto& vlSelfRef = std::ref(*vlSelf).get();
     // Locals
-    CData/*5:0*/ minimal_node_test__DOT__dut__DOT__new_tgt;
-    minimal_node_test__DOT__dut__DOT__new_tgt = 0;
-    CData/*0:0*/ minimal_node_test__DOT__dut__DOT__tgt_is_pg;
-    minimal_node_test__DOT__dut__DOT__tgt_is_pg = 0;
-    CData/*2:0*/ minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x;
-    minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x = 0;
-    CData/*1:0*/ minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type;
-    minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type = 0;
-    CData/*5:0*/ minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw;
-    minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw = 0;
-    CData/*0:0*/ minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr;
-    minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr = 0;
     SData/*9:0*/ __Vtableidx6;
     __Vtableidx6 = 0;
     // Body
-    minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr 
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr 
         = (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_ctrl_rdy) 
             & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_data_rdy)) 
            & (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_vld));
-    if (minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr) {
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x = 0U;
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw 
+    if (vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr) {
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x = 0U;
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw 
             = vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_tgt;
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type 
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type 
             = (3U & (IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_type));
     } else {
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x 
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x 
             = (7U & ((IData)(1U) + (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered)));
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw 
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw 
             = vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered;
-        minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type 
+        vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type 
             = (3U & (vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellout__u_IBUF_A_DATA__payload_o 
                      >> 0x0000000eU));
     }
-    minimal_node_test__DOT__dut__DOT__new_tgt = ((IData)(vlSelfRef.minimal_node_test__DOT__pg_en)
-                                                  ? 
-                                                 ((3U 
-                                                   == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
-                                                   ? 
-                                                  ((((IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr)
-                                                      ? 0U
-                                                      : 
-                                                     (7U 
-                                                      & (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered) 
-                                                          >> 3U) 
-                                                         + 
-                                                         (7U 
-                                                          == 
-                                                          (7U 
-                                                           & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered)))))) 
-                                                    << 3U) 
-                                                   | (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x))
-                                                   : 
-                                                  ((1U 
-                                                    == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
-                                                    ? 
-                                                   ((((IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr)
-                                                       ? 0U
-                                                       : 
-                                                      (7U 
-                                                       & ((IData)(1U) 
-                                                          + 
-                                                          ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered) 
-                                                           >> 3U)))) 
-                                                     << 3U) 
-                                                    | (7U 
-                                                       & (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw)))
-                                                    : 
-                                                   ((2U 
-                                                     == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
-                                                     ? 
-                                                    ((0x00000038U 
-                                                      & (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw)) 
-                                                     | (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x))
-                                                     : (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw))))
-                                                  : (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw));
-    __Vtableidx6 = ((((3U == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
-                      << 9U) | ((2U == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
-                                << 8U)) | (((IData)(minimal_node_test__DOT__dut__DOT__new_tgt) 
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__new_tgt 
+        = ((IData)(vlSelfRef.minimal_node_test__DOT__pg_en)
+            ? ((3U == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
+                ? ((((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr)
+                      ? 0U : (7U & (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered) 
+                                     >> 3U) + (7U == 
+                                               (7U 
+                                                & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered)))))) 
+                    << 3U) | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x))
+                : ((1U == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
+                    ? ((((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__clr)
+                          ? 0U : (7U & ((IData)(1U) 
+                                        + ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_tgt_A_buffered) 
+                                           >> 3U)))) 
+                        << 3U) | (7U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw)))
+                    : ((2U == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type))
+                        ? ((0x00000038U & (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw)) 
+                           | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__new_x))
+                        : (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw))))
+            : (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__tgt_raw));
+    __Vtableidx6 = ((((3U == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
+                      << 9U) | ((2U == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
+                                << 8U)) | (((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__new_tgt) 
                                             << 2U) 
                                            | (((1U 
-                                                == (IData)(minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
+                                                == (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__u_multi_packet_gen__DOT__pkt_type)) 
                                                << 1U) 
                                               | (IData)(vlSelfRef.minimal_node_test__DOT__pg_en))));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__cpy_mode 
         = Vminimal_node_test__ConstPool__TABLE_h14c994e7_0
         [__Vtableidx6];
-    minimal_node_test__DOT__dut__DOT__tgt_is_pg = ((IData)(minimal_node_test__DOT__dut__DOT__new_tgt) 
-                                                   == (IData)(vlSelfRef.minimal_node_test__DOT__pg_node));
+    vlSelfRef.minimal_node_test__DOT__dut__DOT__tgt_is_pg 
+        = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__new_tgt) 
+           == (IData)(vlSelfRef.minimal_node_test__DOT__pg_node));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_A_CTRL__DOT__set 
         = ((IData)(vlSymsp->TOP__minimal_node_test__DOT__pkt_i.pkt_in_vld) 
            & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__cpy_mode) 
               | (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__pkt_in_ctrl_rdy)));
     vlSelfRef.minimal_node_test__DOT__dut__DOT____Vcellinp__u_IBUF_A_CTRL__route_req 
         = ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__route_req_A) 
-           & (- (IData)((1U & (~ (IData)(minimal_node_test__DOT__dut__DOT__tgt_is_pg))))));
+           & (- (IData)((1U & (~ (IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__tgt_is_pg))))));
     vlSelfRef.minimal_node_test__DOT__dut__DOT__u_IBUF_A_CTRL__DOT__clr 
         = (vlSelfRef.minimal_node_test__DOT__dut__DOT__arb_gnt
            [4U] & ((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__obuf_rdy) 
-                   | (- (IData)((IData)(minimal_node_test__DOT__dut__DOT__tgt_is_pg)))));
+                   | (- (IData)((IData)(vlSelfRef.minimal_node_test__DOT__dut__DOT__tgt_is_pg)))));
 }
 
 void Vminimal_node_test___024root___eval_nba(Vminimal_node_test___024root* vlSelf) {
@@ -1509,17 +1489,21 @@ void Vminimal_node_test___024root___eval_nba(Vminimal_node_test___024root* vlSel
     // Body
     if ((1ULL & vlSelfRef.__VnbaTriggered[0U])) {
         Vminimal_node_test___024root___nba_sequent__TOP__0(vlSelf);
+        vlSelfRef.__Vm_traceActivity[4U] = 1U;
     }
     if ((3ULL & vlSelfRef.__VnbaTriggered[0U])) {
         Vminimal_node_test___024root___nba_sequent__TOP__1(vlSelf);
+        vlSelfRef.__Vm_traceActivity[5U] = 1U;
     }
     if ((0x000000000000000dULL & vlSelfRef.__VnbaTriggered
          [0U])) {
         Vminimal_node_test___024root___nba_comb__TOP__0(vlSelf);
+        vlSelfRef.__Vm_traceActivity[6U] = 1U;
     }
     if ((0x000000000000000fULL & vlSelfRef.__VnbaTriggered
          [0U])) {
         Vminimal_node_test___024root___nba_comb__TOP__1(vlSelf);
+        vlSelfRef.__Vm_traceActivity[7U] = 1U;
     }
 }
 
@@ -1631,7 +1615,7 @@ void Vminimal_node_test___024root___eval(Vminimal_node_test___024root* vlSelf) {
 #ifdef VL_DEBUG
             Vminimal_node_test___024root___dump_triggers__act(vlSelfRef.__VnbaTriggered, "nba"s);
 #endif
-            VL_FATAL_MT("/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 16, "", "NBA region did not converge after 100 tries");
+            VL_FATAL_MT("minimal_node_test.sv", 16, "", "NBA region did not converge after 100 tries");
         }
         __VnbaIterCount = ((IData)(1U) + __VnbaIterCount);
         vlSelfRef.__VactIterCount = 0U;
@@ -1640,7 +1624,7 @@ void Vminimal_node_test___024root___eval(Vminimal_node_test___024root* vlSelf) {
 #ifdef VL_DEBUG
                 Vminimal_node_test___024root___dump_triggers__act(vlSelfRef.__VactTriggered, "act"s);
 #endif
-                VL_FATAL_MT("/home/liangmx/maze_mesh/verification/testbench/node_testbench/minimal_node_test.sv", 16, "", "Active region did not converge after 100 tries");
+                VL_FATAL_MT("minimal_node_test.sv", 16, "", "Active region did not converge after 100 tries");
             }
             vlSelfRef.__VactIterCount = ((IData)(1U) 
                                          + vlSelfRef.__VactIterCount);

@@ -4,6 +4,15 @@
 
 `timescale 1ns/1ps
 
+// ========================================
+// 包含必要的接口定义（在模块外部）
+// ========================================
+`include "/home/liangmx/maze_mesh/rtl/top_define.v"
+`include "/home/liangmx/maze_mesh/rtl/irs.v"
+`include "/home/liangmx/maze_mesh/rtl/interface_a.sv"
+`include "/home/liangmx/maze_mesh/rtl/interface_b.sv"
+`include "/home/liangmx/maze_mesh/rtl/USER_DEFINE/interface_c.sv"
+
 module minimal_node_test(
     // C++提供的时钟和复位信号输入
     input clk,
@@ -11,9 +20,9 @@ module minimal_node_test(
 );
 
     // ========================================
-    // 包含必要的定义
+    // 包含参数定义
     // ========================================
-    `include "param.v"
+    `include "/home/liangmx/maze_mesh/rtl/USER_DEFINE/param.v"
 
     // ========================================
     // 信号定义

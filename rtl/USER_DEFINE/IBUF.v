@@ -44,7 +44,7 @@ always@(posedge clk or negedge rst_n) begin
         ibuf_rdy <= 'b1;
     end
     else begin
-        ibuf_rdy <= ~|(arb_req & clr);
+        ibuf_rdy <=  ~|(arb_req & ~clr);
         payload_o <= set ? payload_i : payload_o;
     end
 end
