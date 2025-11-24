@@ -17,7 +17,7 @@
 // =============================================================================
 `timescale 1ns/1ps
 `include "param.v"
-module node #(
+module NODE #(
     parameter HP = 0,                    // 水平坐标 (0-7)
     parameter VP = 0                     // 垂直坐标 (0-7)
 ) (

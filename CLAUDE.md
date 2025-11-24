@@ -2,6 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 关键要求摘要
+
+**⚠️ 强制性验证环境**:
+- 只能使用Verilator（禁止使用iverilog或其他仿真软件）
+- 必须在verification目录下进行所有验证工作
+- 修改RTL后必须执行 `make node-test-basic`
+
+**📋 快速开始**:
+```bash
+cd verification
+make test-quick                    # 基本路由测试
+make node-test-basic              # 强制性调试步骤
+```
+
 ## MAZE网络架构文档
 
 ## 概述
@@ -107,50 +121,83 @@ MAZE网络实现了**64节点(8×8网格)网格拓扑**，具有以下关键特�
 
 ## 构建和编译命令
 
-### 构建脚本
+### 验证环境工作流程
 
-使用提供的构建脚本进行编译：
+**重要**: 所有验证工作必须在verification目录下进行，严格遵循文件结构规范。
 
 ```bash
-# 构建MAZE_TOP模块（默认）
-./scripts/build/build_maze.sh
+# 进入验证目录
+cd verification
 
-# 构建特定模块
-./scripts/build/build_maze.sh node      # 构建单个节点
-./scripts/build/build_maze.sh topo      # 构建拓扑模块
-
-# 指定波形格式
-./scripts/build/build_maze.sh MAZE_TOP fst    # FST格式
-./scripts/build/build_maze.sh MAZE_TOP vcd    # VCD格式
+# 检查文件结构合规性（必须执行）
+./scripts/verification/check_file_structure.sh
 ```
 
-### Verilator编译（只能使用verilator，而不能使用iverilog或者任意其他仿真软件）
+### 节点基本路由测试（P0级别）
 
 ```bash
-# 构建MAZE_TOP模块
-verilator --top-module MAZE_TOP \
-  --cc -f rtl.filelist \
-  -Wno-fatal \
-  --CFLAGS "-std=c++11" \
-  --Mdir obj_dir \
-  --trace --trace-fst --trace-structs
+# 快速测试中心节点(3,3)
+make test-quick
 
-# 编译生成可执行文件
-cd obj_dir
-make -f VMAZE_TOP.mk
+# 测试特定节点
+make test-node-basic NODE_X=3 NODE_Y=3
+
+# 完整测试套件（9个典型节点位置）
+make test-all
+
+# 边缘节点测试
+make test-edge
+
+# 四角节点测试
+make test-corner
 ```
 
-### Verilator仿真命令
+### 完整节点验证环境
 
 ```bash
-# 运行基本仿真
-./VMAZE_TOP
+# 基础节点功能测试（强制调试步骤）
+make node-test-basic
 
-# 运行带波形的仿真
-./VMAZE_TOP +trace
+# 带波形的完整测试
+make node-test-all TRACE=1
 
-# 详细输出
-./VMAZE_TOP +verbose
+# QoS仲裁测试
+make node-test-qos
+
+# 故障容错测试
+make node-test-fault
+
+# 多播广播测试
+make node-test-multicast
+
+# 压力测试
+make node-test-stress
+```
+
+### 直接使用构建脚本
+
+```bash
+# 构建基本路由测试
+cd verification
+./scripts/build/build_simple_test.sh verilator 3 3
+cd sim/work/build && ./Vsimple_test
+```
+
+### Verilator编译规范（只能使用verilator）
+
+```bash
+# 单个模块编译
+verilator --top-module node \
+  --cc rtl/USER_DEFINE/node.v rtl/interface_*.sv rtl/top_define.v \
+  -Wno-fatal --CFLAGS "-std=c++11" -Mdir obj_dir
+
+# 带波形的编译
+verilator --top-module node \
+  --cc rtl/USER_DEFINE/node.v rtl/interface_*.sv rtl/top_define.v \
+  -Wno-fatal --trace --trace-fst --CFLAGS "-std=c++11" -Mdir obj_dir
+
+# 编译和运行
+cd obj_dir && make -f Vnode.mk && ./Vnode
 ```
 
 ### 编译参数
@@ -249,6 +296,35 @@ make -f VMAZE_TOP.mk
 - **多播处理**: 多播和广播时故障节点自动从目标列表中排除
 - **容错区域**: 支持9种故障相对位置，包括正常状态和8个方向的故障区域
 
+## 🔒 强制性验证环境要求
+
+**关键原则**: MAZE项目使用严格的验证环境，**任何时候都必须强制执行**以下规范：
+
+### 核心要求
+- **只能使用verilator，而不能使用iverilog或者任意其他仿真软件**
+- **必须**在verification目录下进行所有验证工作
+- **必须**运行 `./scripts/verification/check_file_structure.sh` 验证合规性
+- **严禁**在非标准位置创建测试文件或临时目录
+
+### 强制性调试工作流程
+每次修改任何与节点相关的RTL代码后，**必须**执行：
+```bash
+cd verification
+make node-test-basic
+```
+
+**检查要点**:
+- ✅ 接口端口信号完整性
+- ✅ 初始状态检测（buffer ready=1，其他信号=0）
+- ✅ 基本路由功能验证
+- ✅ 编译无错误无警告
+- ✅ 所有测试用例通过
+
+### 违规后果
+- 测试将被视为无效
+- 代码提交将被拒绝
+- 验证环境无法正常工作
+
 ## 开发工作流信息
 
 ### 模块开发层次
@@ -346,18 +422,20 @@ MAZE项目使用结构化的文件架构来支持系统化的开发和验证。
 
 ### ✅ 测试环境
 
-**位置**: `testbench/`
-- **单元测试**: `testbench/src/unit_tests/` - 单个模块测试
-- **集成测试**: `testbench/src/integration_tests/` - 多模块测试
-- **系统测试**: `testbench/src/system_tests/` - 完整网络验证
-- **C++测试**: `testbench/cpp/` - 基于Verilator的C++测试台（只能使用verilator，而不能使用iverilog或者任意其他仿真软件）
+**位置**: `verification/testbench/`
+- **单元测试**: `verification/testbench/unit_tests/` - 单个模块测试
+- **集成测试**: `verification/testbench/integration_tests/` - 多模块测试
+- **系统测试**: `verification/testbench/system_tests/` - 完整网络验证
+- **节点测试台**: `verification/testbench/node_testbench/` - 节点验证环境
+- **C++测试**: 基于Verilator的C++测试台（只能使用verilator，而不能使用iverilog或者任意其他仿真软件）
 
 ### 🗂️ 临时文件
 
 **位置**: `verification/sim/`
-- **构建产物**: `verification/sim/build/obj_dir/` - Verilator生成的文件
-- **运行时文件**: `verification/sim/run/temp/` - 临时仿真数据
-- **波形文件**: `verification/sim/wave/` - 按格式组织 (vcd, fsdb, vpd, fst)
+- **构建产物**: `verification/sim/work/build/` - Verilator生成的文件和可执行文件
+- **运行时文件**: `verification/sim/work/run/` - 临时仿真数据
+- **波形文件**: `verification/sim/wave/` - 按格式组织 (vcd, fst, fsdb, vpd)
+- **工作目录**: `verification/sim/work/` - 所有临时文件（git忽略）
 
 ### 📄 报告和文档
 
@@ -422,7 +500,10 @@ make test-quick
 cd sim/work/build && ./Vsimple_test
 
 # 波形分析
-ls sim/wave/vcd/  # 检查生成的波形文件
+ls sim/wave/fst/  # 检查生成的波形文件
+
+# 强制性节点调试（每次修改RTL后必须执行）
+make node-test-basic
 ```
 
 ### 🔒 **强制验证环境规范**
@@ -484,8 +565,8 @@ make node-test-basic
 
 #### 当前验证重点
 - **P0级别测试**: 节点基本路由功能（N-RF-001到N-RF-005）
-- **测试台位置**: `testbench/integration_tests/node_basic_routing/simple_test.sv`
-- **执行位置**: `sim/work/build/Vsimple_test`
+- **测试台位置**: `verification/testbench/node_testbench/`
+- **执行位置**: `verification/sim/work/build/Vminimal_node_test`
 - **文档参考**: `verification/docs/test_plans/test_point_decomposition.md`
 
 **⚠️ 违反验证环境规范将导致验证失败！**
@@ -508,7 +589,23 @@ make node-test-basic
 
 ### 🎯 高优先级代理 (立即影响)
 
-#### 1. RTL验证代理
+#### 1. verilator-test-engineer (MAZE专用验证代理)
+**用途**: 专门为MAZE网络芯片创建Verilator测试环境和验证用例
+**能力**:
+- 为MAZE节点模块创建SystemVerilog测试台
+- 实现基于C++的Verilator测试框架
+- 执行故障注入和容错测试
+- 生成数据包路由的断言式验证
+- 构建节点基本路由功能的完整测试套件
+
+**何时使用**:
+- 验证节点模块的基本路由功能(N-RF-001到N-RF-005)
+- 测试QoS仲裁和容错机制
+- 在verification环境下创建符合规范的测试用例
+
+**集成**: 与verification/目录下的标准化测试环境完全集成，严格遵循文件结构规范
+
+#### 2. RTL验证代理
 **用途**: 对64节点网络进行全面测试和验证
 **能力**:
 - 为Verilator仿真生成自动化测试台环境
@@ -524,7 +621,7 @@ make node-test-basic
 
 **集成**: 与现有构建脚本(`scripts/build/build_maze.sh`)和Verilator基础设施配合工作（只能使用verilator，而不能使用iverilog或者任意其他仿真软件）
 
-#### 2. 测试开发和自动化代理
+#### 3. 测试开发和自动化代理
 **用途**: 创建全面的测试基础设施
 **能力**:
 - 为64节点网络开发可扩展的测试台
@@ -540,7 +637,7 @@ make node-test-basic
 
 ### 🏗️ 中等优先级代理 (架构改进)
 
-#### 3. 片上网络架构专家
+#### 4. 片上网络架构专家
 **用途**: 分析和优化网格拓扑和路由
 **能力**:
 - 评估8×8网格拓扑优化
@@ -554,7 +651,7 @@ make node-test-basic
 - 针对不同曼哈顿距离优化IRS模块配置
 - 建议简化方向仲裁的改进方案
 
-#### 4. SystemVerilog设计审查代理
+#### 5. SystemVerilog设计审查代理
 **用途**: 代码质量、综合和时序分析
 **能力**:
 - 面向综合准备的全面代码审查
@@ -570,7 +667,7 @@ make node-test-basic
 
 ### 📊 低优先级代理 (长期增强)
 
-#### 5. 性能分析和优化代理
+#### 6. 性能分析和优化代理
 **用途**: 定量性能分析
 **能力**:
 - 分析吞吐量和延迟特征
@@ -584,7 +681,7 @@ make node-test-basic
 - 需要特定工作负载的性能优化
 - 生成详细性能报告
 
-#### 6. 文档和规范代理
+#### 7. 文档和规范代理
 **用途**: 维护全面的项目文档
 **能力**:
 - 为接口生成API文档
@@ -621,6 +718,7 @@ make node-test-basic
 
 ### 💡 代理选择指南
 
+- **使用verilator-test-engineer代理** 当: 为MAZE节点创建Verilator测试环境、验证基本路由功能时
 - **使用NoC架构专家代理** 当: 处理拓扑模块、NWSE网格连接或节点间通信时
 - **使用测试开发代理** 当: 需要测试台、回归测试或系统级验证时
 - **使用RTL验证代理** 当: 进行功能验证、性能测试或故障注入测试时
