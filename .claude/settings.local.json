@@ -105,7 +105,9 @@
       "Bash(output.log)",
       "Bash(./verification/scripts/build/build_simple_test.sh:*)",
       "Bash(git checkout:*)",
-      "Bash(git restore:*)"
+      "Bash(git restore:*)",
+      "Bash(/tmp/modular_minimal_node_test.sv)",
+      "Bash(verilation/trace/verilator --top-module minimal_node_test --cc testbench/node_testbench/minimal_node_test.sv testbench/node_testbench/packet_injector_tasks.sv rtl/top_define.v rtl/irs.v rtl/interface_a.sv rtl/interface_b.sv rtl/USER_DEFINE/interface_c.sv rtl/USER_DEFINE/param.v rtl/USER_DEFINE/node.v -CFLAGS \"-std=c++14 -O2\" -Mdir sim/work/build --trace-fst --trace-structs:*)"
     ],
     "deny": [],
     "ask": []
