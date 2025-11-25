@@ -396,11 +396,10 @@ IBUF#(
     logic n_out_valid, n_out_ready;
     logic [`PKT_W-1:0] n_out_pkt;
 
-    IRS_N #(
-        .PYLD_W(`PKT_W),
-        .IRS_DEEP(1),               // 1级深度缓冲
-        .TYPE_RO_EN(1)              // Reg_Out寄存器输出模式
-    ) irs_output_N (
+
+    OBUF #(
+        .PYLD_W(`PKT_W)
+    ) U_OBUF_N (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_N),
@@ -414,10 +413,10 @@ IBUF#(
     logic w_out_valid, w_out_ready;
     logic [`PKT_W-1:0] w_out_pkt;
 
-        IRS_LP #(
-          .PYLD_W (`PKT_W)
-          ,.RO_EN(1)
-    ) irs_output_W (
+
+    OBUF #(
+        .PYLD_W (`PKT_W)
+    ) U_OBUF_W (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_W),
@@ -431,10 +430,10 @@ IBUF#(
     logic s_out_valid, s_out_ready;
     logic [`PKT_W-1:0] s_out_pkt;
 
-        IRS_LP #(
+    OBUF #(
           .PYLD_W (`PKT_W)
           ,.RO_EN(1)
-    ) irs_output_S (
+    ) U_OBUF_S (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_S),
@@ -448,10 +447,10 @@ IBUF#(
     logic e_out_valid, e_out_ready;
     logic [`PKT_W-1:0] e_out_pkt;
 
-        IRS_LP #(
+    OBUF #(
           .PYLD_W (`PKT_W)
           ,.RO_EN(1)
-    ) irs_output_E (
+    ) U_OBUF_E (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_E),
@@ -465,10 +464,10 @@ IBUF#(
     logic b_out_valid, b_out_ready;
     logic [`PKT_W-1:0] b_out_pkt;
 
-        IRS_LP #(
+    OBUF #(
           .PYLD_W (`PKT_W)
           ,.RO_EN(1)
-    ) irs_output_B (
+    ) U_OBUF_B (
         .clk(clk),
         .rst_n(rst_n),
         .valid_i(|arb_gnt_B),
