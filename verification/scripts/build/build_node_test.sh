@@ -74,7 +74,7 @@ check_source_files() {
     local required_files=(
         "$RTL_DIR/USER_DEFINE/node.v"
         "$RTL_DIR/USER_DEFINE/param.v"
-        "$RTL_DIR/USER_DEFINE/interface_c.sv"
+        "$RTL_DIR/USER_DEFINE/interface_port_c.sv"
         "$RTL_DIR/irs.v"
         "$RTL_DIR/top_define.v"
         "$RTL_DIR/interface_a.sv"
@@ -128,7 +128,7 @@ build_test_environment() {
         "$RTL_DIR/interface_b.sv"
         "$RTL_DIR/irs.v"
         "$RTL_DIR/USER_DEFINE/param.v"
-        "$RTL_DIR/USER_DEFINE/interface_c.sv"
+        "$RTL_DIR/USER_DEFINE/interface_port_c.sv"
         "$RTL_DIR/USER_DEFINE/node.v"
         "$NODE_TEST_DIR/packet_injector.sv"
         "$NODE_TEST_DIR/packet_monitor.sv"

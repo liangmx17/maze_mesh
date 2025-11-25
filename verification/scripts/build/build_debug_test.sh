@@ -72,7 +72,7 @@ check_source_files() {
         "$RTL_DIR/include/global_defines/top_define.v"
         "$RTL_DIR/include/interfaces/interface_a.sv"
         "$RTL_DIR/include/interfaces/interface_b.sv"
-        "$RTL_DIR/include/interfaces/interface_c.sv"
+        "$RTL_DIR/include/interfaces/interface_port_c.sv"
         "$TESTBENCH_DIR/test_node_wrapper.sv"
         "$TESTBENCH_DIR/simple_test.sv"
         "$TESTBENCH_DIR/debug_simple_test.cpp"
@@ -107,7 +107,7 @@ compile_with_verilator() {
 $RTL_DIR/include/global_defines/top_define.v
 $RTL_DIR/include/interfaces/interface_a.sv
 $RTL_DIR/include/interfaces/interface_b.sv
-$RTL_DIR/include/interfaces/interface_c.sv
+$RTL_DIR/include/interfaces/interface_port_c.sv
 $RTL_DIR/lib/irs/irs.v
 $RTL_DIR/src/node/node.v
 $TESTBENCH_DIR/test_node_wrapper.sv

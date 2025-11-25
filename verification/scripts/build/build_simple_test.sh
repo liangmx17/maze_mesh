@@ -71,7 +71,7 @@ check_source_files() {
     local required_files=(
         "$RTL_DIR/USER_DEFINE/node.v"
         "$RTL_DIR/USER_DEFINE/param.v"
-        "$RTL_DIR/USER_DEFINE/interface_c.sv"
+        "$RTL_DIR/USER_DEFINE/interface_port_c.sv"
         "$RTL_DIR/irs.v"
         "$RTL_DIR/top_define.v"
         "$RTL_DIR/interface_a.sv"
@@ -112,7 +112,7 @@ $RTL_DIR/interface_a.sv
 $RTL_DIR/interface_b.sv
 $RTL_DIR/irs.v
 $RTL_DIR/USER_DEFINE/param.v
-$RTL_DIR/USER_DEFINE/interface_c.sv
+$RTL_DIR/USER_DEFINE/interface_port_c.sv
 $RTL_DIR/USER_DEFINE/node.v
 $TESTBENCH_DIR/minimal_node_test.sv
 EOF

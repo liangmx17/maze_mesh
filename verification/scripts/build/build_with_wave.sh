@@ -73,7 +73,7 @@ compile_with_verilator() {
         $RTL_DIR/interface_b.sv \
         $RTL_DIR/irs.v \
         $RTL_DIR/USER_DEFINE/param.v \
-        $RTL_DIR/USER_DEFINE/interface_c.sv \
+        $RTL_DIR/USER_DEFINE/interface_port_c.sv \
         $RTL_DIR/USER_DEFINE/node.v \
         $VERIFICATION_DIR/testbench/node_testbench/minimal_node_test.sv \
         $VERIFICATION_DIR/testbench/node_testbench/minimal_main.cpp \

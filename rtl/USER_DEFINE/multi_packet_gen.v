@@ -1,5 +1,4 @@
 `timescale 1ns/1ps
-`include "param.v"
 
 // 无坏点的情况下，直接透传pkt type和tgt
 // 有坏点的情况下，根据当前pkt type去修改tgt

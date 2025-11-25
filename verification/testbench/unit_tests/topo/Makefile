@@ -21,7 +21,7 @@ RTL_SOURCES = \
 	$(RTL_DIR)/include/global_defines/top_define.v \
 	$(RTL_DIR)/include/interfaces/interface_a.sv \
 	$(RTL_DIR)/include/interfaces/interface_b.sv \
-	$(RTL_DIR)/include/interfaces/interface_c.sv \
+	$(RTL_DIR)/include/interfaces/interface_port_c.sv \
 	$(RTL_DIR)/lib/irs/irs.v \
 	$(RTL_DIR)/src/node_components/router_unit.v \
 	$(RTL_DIR)/src/node_components/arbiter.v \

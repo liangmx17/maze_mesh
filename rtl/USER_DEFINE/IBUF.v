@@ -1,5 +1,4 @@
 `timescale 1ns/1ps
-`include "param.v"
 
 module IBUF #(
     parameter PYLD_W = `PKT_W

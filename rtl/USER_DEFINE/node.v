@@ -16,7 +16,6 @@
 // MAZE网络节点主模块
 // =============================================================================
 `timescale 1ns/1ps
-`include "param.v"
 module NODE #(
     parameter HP = 0,                    // 水平坐标 (0-7)
     parameter VP = 0                     // 垂直坐标 (0-7)
@@ -389,10 +388,6 @@ IBUF#(
         else begin pkt_B = {`PKT_W{1'b0}}; end
     end
 
-    // =============================================================================
-    // 输出IRS_N缓冲器 (寄存器输出模式RO_EN=1)
-    // =============================================================================
-
     logic n_out_valid, n_out_ready;
     logic [`PKT_W-1:0] n_out_pkt;
 
@@ -432,7 +427,6 @@ IBUF#(
 
     OBUF #(
           .PYLD_W (`PKT_W)
-          ,.RO_EN(1)
     ) U_OBUF_S (
         .clk(clk),
         .rst_n(rst_n),
@@ -449,7 +443,6 @@ IBUF#(
 
     OBUF #(
           .PYLD_W (`PKT_W)
-          ,.RO_EN(1)
     ) U_OBUF_E (
         .clk(clk),
         .rst_n(rst_n),
@@ -466,7 +459,6 @@ IBUF#(
 
     OBUF #(
           .PYLD_W (`PKT_W)
-          ,.RO_EN(1)
     ) U_OBUF_B (
         .clk(clk),
         .rst_n(rst_n),

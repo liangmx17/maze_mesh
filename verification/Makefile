@@ -341,8 +341,8 @@ check-node-test-deps:
 		echo "$(RED)[ERROR]$(NC) 缺少RTL文件: $(RTL_DIR)/USER_DEFINE/node.v"; \
 		exit 1; \
 	fi
-	@if [ ! -f "$(RTL_DIR)/USER_DEFINE/interface_c.sv" ]; then \
-		echo "$(RED)[ERROR]$(NC) 缺少接口文件: $(RTL_DIR)/USER_DEFINE/interface_c.sv"; \
+	@if [ ! -f "$(RTL_DIR)/USER_DEFINE/interface_port_c.sv" ]; then \
+		echo "$(RED)[ERROR]$(NC) 缺少接口文件: $(RTL_DIR)/USER_DEFINE/interface_port_c.sv"; \
 		exit 1; \
 	fi
 	@if [ ! -f "$(NODE_TEST_DIR)/node_test_environment.sv" ]; then \
@@ -371,13 +371,7 @@ build-node-test: check-node-test-deps | $(NODE_TEST_BUILD_DIR)
 		-I$(RTL_DIR) \
 		-I$(RTL_DIR)/USER_DEFINE \
 		-I$(NODE_TEST_DIR) \
-		$(RTL_DIR)/top_define.v \
-		$(RTL_DIR)/interface_a.sv \
-		$(RTL_DIR)/interface_b.sv \
-		$(RTL_DIR)/irs.v \
-		$(RTL_DIR)/USER_DEFINE/param.v \
-		$(RTL_DIR)/USER_DEFINE/interface_c.sv \
-		$(RTL_DIR)/USER_DEFINE/node.v \
+		-f $(PROJECT_ROOT)/filelist_verification.f \
 		$(NODE_TEST_DIR)/packet_injector.sv \
 		$(NODE_TEST_DIR)/packet_monitor.sv \
 		$(NODE_TEST_DIR)/config_manager.sv \
@@ -400,13 +394,7 @@ build-node-test: check-node-test-deps | $(NODE_TEST_BUILD_DIR)
 			-I$(RTL_DIR) \
 			-I$(RTL_DIR)/USER_DEFINE \
 			-I$(NODE_TEST_DIR) \
-			$(RTL_DIR)/top_define.v \
-			$(RTL_DIR)/interface_a.sv \
-			$(RTL_DIR)/interface_b.sv \
-			$(RTL_DIR)/irs.v \
-			$(RTL_DIR)/USER_DEFINE/param.v \
-			$(RTL_DIR)/USER_DEFINE/interface_c.sv \
-			$(RTL_DIR)/USER_DEFINE/node.v \
+			-f $(PROJECT_ROOT)/filelist_verification.f \
 			$(NODE_TEST_DIR)/packet_injector.sv \
 			$(NODE_TEST_DIR)/packet_monitor.sv \
 			$(NODE_TEST_DIR)/config_manager.sv \
@@ -452,13 +440,7 @@ node-test:
 		-I$(RTL_DIR) \
 		-I$(RTL_DIR)/USER_DEFINE \
 		-I$(NODE_TEST_DIR) \
-		$(RTL_DIR)/top_define.v \
-		$(RTL_DIR)/interface_a.sv \
-		$(RTL_DIR)/interface_b.sv \
-		$(RTL_DIR)/irs.v \
-		$(RTL_DIR)/USER_DEFINE/param.v \
-		$(RTL_DIR)/USER_DEFINE/interface_c.sv \
-		$(RTL_DIR)/USER_DEFINE/node.v \
+		-f $(PROJECT_ROOT)/filelist_verification.f \
 		$(NODE_TEST_DIR)/minimal_node_test.sv \
 		$(NODE_TEST_DIR)/minimal_main.cpp \
 		-CFLAGS "-std=c++14 -O2" \
@@ -538,7 +520,7 @@ node-test-simple:
 		$(RTL_DIR)/interface_b.sv \
 		$(RTL_DIR)/irs.v \
 		$(RTL_DIR)/USER_DEFINE/param.v \
-		$(RTL_DIR)/USER_DEFINE/interface_c.sv \
+		$(RTL_DIR)/USER_DEFINE/interface_port_c.sv \
 		$(RTL_DIR)/USER_DEFINE/node.v \
 		$(NODE_TEST_DIR)/minimal_node_test.sv \
 		$(NODE_TEST_DIR)/minimal_main.cpp \
@@ -571,13 +553,7 @@ node-test-vcd:
 		-I$(RTL_DIR) \
 		-I$(RTL_DIR)/USER_DEFINE \
 		-I$(NODE_TEST_DIR) \
-		$(RTL_DIR)/top_define.v \
-		$(RTL_DIR)/interface_a.sv \
-		$(RTL_DIR)/interface_b.sv \
-		$(RTL_DIR)/irs.v \
-		$(RTL_DIR)/USER_DEFINE/param.v \
-		$(RTL_DIR)/USER_DEFINE/interface_c.sv \
-		$(RTL_DIR)/USER_DEFINE/node.v \
+		-f $(PROJECT_ROOT)/filelist_verification.f \
 		$(NODE_TEST_DIR)/minimal_node_test.sv \
 		$(NODE_TEST_DIR)/minimal_main.cpp \
 		-CFLAGS "-std=c++14 -O2" \

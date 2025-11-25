@@ -56,7 +56,7 @@ check_source_files() {
         "$PROJECT_ROOT/rtl/include/global_defines/top_define.v"
         "$PROJECT_ROOT/rtl/include/interfaces/interface_a.sv"
         "$PROJECT_ROOT/rtl/include/interfaces/interface_b.sv"
-        "$PROJECT_ROOT/rtl/include/interfaces/interface_c.sv"
+        "$PROJECT_ROOT/rtl/include/interfaces/interface_port_c.sv"
         "$TESTBENCH_DIR/test_node_wrapper.sv"
         "$TESTBENCH_DIR/node_basic_routing_tb.cpp"
         "$TESTBENCH_DIR/packet_generator.h"
@@ -96,7 +96,7 @@ $PROJECT_ROOT/rtl/include/global_defines/top_define.v
 # 接口定义文件
 $PROJECT_ROOT/rtl/include/interfaces/interface_a.sv
 $PROJECT_ROOT/rtl/include/interfaces/interface_b.sv
-$PROJECT_ROOT/rtl/include/interfaces/interface_c.sv
+$PROJECT_ROOT/rtl/include/interfaces/interface_port_c.sv
 
 # IRS模块
 $PROJECT_ROOT/rtl/lib/irs/irs.v

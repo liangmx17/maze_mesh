@@ -1,5 +1,4 @@
 `timescale 1ns/1ps
-`include "param.v"
 
 module  fault_relative_pos_detect #
 (   parameter LOCAL_X = 0,        // 当前节点的X坐标
