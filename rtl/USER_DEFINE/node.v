@@ -102,11 +102,11 @@ pre_router#(
     .LOCAL_Y              ( VP ),
     .router_id              ( `DIR_A )
 )u_router_A(
-    .tgt_x              ( pkt_con.ni_tgt[2:0]              ),
-    .tgt_y              ( pkt_con.ni_tgt[5:3]              ),
-    .src_x              ( pkt_con.ni_src[2:0]              ),
-    .src_y              ( pkt_con.ni_src[5:3]              ),
-    .pkt_type           ( pkt_con.ni_type           ),
+    .tgt_x              ( new_tgt[2:0]              ),
+    .tgt_y              ( new_tgt[5:3]              ),
+    .src_x              ( pkt_i.pkt_in_src[2:0]              ),
+    .src_y              ( pkt_i.pkt_in_src[5:3]              ),
+    .pkt_type           ( pkt_i.pkt_in_type           ),
     .pg_en              ( pg_en              ),
     .fault_relative_pos ( fault_relative_pos ),
     .route_req          ( route_req_A          )
@@ -298,10 +298,15 @@ IBUF#(
     assign arb_req_E = {arb_req[`DIR_B][3], arb_req[`DIR_N][3], arb_req[`DIR_W][3], arb_req[`DIR_S][3]};
     assign arb_qos_E = {pld_buf[`DIR_A][`QOS_POS], pld_buf[`DIR_N][`QOS_POS], pld_buf[`DIR_W][`QOS_POS], pld_buf[`DIR_S][`QOS_POS]};
 
-    // B仲裁器：支持所有4个输入 [A,N,W,S,E]
+    // B仲裁器：支持所有5个输入 [A,N,W,S,E]
     assign arb_req_B = {arb_req[`DIR_B][4], arb_req[`DIR_N][4], arb_req[`DIR_W][4], arb_req[`DIR_S][4], arb_req[`DIR_E][4]};
     assign arb_qos_B = {pld_buf[`DIR_A][`QOS_POS], pld_buf[`DIR_N][`QOS_POS], pld_buf[`DIR_W][`QOS_POS], pld_buf[`DIR_S][`QOS_POS], pld_buf[`DIR_E][`QOS_POS]};
 
+    assign arb_gnt[`DIR_A] = {arb_gnt_B[4], arb_gnt_E[3], arb_gnt_S[3], arb_gnt_W[3], arb_gnt_N[3]};
+    assign arb_gnt[`DIR_E] = {arb_gnt_B[0], 1'b0, arb_gnt_S[0], arb_gnt_W[0], arb_gnt_N[0]};
+    assign arb_gnt[`DIR_S] = {arb_gnt_B[1], arb_gnt_E[0], 1'b0, arb_gnt_W[1], arb_gnt_N[1]};
+    assign arb_gnt[`DIR_W] = {arb_gnt_B[2], arb_gnt_E[1], arb_gnt_S[1], 1'b0, arb_gnt_N[2]};
+    assign arb_gnt[`DIR_N] = {arb_gnt_B[3], arb_gnt_E[2], arb_gnt_S[2], arb_gnt_W[2], 1'b0};
     // 实例化仲裁器 - 所有仲裁器都使用WIDTH=4
     // 北仲裁器：4输入仲裁器，排除北输入 [A,W,S,E]
     arbiter #(.WIDTH(4)) u_arbiter_N (

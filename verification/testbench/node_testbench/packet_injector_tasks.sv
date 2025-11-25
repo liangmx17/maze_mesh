@@ -65,8 +65,6 @@ task automatic inject_packet_to_port(
 );
     logic injection_complete;
 
-    $display("时钟计数器=%0d: 向端口 %s 注入包: qos=%b, src=%h, tgt=%h, data=%h",
-             clk_counter, port.name(), packet_qos, packet_src, packet_tgt, packet_data_field);
 
     injection_complete = 0;
 
@@ -122,6 +120,8 @@ task automatic inject_packet_to_port(
 
         default: $display("时钟计数器=%0d: 错误: 未知端口类型 %s", clk_counter, port.name());
     endcase
+    $display("时钟计数器=%0d: 向端口 %s 注入包: qos=%b, src=%h, tgt=%h, data=%h",
+             clk_counter, port.name(), packet_qos, packet_src, packet_tgt, packet_data_field);
 
     // 等待对应握手完成
     case (port)

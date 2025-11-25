@@ -224,6 +224,14 @@ module minimal_node_test(
         // 使用标准化的随机数据包注入
         $display("时钟计数器=%0d: 向A端口注入随机数据包", clk_counter);
         rand_single_packet_inject(PORT_A, 0);
+        $display("时钟计数器=%0d: 向A端口注入随机数据包", clk_counter);
+        rand_single_packet_inject(PORT_A, 0);
+        $display("时钟计数器=%0d: 向A端口注入随机数据包", clk_counter);
+        rand_single_packet_inject(PORT_A, 0);
+        $display("时钟计数器=%0d: 向A端口注入随机数据包", clk_counter);
+        rand_single_packet_inject(PORT_A, 0);
+        $display("时钟计数器=%0d: 向A端口注入随机数据包", clk_counter);
+        rand_single_packet_inject(PORT_A, 0);
 
         // repeat(15) @(posedge clk);
         // $display("时钟计数器=%0d: 向北端口注入随机数据包", clk_counter);

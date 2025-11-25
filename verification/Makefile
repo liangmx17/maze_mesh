@@ -2,7 +2,7 @@
 # MAZE网络验证环境Makefile
 # =============================================================================
 
-.PHONY: help test clean regress coverage waves all test-node-basic test-quick test-edge test-corner test-check-result node-test node-test-all node-test-basic node-test-qos node-test-fault node-test-multicast node-test-stress
+.PHONY: help test clean regress coverage waves all test-node-basic test-quick test-edge test-corner test-check-result node-test node-test-all node-test-basic node-test-qos node-test-fault node-test-multicast node-test-stress node-test-vcd
 
 # 默认目标
 all: test
@@ -67,6 +67,8 @@ help:
 	@echo "      # 运行压力测试"
 	@echo "  make node-test-all [TRACE=1]"
 	@echo "      # 运行完整测试套件并生成波形"
+	@echo "  make node-test-vcd"
+	@echo "      # 运行简化测试并生成VCD波形文件"
 	@echo ""
 	@echo "参数说明:"
 	@echo "  TEST=模式         指定测试模式 (all|basic|qos|fault|multicast|stress)"
@@ -550,6 +552,51 @@ node-test-simple:
 	@echo "$(GREEN)[PASS]$(NC) ✓ 简化测试构建完成"
 	@echo "$(BLUE)[INFO]$(NC) 运行简化测试..."
 	cd $(NODE_TEST_BUILD_DIR) && ./Vminimal_node_test
+
+# VCD波形版本测试（支持VCD波形生成）
+node-test-vcd:
+	@echo "$(BLUE)[INFO]$(NC) 运行带VCD波形的简化节点测试..."
+	@mkdir -p $(NODE_TEST_BUILD_DIR)
+	@mkdir -p $(NODE_TEST_WAVE_DIR)
+	@mkdir -p $(VERIFICATION_DIR)/sim/wave/vcd
+	cd $(NODE_TEST_BUILD_DIR) && \
+	verilator \
+		--top-module minimal_node_test \
+		--cc \
+		--trace \
+		-Wno-fatal \
+		--timing \
+		--autoflush \
+		-I$(PROJECT_ROOT) \
+		-I$(RTL_DIR) \
+		-I$(RTL_DIR)/USER_DEFINE \
+		-I$(NODE_TEST_DIR) \
+		$(RTL_DIR)/top_define.v \
+		$(RTL_DIR)/interface_a.sv \
+		$(RTL_DIR)/interface_b.sv \
+		$(RTL_DIR)/irs.v \
+		$(RTL_DIR)/USER_DEFINE/param.v \
+		$(RTL_DIR)/USER_DEFINE/interface_c.sv \
+		$(RTL_DIR)/USER_DEFINE/node.v \
+		$(NODE_TEST_DIR)/minimal_node_test.sv \
+		$(NODE_TEST_DIR)/minimal_main.cpp \
+		-CFLAGS "-std=c++14 -O2" \
+		--Mdir . \
+		--exe
+	@echo "$(YELLOW)[INFO]$(NC) 编译VCD测试..."
+	cd $(NODE_TEST_BUILD_DIR) && \
+	if command -v nproc >/dev/null 2>&1; then NPROC=$$(nproc); else NPROC=$$(sysctl -n hw.ncpu); fi; \
+	make -f Vminimal_node_test.mk -j$$NPROC
+	@echo "$(GREEN)[PASS]$(NC) ✓ VCD测试构建完成"
+	@echo "$(BLUE)[INFO]$(NC) 运行VCD测试..."
+	cd $(NODE_TEST_BUILD_DIR) && ./Vminimal_node_test
+	@echo ""
+	@echo "$(GREEN)[PASS]$(NC) ✓ VCD波形测试完成"
+	@echo "  VCD波形文件: $(VERIFICATION_DIR)/sim/wave/vcd/node_test.vcd"
+	@echo ""
+	@echo "$(BLUE)[INFO]$(NC) 查看波形文件:"
+	@echo "  gtkwave $(VERIFICATION_DIR)/sim/wave/vcd/node_test.vcd"
+	@echo "  或上传到在线查看器: https://surfer-project.org/"
 
 # 清理node测试环境
 clean-node-test:

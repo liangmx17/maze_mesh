@@ -39,7 +39,7 @@ module node_test_environment;
     // ========================================
     // 被测节点 (DUT)
     // ========================================
-    node #(
+    NODE #(
         .HP(TEST_NODE_X),
         .VP(TEST_NODE_Y)
     ) u_dut (
