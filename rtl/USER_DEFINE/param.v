@@ -18,11 +18,13 @@
 `define NW_OF_x   4'd8  // 当前节点在故障节点西北方
 
 // 路由方向定义
-`define DIR_N     3'd0   // 北方向
-`define DIR_W     3'd1   // 西方向
-`define DIR_S     3'd2   // 南方向
-`define DIR_E     3'd3   // 东方向
-`define DIR_B     3'd4   // 本地输出
-`define DIR_A     3'd4   // 本地输入
+`define DIR_Q     4'd0
+`define DIR_W     4'd1   // 西方向
+`define DIR_E     4'd2   // 东方向
+`define DIR_R     4'd3   // 东方向
+`define DIR_N     4'd4   // 北方向
+`define DIR_S     4'd5   // 南方向
+`define DIR_B     4'd6   // 本地输出
+`define DIR_A     4'd6   // 本地输入
 
 `define PKT_W  23  // 2+1+6+6+8  23位
