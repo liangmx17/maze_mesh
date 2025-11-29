@@ -34,180 +34,128 @@ module NODE #(
     pkt_con_if.mst pkt_con               // C接口 - 四方向网格连接
 );
 
+    localparam   LOC_X = HP;
+    localparam   LOC_Y = VP;
     // 直接使用HP/VP作为当前节点坐标，使用pg_node位段作为故障节点坐标
 
-    // 故障相对位置计算
-    wire [3:0] fault_relative_pos;           // 故障相对位置（需要4位支持9种状态）
-    wire [5:0] new_tgt;                  // 经过multi_packet_gen生成的新目标地址
-    wire tgt_is_pg;
-    wire cpy_mode;
 
-    wire [4:0]  route_req_N;
-    wire [4:0]  route_req_S;
-    wire [4:0]  route_req_E;
-    wire [4:0]  route_req_W;
-    wire [4:0]  route_req_A;
+    wire [6:0]  route_req_N;
+    wire [6:0]  route_req_S;
+    wire [6:0]  route_req_E;
+    wire [6:0]  route_req_W;
+    wire [6:0]  route_req_A;
+    wire [6:0]  route_req_Q;
+    wire [6:0]  route_req_R;
 
-    wire [4:0]  arb_req[4:0];   // arb_req[from_input][to_output]
-    wire [4:0]  arb_gnt[4:0];   // arb_gnt[from_input][to_output]
-    wire [`PKT_W-1:0]  pld_buf[4:0];
-    wire [4:0]  obuf_rdy;
-    wire pkt_in_qos_A_buffered;
-    wire [1:0]  pkt_in_type_A_buffered;
-    wire [5:0]  pkt_in_src_A_buffered;
-    wire [5:0]  pkt_in_tgt_A_buffered;
-    wire [7:0]  pkt_in_data_A_buffered;
 
-    // 内部信号，用于解决多重驱动问题
-    wire pkt_in_ctrl_rdy;
-    wire pkt_in_data_rdy;
-
-    assign pld_buf[`DIR_A] = {pkt_in_qos_A_buffered, pkt_in_type_A_buffered, pkt_in_src_A_buffered, pkt_in_tgt_A_buffered, pkt_in_data_A_buffered};
-
-    // 组合pkt_in_rdy信号，避免多重驱动
-    assign pkt_i.pkt_in_rdy = pkt_in_ctrl_rdy && pkt_in_data_rdy;
-
-fault_relative_pos_detect#(
-    .LOCAL_X ( HP ),
-    .LOCAL_Y ( VP )
-)u_fault_relative_pos_detect(
-    .pg_en   ( pg_en   ),
-    .pg_node ( pg_node ),
-    .fault_relative_pos  ( fault_relative_pos  )
-);
-
-multi_packet_gen#(
-    .LOCAL_X      ( HP ),
-    .LOCAL_Y      ( VP )
-)u_multi_packet_gen(
-    .clk          ( clk          ),
-    .rst_n        ( rst_n        ),
-    .pkt_type_A   ( pkt_i.pkt_in_type   ),
-    .tgt_A        ( pkt_i.pkt_in_tgt        ),
-    .pkt_type_buf ( pkt_in_type_A_buffered ),
-    .tgt_buf      ( pkt_in_tgt_A_buffered ),
-    .pg_en        ( pg_en        ),
-    .pg_node      ( pg_node      ),
-    .vld          ( pkt_i.pkt_in_vld          ),
-    .rdy          ( pkt_i.pkt_in_rdy          ),
-    .new_tgt      ( new_tgt      ),
-    .tgt_is_pg    ( tgt_is_pg    ),
-    .cpy_mode     ( cpy_mode     )
-);
+    wire [6:0]  arb_req[6:0];   // arb_req[from_input][to_output]
+    wire [6:0]  arb_gnt[6:0];   // arb_gnt[from_input][to_output]
+    wire [`PKT_W-1:0]  pld_buf[6:0];
+    wire [6:0]  obuf_rdy;
 
 
 pre_router#(
-    .LOCAL_X              ( HP ),
-    .LOCAL_Y              ( VP ),
-    .router_id              ( `DIR_A )
+    .LOC_X              ( HP ),
+    .LOC_Y              ( VP ),
+    .router_id            ( `DIR_A )
 )u_router_A(
-    .tgt_x              ( new_tgt[2:0]              ),
-    .tgt_y              ( new_tgt[5:3]              ),
-    .src_x              ( pkt_i.pkt_in_src[2:0]              ),
-    .src_y              ( pkt_i.pkt_in_src[5:3]              ),
+    .tgt_x              ( pkt_i.pkt_in_tgt[2:0]              ),
+    .tgt_y              ( pkt_i.pkt_in_tgt[2:0]              ),
     .pkt_type           ( pkt_i.pkt_in_type           ),
     .pg_en              ( pg_en              ),
-    .fault_relative_pos ( fault_relative_pos ),
     .route_req          ( route_req_A          )
 );
 
 pre_router#(
-    .LOCAL_X              ( HP ),
-    .LOCAL_Y              ( VP ),
-    .router_id              ( `DIR_N )
+    .LOC_X              ( HP ),
+    .LOC_Y              ( VP ),
+    .router_id          ( `DIR_N )
 )u_router_N(
     .tgt_x              ( pkt_con.ni_tgt[2:0]              ),
     .tgt_y              ( pkt_con.ni_tgt[5:3]              ),
-    .src_x              ( pkt_con.ni_src[2:0]              ),
-    .src_y              ( pkt_con.ni_src[5:3]              ),
     .pkt_type           ( pkt_con.ni_type           ),
     .pg_en              ( pg_en              ),
-    .fault_relative_pos ( fault_relative_pos ),
     .route_req          ( route_req_N          )
 );
 
 
 pre_router#(
-    .LOCAL_X              ( HP ),
-    .LOCAL_Y              ( VP ),
+    .LOC_X              ( HP ),
+    .LOC_Y              ( VP ),
     .router_id            ( `DIR_S )
 )u_router_S(
     .tgt_x              ( pkt_con.si_tgt[2:0]              ),
     .tgt_y              ( pkt_con.si_tgt[5:3]              ),
-    .src_x              ( pkt_con.si_src[2:0]              ),
-    .src_y              ( pkt_con.si_src[5:3]              ),
     .pkt_type           ( pkt_con.si_type           ),
     .pg_en              ( pg_en              ),
-    .fault_relative_pos ( fault_relative_pos ),
     .route_req          ( route_req_S          )
 );
 
 
 pre_router#(
-    .LOCAL_X              ( HP ),
-    .LOCAL_Y              ( VP ),
+    .LOC_X              ( HP ),
+    .LOC_Y              ( VP ),
     .router_id            ( `DIR_E )
 )u_router_E(
     .tgt_x              ( pkt_con.ei_tgt[2:0]              ),
     .tgt_y              ( pkt_con.ei_tgt[5:3]              ),
-    .src_x              ( pkt_con.ei_src[2:0]              ),
-    .src_y              ( pkt_con.ei_src[5:3]              ),
     .pkt_type           ( pkt_con.ei_type           ),
     .pg_en              ( pg_en              ),
-    .fault_relative_pos ( fault_relative_pos ),
     .route_req          ( route_req_E          )
 );
 
 
 pre_router#(
-    .LOCAL_X              ( HP ),
-    .LOCAL_Y              ( VP ),
+    .LOC_X              ( HP ),
+    .LOC_Y              ( VP ),
     .router_id            ( `DIR_W )
 )u_router_W(
     .tgt_x              ( pkt_con.wi_tgt[2:0]              ),
     .tgt_y              ( pkt_con.wi_tgt[5:3]              ),
-    .src_x              ( pkt_con.wi_src[2:0]              ),
-    .src_y              ( pkt_con.wi_src[5:3]              ),
     .pkt_type           ( pkt_con.wi_type           ),
     .pg_en              ( pg_en              ),
-    .fault_relative_pos ( fault_relative_pos ),
     .route_req          ( route_req_W          )
 );
 
+pre_router#(
+    .LOC_X              ( HP ),
+    .LOC_Y              ( VP ),
+    .router_id            ( `DIR_W )
+)u_router_Q(
+    .tgt_x              ( pkt_con.qi_tgt[2:0]              ),
+    .tgt_y              ( pkt_con.qi_tgt[5:3]              ),
+    .pkt_type           ( pkt_con.qi_type           ),
+    .pg_en              ( pg_en              ),
+    .route_req          ( route_req_Q          )
+);
 
-IBUF_A_CTRL#(
-    .PYLD_W    ( 6 )
-)u_IBUF_A_CTRL(
+pre_router#(
+    .LOC_X              ( HP ),
+    .LOC_Y              ( VP ),
+    .router_id            ( `DIR_W )
+)u_router_R(
+    .tgt_x              ( pkt_con.ri_tgt[2:0]              ),
+    .tgt_y              ( pkt_con.ri_tgt[5:3]              ),
+    .pkt_type           ( pkt_con.ri_type           ),
+    .pg_en              ( pg_en              ),
+    .route_req          ( route_req_A          )
+);
+
+
+IBUF#(
+    .PYLD_W    ( `PKT_W )
+)u_IBUF_A(
     .clk       ( clk       ),
     .rst_n     ( rst_n     ),
     .ibuf_vld  ( pkt_i.pkt_in_vld  ),
-    .pg_en     ( pg_en     ),
-    .cpy_mode  ( cpy_mode  ),
-    .ibuf_rdy  ( pkt_in_ctrl_rdy  ),
-    .route_req ( route_req_A & {5{~tgt_is_pg}} ),
-    .payload_i ( pkt_i.pkt_in_tgt ),
+    .ibuf_rdy  ( pkt_in_data_rdy  ),
+    .route_req ( route_req_A ),
+    .payload_i ( {pkt_i.pkt_in_qos, pkt_i.pkt_in_type, pkt_i.pkt_in_src, pkt_i.pkt_in_tgt, pkt_i.pkt_in_data} ),
     .arb_req   ( arb_req[`DIR_A]   ),
     .arb_gnt   ( arb_gnt[`DIR_A]   ),
-    .obuf_rdy  ( obuf_rdy[4:0] | {5{tgt_is_pg}}  ),
-    .payload_o  ( pkt_in_tgt_A_buffered  )
+    .obuf_rdy  ( obuf_rdy),
+    .payload_o  ( pld_buf[`DIR_A]  )
 );
-
-IBUF_A_DATA#(
-    .PYLD_W    ( 17 )
-)u_IBUF_A_DATA(
-    .clk       ( clk       ),
-    .rst_n     ( rst_n     ),
-    .ibuf_vld  ( pkt_i.pkt_in_vld  ),
-    .pg_en     ( pg_en     ),
-    .cpy_mode  ( cpy_mode  ),
-    .ibuf_rdy  ( pkt_in_data_rdy    ),
-    .payload_i ( {pkt_i.pkt_in_qos, pkt_i.pkt_in_type, pkt_i.pkt_in_src, pkt_i.pkt_in_data}  ),
-    .arb_req   ( arb_req[`DIR_A]   ),
-    .arb_gnt   ( arb_gnt[`DIR_A]   ),
-    .obuf_rdy  ( {obuf_rdy[`DIR_B], obuf_rdy[`DIR_E], obuf_rdy[`DIR_S], obuf_rdy[`DIR_W], obuf_rdy[`DIR_N]} ),
-    .payload_o  ( {pkt_in_qos_A_buffered, pkt_in_type_A_buffered, pkt_in_src_A_buffered, pkt_in_data_A_buffered}  )
-);
-
 
 IBUF#(
     .PYLD_W    ( `PKT_W )
@@ -220,7 +168,7 @@ IBUF#(
     .payload_i ( {pkt_con.ni_qos, pkt_con.ni_type, pkt_con.ni_src, pkt_con.ni_tgt, pkt_con.ni_data} ),
     .arb_req   ( arb_req[`DIR_N]   ),
     .arb_gnt   ( arb_gnt[`DIR_N]   ),
-    .obuf_rdy  ( {obuf_rdy[`DIR_B], obuf_rdy[`DIR_E], obuf_rdy[`DIR_S], obuf_rdy[`DIR_W], obuf_rdy[`DIR_N]}),
+    .obuf_rdy  ( obuf_rdy),
     .payload_o  ( pld_buf[`DIR_N]  )
 );
 
@@ -236,7 +184,7 @@ IBUF#(
     .payload_i ( {pkt_con.wi_qos, pkt_con.wi_type, pkt_con.wi_src, pkt_con.wi_tgt, pkt_con.wi_data} ),
     .arb_req   ( arb_req[`DIR_W]   ),
     .arb_gnt   ( arb_gnt[`DIR_W]   ),
-    .obuf_rdy  ( {obuf_rdy[`DIR_B], obuf_rdy[`DIR_E], obuf_rdy[`DIR_S], obuf_rdy[`DIR_W], obuf_rdy[`DIR_N]}),
+    .obuf_rdy  ( obuf_rdy),
     .payload_o  ( pld_buf[`DIR_W]  )
 );
 
@@ -251,7 +199,7 @@ IBUF#(
     .payload_i ( {pkt_con.si_qos, pkt_con.si_type, pkt_con.si_src, pkt_con.si_tgt, pkt_con.si_data} ),
     .arb_req   ( arb_req[`DIR_S]   ),
     .arb_gnt   ( arb_gnt[`DIR_S]   ),
-    .obuf_rdy  ( {obuf_rdy[`DIR_B], obuf_rdy[`DIR_E], obuf_rdy[`DIR_S], obuf_rdy[`DIR_W], obuf_rdy[`DIR_N]}),
+    .obuf_rdy  ( obuf_rdy),
     .payload_o  ( pld_buf[`DIR_S]  )
 );
 
@@ -268,10 +216,40 @@ IBUF#(
     .payload_i ( {pkt_con.ei_qos, pkt_con.ei_type, pkt_con.ei_src, pkt_con.ei_tgt, pkt_con.ei_data} ),
     .arb_req   ( arb_req[`DIR_E]   ),
     .arb_gnt   ( arb_gnt[`DIR_E]   ),
-    .obuf_rdy  ( {obuf_rdy[`DIR_B], obuf_rdy[`DIR_E], obuf_rdy[`DIR_S], obuf_rdy[`DIR_W], obuf_rdy[`DIR_N]}),
+    .obuf_rdy  ( obuf_rdy),
     .payload_o  ( pld_buf[`DIR_E]  )
 );
 
+IBUF#(
+    .PYLD_W    ( `PKT_W )
+)u_IBUF_Q(
+    .clk       ( clk       ),
+    .rst_n     ( rst_n     ),
+    .ibuf_vld  ( pkt_con.qi_vld  ),
+    .ibuf_rdy  ( pkt_con.qi_rdy  ),
+    .route_req ( route_req_Q ),
+    .payload_i ( {pkt_con.qi_qos, pkt_con.qi_type, pkt_con.qi_src, pkt_con.qi_tgt, pkt_con.qi_data} ),
+    .arb_req   ( arb_req[`DIR_Q]   ),
+    .arb_gnt   ( arb_gnt[`DIR_Q]   ),
+    .obuf_rdy  ( obuf_rdy),
+    .payload_o  ( pld_buf[`DIR_Q]  )
+);
+
+
+IBUF#(
+    .PYLD_W    ( `PKT_W )
+)u_IBUF_R(
+    .clk       ( clk       ),
+    .rst_n     ( rst_n     ),
+    .ibuf_vld  ( pkt_con.ri_vld  ),
+    .ibuf_rdy  ( pkt_con.ri_rdy  ),
+    .route_req ( route_req_R ),
+    .payload_i ( {pkt_con.ri_qos, pkt_con.ri_type, pkt_con.ri_src, pkt_con.ri_tgt, pkt_con.ri_data} ),
+    .arb_req   ( arb_req[`DIR_R]   ),
+    .arb_gnt   ( arb_gnt[`DIR_R]   ),
+    .obuf_rdy  ( obuf_rdy),
+    .payload_o  ( pld_buf[`DIR_R]  )
+);
 
     // 仲裁器请求信号映射
     logic [3:0] arb_req_N, arb_qos_N, arb_gnt_N;  // 北仲裁器：4个输入(A,W,S,E)，排除北输入

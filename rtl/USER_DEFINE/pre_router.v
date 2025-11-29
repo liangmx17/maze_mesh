@@ -28,17 +28,13 @@ module pre_router #(
     // 输入数据包接口
     input wire [2:0] tgt_x,               // 包原始目标X坐标 (0-7)
     input wire [2:0] tgt_y,               // 包原始目标Y坐标 (0-7)
-    input wire [2:0] src_x,               // 包原始目标X坐标 (0-7)
-    input wire [2:0] src_y,               // 包原始目标Y坐标 (0-7)
     input wire [1:0] pkt_type,             //包类型：00 单播， 01 x相同的广播（列多播），10 y相同的多播（行多播），11 广播
 
-    
-    input wire       pg_en,                   // 坏点存在信号
-    input   wire    pg_pos,             
-    input wire [3:0] fault_relative_pos,               // 坏点Y坐标 (0-7)
+    input   wire    pg_en,                   // 坏点存在信号
+    // input   wire    [6:0]    pg_pos,             
 
     // 路由输出接口
-    output reg [4:0] route_req            // 5-bit 路由请求 [N,W,S,E,B]，多播、广播模式下存在多bit 1
+    output reg [6:0] route_req            // 5-bit 路由请求 [N,W,S,E,B]，多播、广播模式下存在多bit 1
 );
 
 // =============================================================================
@@ -57,12 +53,7 @@ wire tgt_x_ls_loc_x_m1 = tgt_x < (LOCAL_X-1);
 wire tgt_y_gt_loc_y = tgt_y > LOCAL_Y;
 wire tgt_y_gt_loc_y_p1 = tgt_y > (LOCAL_Y+1);
 wire tgt_y_ls_loc_y = tgt_y < LOCAL_Y;
-wire src_y_eq_loc_y = src_y == LOCAL_Y;
 
-wire pg_reach = pkt_type == 2'b00   ?   tgt_y_eq_loc_y & tgt_x_eq_loc_x :
-                pkt_type == 2'b01   ?   tgt_x_eq_loc_x  :
-                pkt_type == 2'b10   ?   tgt_y_eq_loc_y  :
-                pkt_type == 2'b11   ?   1;
 
 wire pg_loc_reach   =   pkt_type == 2'b00   ?   tgt_y_eq_loc_y & tgt_x_eq_loc_x :
                         pkt_type == 2'b01   ?   tgt_x_eq_loc_x  :
@@ -95,12 +86,12 @@ wire pg_loc_reach   =   pkt_type == 2'b00   ?   tgt_y_eq_loc_y & tgt_x_eq_loc_x 
 //                         pkt_type == 2'b10   ?   (tgt_y == LOC_Y + 1)    :
 //                         pkt_type == 2'b11   ?   1   :   0;
 
-wire    pg_is_Q = pg_pos[`DIR_Q];
-wire    pg_is_W = pg_pos[`DIR_W];
-wire    pg_is_E = pg_pos[`DIR_E];
-wire    pg_is_R = pg_pos[`DIR_R];
-wire    pg_is_N = pg_pos[`DIR_N];
-wire    pg_is_S = pg_pos[`DIR_S];
+// wire    pg_is_Q = pg_pos[`DIR_Q];
+// wire    pg_is_W = pg_pos[`DIR_W];
+// wire    pg_is_E = pg_pos[`DIR_E];
+// wire    pg_is_R = pg_pos[`DIR_R];
+// wire    pg_is_N = pg_pos[`DIR_N];
+// wire    pg_is_S = pg_pos[`DIR_S];
 
 always_comb begin
     // 默认无请求，输出零数据包

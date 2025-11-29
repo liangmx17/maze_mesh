@@ -7,11 +7,11 @@ module IBUF #(
     input   rst_n,
     input   ibuf_vld,
     output  reg     ibuf_rdy,
-    input   [4:0]   route_req,
+    input   [6:0]   route_req,
     input   [PYLD_W-1:0] payload_i,
-    output  reg [4:0]   arb_req,
-    input   [4:0]   arb_gnt,
-    input   [4:0]   obuf_rdy,
+    output  reg [6:0]   arb_req,
+    input   [6:0]   arb_gnt,
+    input   [6:0]   obuf_rdy,
     output  reg [PYLD_W-1:0] payload_o
 );
 
@@ -35,6 +35,10 @@ always@(posedge clk or negedge rst_n) begin
                             clr[`DIR_W] ?  0 : arb_req[`DIR_W];
         arb_req[`DIR_B] <=   set ? route_req[`DIR_B] : 
                             clr[`DIR_B] ?  0 : arb_req[`DIR_B];
+        arb_req[`DIR_Q] <=   set ? route_req[`DIR_Q] : 
+                            clr[`DIR_Q] ?  0 : arb_req[`DIR_Q];
+        arb_req[`DIR_R] <=   set ? route_req[`DIR_R] : 
+                            clr[`DIR_R] ?  0 : arb_req[`DIR_R];
     end
 end
 
