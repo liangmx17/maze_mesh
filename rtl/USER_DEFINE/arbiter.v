@@ -14,7 +14,7 @@ module arbiter #(
 ) (
     // 仲裁器输入接口
     input  logic [WIDTH-1:0] req,          // 请求信号，1表示有请求
-    input  logic [WIDTH-1:0] qos,          // QoS优先级信号，1表示高优先级
+    // input  logic [WIDTH-1:0] qos,          // QoS优先级信号，1表示高优先级
 
     // 仲裁器输出接口
     output logic [WIDTH-1:0] gnt           // 授权信号，1表示获得授权
@@ -31,6 +31,7 @@ module arbiter #(
 // 5. 使用位操作实现高效的优先级编码
 // =============================================================================
 
-assign gnt = (|qos) ? (qos & (~(qos-1))) : (req & (~(req-1)));
+// assign gnt = (|qos) ? (qos & (~(qos-1))) : (req & (~(req-1)));
+assign gnt = (req & (~(req-1)));
 
 endmodule

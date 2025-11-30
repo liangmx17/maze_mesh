@@ -52,6 +52,7 @@ module NODE #(
     wire [6:0]  arb_gnt[6:0];   // arb_gnt[from_input][to_output]
     wire [`PKT_W-1:0]  pld_buf[6:0];
     wire [6:0]  obuf_rdy;
+    wire [`PKT_W-1:0] pkt_N, pkt_W, pkt_S, pkt_E, ,pkt_Q, pkt_R, pkt_B;
 
 
 pre_router#(
@@ -65,82 +66,6 @@ pre_router#(
     .pg_en              ( pg_en              ),
     .route_req          ( route_req_A          )
 );
-
-pre_router#(
-    .LOC_X              ( HP ),
-    .LOC_Y              ( VP ),
-    .router_id          ( `DIR_N )
-)u_router_N(
-    .tgt_x              ( pkt_con.ni_tgt[2:0]              ),
-    .tgt_y              ( pkt_con.ni_tgt[5:3]              ),
-    .pkt_type           ( pkt_con.ni_type           ),
-    .pg_en              ( pg_en              ),
-    .route_req          ( route_req_N          )
-);
-
-
-pre_router#(
-    .LOC_X              ( HP ),
-    .LOC_Y              ( VP ),
-    .router_id            ( `DIR_S )
-)u_router_S(
-    .tgt_x              ( pkt_con.si_tgt[2:0]              ),
-    .tgt_y              ( pkt_con.si_tgt[5:3]              ),
-    .pkt_type           ( pkt_con.si_type           ),
-    .pg_en              ( pg_en              ),
-    .route_req          ( route_req_S          )
-);
-
-
-pre_router#(
-    .LOC_X              ( HP ),
-    .LOC_Y              ( VP ),
-    .router_id            ( `DIR_E )
-)u_router_E(
-    .tgt_x              ( pkt_con.ei_tgt[2:0]              ),
-    .tgt_y              ( pkt_con.ei_tgt[5:3]              ),
-    .pkt_type           ( pkt_con.ei_type           ),
-    .pg_en              ( pg_en              ),
-    .route_req          ( route_req_E          )
-);
-
-
-pre_router#(
-    .LOC_X              ( HP ),
-    .LOC_Y              ( VP ),
-    .router_id            ( `DIR_W )
-)u_router_W(
-    .tgt_x              ( pkt_con.wi_tgt[2:0]              ),
-    .tgt_y              ( pkt_con.wi_tgt[5:3]              ),
-    .pkt_type           ( pkt_con.wi_type           ),
-    .pg_en              ( pg_en              ),
-    .route_req          ( route_req_W          )
-);
-
-pre_router#(
-    .LOC_X              ( HP ),
-    .LOC_Y              ( VP ),
-    .router_id            ( `DIR_W )
-)u_router_Q(
-    .tgt_x              ( pkt_con.qi_tgt[2:0]              ),
-    .tgt_y              ( pkt_con.qi_tgt[5:3]              ),
-    .pkt_type           ( pkt_con.qi_type           ),
-    .pg_en              ( pg_en              ),
-    .route_req          ( route_req_Q          )
-);
-
-pre_router#(
-    .LOC_X              ( HP ),
-    .LOC_Y              ( VP ),
-    .router_id            ( `DIR_W )
-)u_router_R(
-    .tgt_x              ( pkt_con.ri_tgt[2:0]              ),
-    .tgt_y              ( pkt_con.ri_tgt[5:3]              ),
-    .pkt_type           ( pkt_con.ri_type           ),
-    .pg_en              ( pg_en              ),
-    .route_req          ( route_req_A          )
-);
-
 
 IBUF#(
     .PYLD_W    ( `PKT_W )
@@ -157,214 +82,194 @@ IBUF#(
     .payload_o  ( pld_buf[`DIR_A]  )
 );
 
-IBUF#(
-    .PYLD_W    ( `PKT_W )
-)u_IBUF_N(
-    .clk       ( clk       ),
-    .rst_n     ( rst_n     ),
-    .ibuf_vld  ( pkt_con.ni_vld  ),
-    .ibuf_rdy  ( pkt_con.ni_rdy  ),
-    .route_req ( route_req_N ),
-    .payload_i ( {pkt_con.ni_qos, pkt_con.ni_type, pkt_con.ni_src, pkt_con.ni_tgt, pkt_con.ni_data} ),
-    .arb_req   ( arb_req[`DIR_N]   ),
-    .arb_gnt   ( arb_gnt[`DIR_N]   ),
-    .obuf_rdy  ( obuf_rdy),
-    .payload_o  ( pld_buf[`DIR_N]  )
-);
+`PRE_ROUTER(Q, `DIR_Q, q);
+`PRE_ROUTER(W, `DIR_W, w);
+`PRE_ROUTER(E, `DIR_E, e);
+`PRE_ROUTER(R, `DIR_R, r);
+`PRE_ROUTER(N, `DIR_N, n);
+`PRE_ROUTER(S, `DIR_S, s);
 
-
-IBUF#(
-    .PYLD_W    ( `PKT_W )
-)u_IBUF_W(
-    .clk       ( clk       ),
-    .rst_n     ( rst_n     ),
-    .ibuf_vld  ( pkt_con.wi_vld  ),
-    .ibuf_rdy  ( pkt_con.wi_rdy  ),
-    .route_req ( route_req_W ),
-    .payload_i ( {pkt_con.wi_qos, pkt_con.wi_type, pkt_con.wi_src, pkt_con.wi_tgt, pkt_con.wi_data} ),
-    .arb_req   ( arb_req[`DIR_W]   ),
-    .arb_gnt   ( arb_gnt[`DIR_W]   ),
-    .obuf_rdy  ( obuf_rdy),
-    .payload_o  ( pld_buf[`DIR_W]  )
-);
-
-IBUF#(
-    .PYLD_W    ( `PKT_W )
-)u_IBUF_S(
-    .clk       ( clk       ),
-    .rst_n     ( rst_n     ),
-    .ibuf_vld  ( pkt_con.si_vld  ),
-    .ibuf_rdy  ( pkt_con.si_rdy  ),
-    .route_req ( route_req_S ),
-    .payload_i ( {pkt_con.si_qos, pkt_con.si_type, pkt_con.si_src, pkt_con.si_tgt, pkt_con.si_data} ),
-    .arb_req   ( arb_req[`DIR_S]   ),
-    .arb_gnt   ( arb_gnt[`DIR_S]   ),
-    .obuf_rdy  ( obuf_rdy),
-    .payload_o  ( pld_buf[`DIR_S]  )
-);
+`IBUF(Q, `DIR_Q, q);
+`IBUF(W, `DIR_W, w);
+`IBUF(E, `DIR_E, e);
+`IBUF(R, `DIR_R, r);
+`IBUF(N, `DIR_N, n);
+`IBUF(S, `DIR_S, s);
 
 
 
-IBUF#(
-    .PYLD_W    ( `PKT_W )
-)u_IBUF_E(
-    .clk       ( clk       ),
-    .rst_n     ( rst_n     ),
-    .ibuf_vld  ( pkt_con.ei_vld  ),
-    .ibuf_rdy  ( pkt_con.ei_rdy  ),
-    .route_req ( route_req_E ),
-    .payload_i ( {pkt_con.ei_qos, pkt_con.ei_type, pkt_con.ei_src, pkt_con.ei_tgt, pkt_con.ei_data} ),
-    .arb_req   ( arb_req[`DIR_E]   ),
-    .arb_gnt   ( arb_gnt[`DIR_E]   ),
-    .obuf_rdy  ( obuf_rdy),
-    .payload_o  ( pld_buf[`DIR_E]  )
-);
 
-IBUF#(
-    .PYLD_W    ( `PKT_W )
-)u_IBUF_Q(
-    .clk       ( clk       ),
-    .rst_n     ( rst_n     ),
-    .ibuf_vld  ( pkt_con.qi_vld  ),
-    .ibuf_rdy  ( pkt_con.qi_rdy  ),
-    .route_req ( route_req_Q ),
-    .payload_i ( {pkt_con.qi_qos, pkt_con.qi_type, pkt_con.qi_src, pkt_con.qi_tgt, pkt_con.qi_data} ),
-    .arb_req   ( arb_req[`DIR_Q]   ),
-    .arb_gnt   ( arb_gnt[`DIR_Q]   ),
-    .obuf_rdy  ( obuf_rdy),
-    .payload_o  ( pld_buf[`DIR_Q]  )
-);
+// IBUF#(
+//     .PYLD_W    ( `PKT_W )
+// )u_IBUF_N(
+//     .clk       ( clk       ),
+//     .rst_n     ( rst_n     ),
+//     .ibuf_vld  ( pkt_con.ni_vld  ),
+//     .ibuf_rdy  ( pkt_con.ni_rdy  ),
+//     .route_req ( route_req_N ),
+//     .payload_i ( {pkt_con.ni_qos, pkt_con.ni_type, pkt_con.ni_src, pkt_con.ni_tgt, pkt_con.ni_data} ),
+//     .arb_req   ( arb_req[`DIR_N]   ),
+//     .arb_gnt   ( arb_gnt[`DIR_N]   ),
+//     .obuf_rdy  ( obuf_rdy),
+//     .payload_o  ( pld_buf[`DIR_N]  )
+// );
 
 
-IBUF#(
-    .PYLD_W    ( `PKT_W )
-)u_IBUF_R(
-    .clk       ( clk       ),
-    .rst_n     ( rst_n     ),
-    .ibuf_vld  ( pkt_con.ri_vld  ),
-    .ibuf_rdy  ( pkt_con.ri_rdy  ),
-    .route_req ( route_req_R ),
-    .payload_i ( {pkt_con.ri_qos, pkt_con.ri_type, pkt_con.ri_src, pkt_con.ri_tgt, pkt_con.ri_data} ),
-    .arb_req   ( arb_req[`DIR_R]   ),
-    .arb_gnt   ( arb_gnt[`DIR_R]   ),
-    .obuf_rdy  ( obuf_rdy),
-    .payload_o  ( pld_buf[`DIR_R]  )
-);
+// IBUF#(
+//     .PYLD_W    ( `PKT_W )
+// )u_IBUF_W(
+//     .clk       ( clk       ),
+//     .rst_n     ( rst_n     ),
+//     .ibuf_vld  ( pkt_con.wi_vld  ),
+//     .ibuf_rdy  ( pkt_con.wi_rdy  ),
+//     .route_req ( route_req_W ),
+//     .payload_i ( {pkt_con.wi_qos, pkt_con.wi_type, pkt_con.wi_src, pkt_con.wi_tgt, pkt_con.wi_data} ),
+//     .arb_req   ( arb_req[`DIR_W]   ),
+//     .arb_gnt   ( arb_gnt[`DIR_W]   ),
+//     .obuf_rdy  ( obuf_rdy),
+//     .payload_o  ( pld_buf[`DIR_W]  )
+// );
+
+// IBUF#(
+//     .PYLD_W    ( `PKT_W )
+// )u_IBUF_S(
+//     .clk       ( clk       ),
+//     .rst_n     ( rst_n     ),
+//     .ibuf_vld  ( pkt_con.si_vld  ),
+//     .ibuf_rdy  ( pkt_con.si_rdy  ),
+//     .route_req ( route_req_S ),
+//     .payload_i ( {pkt_con.si_qos, pkt_con.si_type, pkt_con.si_src, pkt_con.si_tgt, pkt_con.si_data} ),
+//     .arb_req   ( arb_req[`DIR_S]   ),
+//     .arb_gnt   ( arb_gnt[`DIR_S]   ),
+//     .obuf_rdy  ( obuf_rdy),
+//     .payload_o  ( pld_buf[`DIR_S]  )
+// );
+
+
+
+// IBUF#(
+//     .PYLD_W    ( `PKT_W )
+// )u_IBUF_E(
+//     .clk       ( clk       ),
+//     .rst_n     ( rst_n     ),
+//     .ibuf_vld  ( pkt_con.ei_vld  ),
+//     .ibuf_rdy  ( pkt_con.ei_rdy  ),
+//     .route_req ( route_req_E ),
+//     .payload_i ( {pkt_con.ei_qos, pkt_con.ei_type, pkt_con.ei_src, pkt_con.ei_tgt, pkt_con.ei_data} ),
+//     .arb_req   ( arb_req[`DIR_E]   ),
+//     .arb_gnt   ( arb_gnt[`DIR_E]   ),
+//     .obuf_rdy  ( obuf_rdy),
+//     .payload_o  ( pld_buf[`DIR_E]  )
+// );
+
+// IBUF#(
+//     .PYLD_W    ( `PKT_W )
+// )u_IBUF_Q(
+//     .clk       ( clk       ),
+//     .rst_n     ( rst_n     ),
+//     .ibuf_vld  ( pkt_con.qi_vld  ),
+//     .ibuf_rdy  ( pkt_con.qi_rdy  ),
+//     .route_req ( route_req_Q ),
+//     .payload_i ( {pkt_con.qi_qos, pkt_con.qi_type, pkt_con.qi_src, pkt_con.qi_tgt, pkt_con.qi_data} ),
+//     .arb_req   ( arb_req[`DIR_Q]   ),
+//     .arb_gnt   ( arb_gnt[`DIR_Q]   ),
+//     .obuf_rdy  ( obuf_rdy),
+//     .payload_o  ( pld_buf[`DIR_Q]  )
+// );
+
+
+// IBUF#(
+//     .PYLD_W    ( `PKT_W )
+// )u_IBUF_R(
+//     .clk       ( clk       ),
+//     .rst_n     ( rst_n     ),
+//     .ibuf_vld  ( pkt_con.ri_vld  ),
+//     .ibuf_rdy  ( pkt_con.ri_rdy  ),
+//     .route_req ( route_req_R ),
+//     .payload_i ( {pkt_con.ri_qos, pkt_con.ri_type, pkt_con.ri_src, pkt_con.ri_tgt, pkt_con.ri_data} ),
+//     .arb_req   ( arb_req[`DIR_R]   ),
+//     .arb_gnt   ( arb_gnt[`DIR_R]   ),
+//     .obuf_rdy  ( obuf_rdy),
+//     .payload_o  ( pld_buf[`DIR_R]  )
+// );
 
     // 仲裁器请求信号映射
-    logic [3:0] arb_req_N, arb_qos_N, arb_gnt_N;  // 北仲裁器：4个输入(A,W,S,E)，排除北输入
-    logic [3:0] arb_req_W, arb_qos_W, arb_gnt_W;  // 西仲裁器：4个输入(A,N,S,E)，排除西输入
-    logic [3:0] arb_req_S, arb_qos_S, arb_gnt_S;  // 南仲裁器：4个输入(A,N,W,E)，排除南输入
-    logic [3:0] arb_req_E, arb_qos_E, arb_gnt_E;  // 东仲裁器：4个输入(A,N,W,S)，排除东输入
-    logic [4:0] arb_req_B, arb_qos_B, arb_gnt_B;  // B仲裁器：支持所有4个输入(A,N,W,S,E)
+    wire    [6:0]   arb_req_B, arb_req_Q, arb_req_W, arb_req_E, arb_req_R, arb_req_N, arb_req_S; 
+    wire    [6:0]   arb_gnt_B, arb_gnt_Q, arb_gnt_W, arb_gnt_E, arb_gnt_R, arb_gnt_N, arb_gnt_S; 
 
-    // 仲裁器输入映射 - 使用常量`QOS_POS确保一致性
-    // 北仲裁器：4个输入，排除来自北方的输入 [A,W,S,E]
-    assign arb_req_N = {arb_req[`DIR_B][0], arb_req[`DIR_W][0], arb_req[`DIR_S][0], arb_req[`DIR_E][0]};
-    assign arb_qos_N = {pld_buf[`DIR_A][`QOS_POS], pld_buf[`DIR_W][`QOS_POS], pld_buf[`DIR_S][`QOS_POS], pld_buf[`DIR_E][`QOS_POS]};
+    // {arb_req[`DIR_A][0], arb_req[`DIR_Q][0], arb_req[`DIR_W][0], arb_req[`DIR_E][0], arb_req[`DIR_R][0], arb_req[`DIR_N][0], arb_req[`DIR_S][0]}；
+    assign arb_req_S = {arb_req[`DIR_A][0], arb_req[`DIR_Q][0], arb_req[`DIR_W][0], arb_req[`DIR_E][0], arb_req[`DIR_R][0], arb_req[`DIR_N][0], arb_req[`DIR_S][0]}；
+    assign arb_req_N = {arb_req[`DIR_A][1], arb_req[`DIR_Q][1], arb_req[`DIR_W][1], arb_req[`DIR_E][1], arb_req[`DIR_R][1], arb_req[`DIR_N][1], arb_req[`DIR_S][1]}；
+    assign arb_req_R = {arb_req[`DIR_A][2], arb_req[`DIR_Q][2], arb_req[`DIR_W][2], arb_req[`DIR_E][2], arb_req[`DIR_R][2], arb_req[`DIR_N][2], arb_req[`DIR_S][2]}；
+    assign arb_req_E = {arb_req[`DIR_A][3], arb_req[`DIR_Q][3], arb_req[`DIR_W][3], arb_req[`DIR_E][3], arb_req[`DIR_R][3], arb_req[`DIR_N][3], arb_req[`DIR_S][3]}；
+    assign arb_req_W = {arb_req[`DIR_A][4], arb_req[`DIR_Q][4], arb_req[`DIR_W][4], arb_req[`DIR_E][4], arb_req[`DIR_R][4], arb_req[`DIR_N][4], arb_req[`DIR_S][4]}；
+    assign arb_req_Q = {arb_req[`DIR_A][5], arb_req[`DIR_Q][5], arb_req[`DIR_W][5], arb_req[`DIR_E][5], arb_req[`DIR_R][5], arb_req[`DIR_N][5], arb_req[`DIR_S][5]}；
+    assign arb_req_B = {arb_req[`DIR_A][6], arb_req[`DIR_Q][6], arb_req[`DIR_W][6], arb_req[`DIR_E][6], arb_req[`DIR_R][6], arb_req[`DIR_N][6], arb_req[`DIR_S][6]}；
+    assign arb_gnt_S = {arb_gnt[`DIR_A][0], arb_gnt[`DIR_Q][0], arb_gnt[`DIR_W][0], arb_gnt[`DIR_E][0], arb_gnt[`DIR_R][0], arb_gnt[`DIR_N][0], arb_gnt[`DIR_S][0]}；
+    assign arb_gnt_N = {arb_gnt[`DIR_A][1], arb_gnt[`DIR_Q][1], arb_gnt[`DIR_W][1], arb_gnt[`DIR_E][1], arb_gnt[`DIR_R][1], arb_gnt[`DIR_N][1], arb_gnt[`DIR_S][1]}；
+    assign arb_gnt_R = {arb_gnt[`DIR_A][2], arb_gnt[`DIR_Q][2], arb_gnt[`DIR_W][2], arb_gnt[`DIR_E][2], arb_gnt[`DIR_R][2], arb_gnt[`DIR_N][2], arb_gnt[`DIR_S][2]}；
+    assign arb_gnt_E = {arb_gnt[`DIR_A][3], arb_gnt[`DIR_Q][3], arb_gnt[`DIR_W][3], arb_gnt[`DIR_E][3], arb_gnt[`DIR_R][3], arb_gnt[`DIR_N][3], arb_gnt[`DIR_S][3]}；
+    assign arb_gnt_W = {arb_gnt[`DIR_A][4], arb_gnt[`DIR_Q][4], arb_gnt[`DIR_W][4], arb_gnt[`DIR_E][4], arb_gnt[`DIR_R][4], arb_gnt[`DIR_N][4], arb_gnt[`DIR_S][4]}；
+    assign arb_gnt_Q = {arb_gnt[`DIR_A][5], arb_gnt[`DIR_Q][5], arb_gnt[`DIR_W][5], arb_gnt[`DIR_E][5], arb_gnt[`DIR_R][5], arb_gnt[`DIR_N][5], arb_gnt[`DIR_S][5]}；
+    assign arb_gnt_B = {arb_gnt[`DIR_A][6], arb_gnt[`DIR_Q][6], arb_gnt[`DIR_W][6], arb_gnt[`DIR_E][6], arb_gnt[`DIR_R][6], arb_gnt[`DIR_N][6], arb_gnt[`DIR_S][6]}；
 
-    // 西仲裁器：4个输入，排除来自西方的输入 [A,N,S,E]
-    assign arb_req_W = {arb_req[`DIR_B][1], arb_req[`DIR_N][1], arb_req[`DIR_S][1], arb_req[`DIR_E][1]};
-    assign arb_qos_W = {pld_buf[`DIR_A][`QOS_POS], pld_buf[`DIR_N][`QOS_POS], pld_buf[`DIR_S][`QOS_POS], pld_buf[`DIR_E][`QOS_POS]};
-
-    // 南仲裁器：4个输入，排除来自南方的输入 [A,N,W,E]
-    assign arb_req_S = {arb_req[`DIR_B][2], arb_req[`DIR_N][2], arb_req[`DIR_W][2], arb_req[`DIR_E][2]};
-    assign arb_qos_S = {pld_buf[`DIR_A][`QOS_POS], pld_buf[`DIR_N][`QOS_POS], pld_buf[`DIR_W][`QOS_POS], pld_buf[`DIR_E][`QOS_POS]};
-
-    // 东仲裁器：4个输入，排除来自东方的输入 [A,N,W,S]
-    assign arb_req_E = {arb_req[`DIR_B][3], arb_req[`DIR_N][3], arb_req[`DIR_W][3], arb_req[`DIR_S][3]};
-    assign arb_qos_E = {pld_buf[`DIR_A][`QOS_POS], pld_buf[`DIR_N][`QOS_POS], pld_buf[`DIR_W][`QOS_POS], pld_buf[`DIR_S][`QOS_POS]};
-
-    // B仲裁器：支持所有5个输入 [A,N,W,S,E]
-    assign arb_req_B = {arb_req[`DIR_B][4], arb_req[`DIR_N][4], arb_req[`DIR_W][4], arb_req[`DIR_S][4], arb_req[`DIR_E][4]};
-    assign arb_qos_B = {pld_buf[`DIR_A][`QOS_POS], pld_buf[`DIR_N][`QOS_POS], pld_buf[`DIR_W][`QOS_POS], pld_buf[`DIR_S][`QOS_POS], pld_buf[`DIR_E][`QOS_POS]};
-
-    assign arb_gnt[`DIR_A] = {arb_gnt_B[4], arb_gnt_E[3], arb_gnt_S[3], arb_gnt_W[3], arb_gnt_N[3]};
-    assign arb_gnt[`DIR_E] = {arb_gnt_B[0], 1'b0, arb_gnt_S[0], arb_gnt_W[0], arb_gnt_N[0]};
-    assign arb_gnt[`DIR_S] = {arb_gnt_B[1], arb_gnt_E[0], 1'b0, arb_gnt_W[1], arb_gnt_N[1]};
-    assign arb_gnt[`DIR_W] = {arb_gnt_B[2], arb_gnt_E[1], arb_gnt_S[1], 1'b0, arb_gnt_N[2]};
-    assign arb_gnt[`DIR_N] = {arb_gnt_B[3], arb_gnt_E[2], arb_gnt_S[2], arb_gnt_W[2], 1'b0};
     // 实例化仲裁器 - 所有仲裁器都使用WIDTH=4
     // 北仲裁器：4输入仲裁器，排除北输入 [A,W,S,E]
-    arbiter #(.WIDTH(4)) u_arbiter_N (
-        .req(arb_req_N),
-        .qos(arb_qos_N),
-        .gnt(arb_gnt_N)
-    );
 
-    // 西仲裁器：4输入仲裁器，排除西输入 [A,N,S,E]
-    arbiter #(.WIDTH(4)) u_arbiter_W (
-        .req(arb_req_W),
-        .qos(arb_qos_W),
-        .gnt(arb_gnt_W)
-    );
+    `ARB(S);
+    `ARB(N);
+    `ARB(R);
+    `ARB(E);
+    `ARB(W);
+    `ARB(Q);
+    `ARB(B);
+    
+    // arbiter #(.WIDTH(7)) u_arbiter_N (
+    //     .req(arb_req_N),
+    //     .qos(arb_qos_N),
+    //     .gnt(arb_gnt_N)
+    // );
 
-    // 南仲裁器：4输入仲裁器，排除南输入 [A,N,W,E]
-    arbiter #(.WIDTH(4)) u_arbiter_S (
-        .req(arb_req_S),
-        .qos(arb_qos_S),
-        .gnt(arb_gnt_S)
-    );
+    // // 西仲裁器：4输入仲裁器，排除西输入 [A,N,S,E]
+    // arbiter #(.WIDTH(7)) u_arbiter_W (
+    //     .req(arb_req_W),
+    //     .qos(arb_qos_W),
+    //     .gnt(arb_gnt_W)
+    // );
 
-    // 东仲裁器：4输入仲裁器，排除东输入 [A,N,W,S]
-    arbiter #(.WIDTH(4)) u_arbiter_E (
-        .req(arb_req_E),
-        .qos(arb_qos_E),
-        .gnt(arb_gnt_E)
-    );
+    // // 南仲裁器：4输入仲裁器，排除南输入 [A,N,W,E]
+    // arbiter #(.WIDTH(7)) u_arbiter_S (
+    //     .req(arb_req_S),
+    //     .qos(arb_qos_S),
+    //     .gnt(arb_gnt_S)
+    // );
 
-    // B仲裁器：5输入仲裁器，支持所有输入 [A,N,W,S,E]
-    arbiter #(.WIDTH(5)) u_arbiter_B (
-        .req(arb_req_B),
-        .qos(arb_qos_B),
-        .gnt(arb_gnt_B)
-    );
+    // // 东仲裁器：4输入仲裁器，排除东输入 [A,N,W,S]
+    // arbiter #(.WIDTH(7)) u_arbiter_E (
+    //     .req(arb_req_E),
+    //     .qos(arb_qos_E),
+    //     .gnt(arb_gnt_E)
+    // );
+
+    // // B仲裁器：5输入仲裁器，支持所有输入 [A,N,W,S,E]
+    // arbiter #(.WIDTH(7)) u_arbiter_B (
+    //     .req(arb_req_B),
+    //     .qos(arb_qos_B),
+    //     .gnt(arb_gnt_B)
+    // );
 
     // =============================================================================
     // 仲裁胜出数据选择
     // =============================================================================
 
-    logic [`PKT_W-1:0] pkt_N, pkt_W, pkt_S, pkt_E, pkt_B;
 
-    // 使用选择器信号进行数据选择
-    // 注意：仲裁器输入映射 [A,W,S,E], [A,N,S,E], [A,N,W,E], [A,N,W,S], [A,N,W,S,E]
-    always_comb begin
-        // 北输出选择 - 映射：[A,W,S,E]
-        if (arb_gnt_N[3]) begin pkt_N = pld_buf[`DIR_A]; end    // bit3: A输入
-        else if (arb_gnt_N[2]) begin pkt_N = pld_buf[`DIR_W]; end  // bit2: W输入
-        else if (arb_gnt_N[1]) begin pkt_N = pld_buf[`DIR_S]; end  // bit1: S输入
-        else if (arb_gnt_N[0]) begin pkt_N = pld_buf[`DIR_E]; end  // bit0: E输入
-        else begin pkt_N = {`PKT_W{1'b0}}; end
-
-        // 西输出选择 - 映射：[A,N,S,E]
-        if (arb_gnt_W[3]) begin pkt_W = pld_buf[`DIR_A]; end    // bit3: A输入
-        else if (arb_gnt_W[2]) begin pkt_W = pld_buf[`DIR_N]; end  // bit2: N输入
-        else if (arb_gnt_W[1]) begin pkt_W = pld_buf[`DIR_S]; end  // bit1: S输入
-        else if (arb_gnt_W[0]) begin pkt_W = pld_buf[`DIR_E]; end  // bit0: E输入
-        else begin pkt_W = {`PKT_W{1'b0}}; end
-
-        // 南输出选择 - 映射：[A,N,W,E]
-        if (arb_gnt_S[3]) begin pkt_S = pld_buf[`DIR_A]; end    // bit3: A输入
-        else if (arb_gnt_S[2]) begin pkt_S = pld_buf[`DIR_N]; end  // bit2: N输入
-        else if (arb_gnt_S[1]) begin pkt_S = pld_buf[`DIR_W]; end  // bit1: W输入
-        else if (arb_gnt_S[0]) begin pkt_S = pld_buf[`DIR_E]; end  // bit0: E输入
-        else begin pkt_S = {`PKT_W{1'b0}}; end
-
-        // 东输出选择 - 映射：[A,N,W,S]
-        if (arb_gnt_E[3]) begin pkt_E = pld_buf[`DIR_A]; end    // bit3: A输入
-        else if (arb_gnt_E[2]) begin pkt_E = pld_buf[`DIR_N]; end  // bit2: N输入
-        else if (arb_gnt_E[1]) begin pkt_E = pld_buf[`DIR_W]; end  // bit1: W输入
-        else if (arb_gnt_E[0]) begin pkt_E = pld_buf[`DIR_S]; end  // bit0: S输入
-        else begin pkt_E = {`PKT_W{1'b0}}; end
-
-        // B输出选择（本地输出）- 映射：[A,N,W,S,E]
-        if (arb_gnt_B[4]) begin pkt_B = pld_buf[`DIR_A]; end    // bit4: A输入
-        else if (arb_gnt_B[3]) begin pkt_B = pld_buf[`DIR_N]; end  // bit3: N输入
-        else if (arb_gnt_B[2]) begin pkt_B = pld_buf[`DIR_W]; end  // bit2: W输入
-        else if (arb_gnt_B[1]) begin pkt_B = pld_buf[`DIR_S]; end  // bit1: S输入
-        else if (arb_gnt_B[0]) begin pkt_B = pld_buf[`DIR_E]; end  // bit0: E输入
-        else begin pkt_B = {`PKT_W{1'b0}}; end
-    end
+        `MUX(B);
+        `MUX(Q);
+        `MUX(W);
+        `MUX(E);
+        `MUX(R);
+        `MUX(N);
+        `MUX(S);
 
     logic n_out_valid, n_out_ready;
     logic [`PKT_W-1:0] n_out_pkt;

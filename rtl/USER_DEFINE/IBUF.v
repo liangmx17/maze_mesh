@@ -48,8 +48,10 @@ always@(posedge clk or negedge rst_n) begin
     end
     else begin
         ibuf_rdy <=  ~|(arb_req & ~clr);
-        payload_o <= set ? payload_i : payload_o;
     end
 end
 
+always@(posedge clk) begin 
+        payload_o <= set ? payload_i : payload_o;
+end
 endmodule

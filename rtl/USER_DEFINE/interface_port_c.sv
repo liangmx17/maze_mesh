@@ -1,125 +1,173 @@
-// C Interface - Network Topology Connections (NWSE 4-Direction Mesh)
+// C Interface - NetWork Topology Connections (NWSE 4-Direction Mesh)
 // 8 separate ports: N input, W input, S input, E input, N output, W output, S output, E output
-// Each node connects to 4 neighbors in North, West, South, East directions
-// Note: This interface expects the following defines to be set before inclusion:
+// Each Node connects to 4 nEighbors in North, West, South, East directions
+// Note: This interface expects the folloWing defines to be set before incluSion:
 // `define QOS_W 1
 // `define ID_W 6
 // `define FLIT_W 8
 
 interface pkt_con_if;
 
-    // INPUT ports - data coming FROM other nodes
-    logic ni_vld;                       // North Input valid signal
-    logic ni_rdy;                       // North Input ready signal
-    logic ni_qos;                       // North Input QoS level
-    logic [1:0] ni_type;                // North Input packet type
-    logic [`ID_W-1:0] ni_src;           // North Input source node ID
-    logic [`ID_W-1:0] ni_tgt;           // North Input target node ID
-    logic [`FLIT_W-1:0] ni_data;        // North Input data payload
+    // INPUT ports - data coming FROM other Nodes
+    logic Ni_vld;                       // North Input valid Signal
+    logic Ni_rdy;                       // North Input ready Signal
+    logic Ni_qos;                       // North Input QoS level
+    logic [1:0] Ni_type;                // North Input packet type
+    logic [`ID_W-1:0] Ni_src;           // North Input Source Node ID
+    logic [`ID_W-1:0] Ni_tgt;           // North Input target Node ID
+    logic [`FLIT_W-1:0] Ni_data;        // North Input data payload
 
-    logic wi_vld;                       // West Input valid signal
-    logic wi_rdy;                       // West Input ready signal
-    logic wi_qos;                       // West Input QoS level
-    logic [1:0] wi_type;                // West Input packet type
-    logic [`ID_W-1:0] wi_src;           // West Input source node ID
-    logic [`ID_W-1:0] wi_tgt;           // West Input target node ID
-    logic [`FLIT_W-1:0] wi_data;        // West Input data payload
+    logic Wi_vld;                       // West Input valid Signal
+    logic Wi_rdy;                       // West Input ready Signal
+    logic Wi_qos;                       // West Input QoS level
+    logic [1:0] Wi_type;                // West Input packet type
+    logic [`ID_W-1:0] Wi_src;           // West Input Source Node ID
+    logic [`ID_W-1:0] Wi_tgt;           // West Input target Node ID
+    logic [`FLIT_W-1:0] Wi_data;        // West Input data payload
 
-    logic si_vld;                       // South Input valid signal
-    logic si_rdy;                       // South Input ready signal
-    logic si_qos;                       // South Input QoS level
-    logic [1:0] si_type;                // South Input packet type
-    logic [`ID_W-1:0] si_src;           // South Input source node ID
-    logic [`ID_W-1:0] si_tgt;           // South Input target node ID
-    logic [`FLIT_W-1:0] si_data;        // South Input data payload
+    logic Si_vld;                       // South Input valid Signal
+    logic Si_rdy;                       // South Input ready Signal
+    logic Si_qos;                       // South Input QoS level
+    logic [1:0] Si_type;                // South Input packet type
+    logic [`ID_W-1:0] Si_src;           // South Input Source Node ID
+    logic [`ID_W-1:0] Si_tgt;           // South Input target Node ID
+    logic [`FLIT_W-1:0] Si_data;        // South Input data payload
 
-    logic ei_vld;                       // East Input valid signal
-    logic ei_rdy;                       // East Input ready signal
-    logic ei_qos;                       // East Input QoS level
-    logic [1:0] ei_type;                // East Input packet type
-    logic [`ID_W-1:0] ei_src;           // East Input source node ID
-    logic [`ID_W-1:0] ei_tgt;           // East Input target node ID
-    logic [`FLIT_W-1:0] ei_data;        // East Input data payload
+    logic Ei_vld;                       // East Input valid Signal
+    logic Ei_rdy;                       // East Input ready Signal
+    logic Ei_qos;                       // East Input QoS level
+    logic [1:0] Ei_type;                // East Input packet type
+    logic [`ID_W-1:0] Ei_src;           // East Input Source Node ID
+    logic [`ID_W-1:0] Ei_tgt;           // East Input target Node ID
+    logic [`FLIT_W-1:0] Ei_data;        // East Input data payload
 
-    // OUTPUT ports - data going TO other nodes
-    logic no_vld;                       // North Output valid signal
-    logic no_rdy;                       // North Output ready signal
-    logic no_qos;                       // North Output QoS level
-    logic [1:0] no_type;                // North Output packet type
-    logic [`ID_W-1:0] no_src;           // North Output source node ID
-    logic [`ID_W-1:0] no_tgt;           // North Output target node ID
-    logic [`FLIT_W-1:0] no_data;        // North Output data payload
+    logic Qi_vld;                       // East Input valid Signal
+    logic Qi_rdy;                       // East Input ready Signal
+    logic Qi_qos;                       // East Input QoS level
+    logic [1:0] Qi_type;                // East Input packet type
+    logic [`ID_W-1:0] Qi_src;           // East Input Source Node ID
+    logic [`ID_W-1:0] Qi_tgt;           // East Input target Node ID
+    logic [`FLIT_W-1:0] Qi_data;        // East Input data payload
 
-    logic wo_vld;                       // West Output valid signal
-    logic wo_rdy;                       // West Output ready signal
-    logic wo_qos;                       // West Output QoS level
-    logic [1:0] wo_type;                // West Output packet type
-    logic [`ID_W-1:0] wo_src;           // West Output source node ID
-    logic [`ID_W-1:0] wo_tgt;           // West Output target node ID
-    logic [`FLIT_W-1:0] wo_data;        // West Output data payload
+    logic Ri_vld;                       // East Input valid Signal
+    logic Ri_rdy;                       // East Input ready Signal
+    logic Ri_qos;                       // East Input QoS level
+    logic [1:0] Ri_type;                // East Input packet type
+    logic [`ID_W-1:0] Ri_src;           // East Input Source Node ID
+    logic [`ID_W-1:0] Ri_tgt;           // East Input target Node ID
+    logic [`FLIT_W-1:0] Ri_data;        // East Input data payload
 
-    logic so_vld;                       // South Output valid signal
-    logic so_rdy;                       // South Output ready signal
-    logic so_qos;                       // South Output QoS level
-    logic [1:0] so_type;                // South Output packet type
-    logic [`ID_W-1:0] so_src;           // South Output source node ID
-    logic [`ID_W-1:0] so_tgt;           // South Output target node ID
-    logic [`FLIT_W-1:0] so_data;        // South Output data payload
+    // OUTPUT ports - data going TO other Nodes
+    logic No_vld;                       // North Output valid Signal
+    logic No_rdy;                       // North Output ready Signal
+    logic No_qos;                       // North Output QoS level
+    logic [1:0] No_type;                // North Output packet type
+    logic [`ID_W-1:0] No_src;           // North Output Source Node ID
+    logic [`ID_W-1:0] No_tgt;           // North Output target Node ID
+    logic [`FLIT_W-1:0] No_data;        // North Output data payload
 
-    logic eo_vld;                       // East Output valid signal
-    logic eo_rdy;                       // East Output ready signal
-    logic eo_qos;                       // East Output QoS level
-    logic [1:0] eo_type;                // East Output packet type
-    logic [`ID_W-1:0] eo_src;           // East Output source node ID
-    logic [`ID_W-1:0] eo_tgt;           // East Output target node ID
-    logic [`FLIT_W-1:0] eo_data;        // East Output data payload
+    logic Wo_vld;                       // West Output valid Signal
+    logic Wo_rdy;                       // West Output ready Signal
+    logic Wo_qos;                       // West Output QoS level
+    logic [1:0] Wo_type;                // West Output packet type
+    logic [`ID_W-1:0] Wo_src;           // West Output Source Node ID
+    logic [`ID_W-1:0] Wo_tgt;           // West Output target Node ID
+    logic [`FLIT_W-1:0] Wo_data;        // West Output data payload
 
-    // Modport for master connections (nodes)
-    // Node drives output ports (no_*, wo_*, so_*, eo_*) and receives from input ports (ni_*, wi_*, si_*, ei_*)
+    logic So_vld;                       // South Output valid Signal
+    logic So_rdy;                       // South Output ready Signal
+    logic So_qos;                       // South Output QoS level
+    logic [1:0] So_type;                // South Output packet type
+    logic [`ID_W-1:0] So_src;           // South Output Source Node ID
+    logic [`ID_W-1:0] So_tgt;           // South Output target Node ID
+    logic [`FLIT_W-1:0] So_data;        // South Output data payload
+
+    logic Eo_vld;                       // East Output valid Signal
+    logic Eo_rdy;                       // East Output ready Signal
+    logic Eo_qos;                       // East Output QoS level
+    logic [1:0] Eo_type;                // East Output packet type
+    logic [`ID_W-1:0] Eo_src;           // East Output Source Node ID
+    logic [`ID_W-1:0] Eo_tgt;           // East Output target Node ID
+    logic [`FLIT_W-1:0] Eo_data;        // East Output data payload
+
+    logic Qo_vld;                       // East Output valid Signal
+    logic Qo_rdy;                       // East Output ready Signal
+    logic Qo_qos;                       // East Output QoS level
+    logic [1:0] Qo_type;                // East Output packet type
+    logic [`ID_W-1:0] Qo_src;           // East Output Source Node ID
+    logic [`ID_W-1:0] Qo_tgt;           // East Output target Node ID
+    logic [`FLIT_W-1:0] Qo_data;        // East Output data payload
+
+    logic Ro_vld;                       // East Output valid Signal
+    logic Ro_rdy;                       // East Output ready Signal
+    logic Ro_qos;                       // East Output QoS level
+    logic [1:0] Ro_type;                // East Output packet type
+    logic [`ID_W-1:0] Ro_src;           // East Output Source Node ID
+    logic [`ID_W-1:0] Ro_tgt;           // East Output target Node ID
+    logic [`FLIT_W-1:0] Ro_data;        // East Output data payload
+
+    // Modport for master connections (Nodes)
+    // Node drives output ports (No_*, Wo_*, So_*, Eo_*) and recEives from input ports (Ni_*, Wi_*, Si_*, Ei_*)
     modport mst (
-        // Input ports (node receives data from these)
-        input  ni_vld, output ni_rdy,
-        input  ni_qos, input  ni_type, input  ni_src, input  ni_tgt, input  ni_data,
-        input  wi_vld, output wi_rdy,
-        input  wi_qos, input  wi_type, input  wi_src, input  wi_tgt, input  wi_data,
-        input  si_vld, output si_rdy,
-        input  si_qos, input  si_type, input  si_src, input  si_tgt, input  si_data,
-        input  ei_vld, output ei_rdy,
-        input  ei_qos, input  ei_type, input  ei_src, input  ei_tgt, input  ei_data,
+        // Input ports (Node recEives data from these)
+        input  Ni_vld, output Ni_rdy,
+        input  Ni_qos, input  Ni_type, input  Ni_src, input  Ni_tgt, input  Ni_data,
+        input  Wi_vld, output Wi_rdy,
+        input  Wi_qos, input  Wi_type, input  Wi_src, input  Wi_tgt, input  Wi_data,
+        input  Si_vld, output Si_rdy,
+        input  Si_qos, input  Si_type, input  Si_src, input  Si_tgt, input  Si_data,
+        input  Ei_vld, output Ei_rdy,
+        input  Ei_qos, input  Ei_type, input  Ei_src, input  Ei_tgt, input  Ei_data,
+        input  Qi_vld, output Qi_rdy,
+        input  Qi_qos, input  Qi_type, input  Qi_src, input  Qi_tgt, input  Qi_data,
+        input  Ri_vld, output Ri_rdy,
+        input  Ri_qos, input  Ri_type, input  Ri_src, input  Ri_tgt, input  Ri_data,
 
-        // Output ports (node drives data to these)
-        output no_vld, input  no_rdy,
-        output no_qos, output no_type, output no_src, output no_tgt, output no_data,
-        output wo_vld, input  wo_rdy,
-        output wo_qos, output wo_type, output wo_src, output wo_tgt, output wo_data,
-        output so_vld, input  so_rdy,
-        output so_qos, output so_type, output so_src, output so_tgt, output so_data,
-        output eo_vld, input  eo_rdy,
-        output eo_qos, output eo_type, output eo_src, output eo_tgt, output eo_data
+        // Output ports (Node drives data to these)
+        output No_vld, input  No_rdy,
+        output No_qos, output No_type, output No_src, output No_tgt, output No_data,
+        output Wo_vld, input  Wo_rdy,
+        output Wo_qos, output Wo_type, output Wo_src, output Wo_tgt, output Wo_data,
+        output So_vld, input  So_rdy,
+        output So_qos, output So_type, output So_src, output So_tgt, output So_data,
+        output Eo_vld, input  Eo_rdy,
+        output Eo_qos, output Eo_type, output Eo_src, output Eo_tgt, output Eo_data,
+        output Qo_vld, input  Qo_rdy,
+        output Qo_qos, output Qo_type, output Qo_src, output Qo_tgt, output Qo_data,
+        output Ro_vld, input  Ro_rdy,
+        output Ro_qos, output Ro_type, output Ro_src, output Ro_tgt, output Ro_data
     );
 
     // Modport for slave connections (topology)
-    // Used by topo module to connect nodes together
+    // Used by topo module to connect Nodes together
     modport slv (
-        // Connect to node outputs (topology receives these)
-        input  no_vld, output no_rdy,
-        input  no_qos, input  no_type, input  no_src, input  no_tgt, input  no_data,
-        input  wo_vld, output wo_rdy,
-        input  wo_qos, input  wo_type, input  wo_src, input  wo_tgt, input  wo_data,
-        input  so_vld, output so_rdy,
-        input  so_qos, input  so_type, input  so_src, input  so_tgt, input  so_data,
-        input  eo_vld, output eo_rdy,
-        input  eo_qos, input  eo_type, input  eo_src, input  eo_tgt, input  eo_data,
+        // Connect to Node outputs (topology recEives these)
+        input  No_vld, output No_rdy,
+        input  No_qos, input  No_type, input  No_src, input  No_tgt, input  No_data,
+        input  Wo_vld, output Wo_rdy,
+        input  Wo_qos, input  Wo_type, input  Wo_src, input  Wo_tgt, input  Wo_data,
+        input  So_vld, output So_rdy,
+        input  So_qos, input  So_type, input  So_src, input  So_tgt, input  So_data,
+        input  Eo_vld, output Eo_rdy,
+        input  Eo_qos, input  Eo_type, input  Eo_src, input  Eo_tgt, input  Eo_data,
+        input  Qo_vld, output Qo_rdy,
+        input  Qo_qos, input  Qo_type, input  Qo_src, input  Qo_tgt, input  Qo_data,
+        input  Ro_vld, output Ro_rdy,
+        input  Ro_qos, input  Ro_type, input  Ro_src, input  Ro_tgt, input  Ro_data,
 
-        // Connect to node inputs (topology drives these)
-        output ni_vld, output ni_rdy,
-        output ni_qos, output ni_type, output ni_src, output ni_tgt, output ni_data,
-        output wi_vld, output wi_rdy,
-        output wi_qos, output wi_type, output wi_src, output wi_tgt, output wi_data,
-        output si_vld, output si_rdy,
-        output si_qos, output si_type, output si_src, output si_tgt, output si_data,
-        output ei_vld, output ei_rdy,
-        output ei_qos, output ei_type, output ei_src, output ei_tgt, output ei_data
+        // Connect to Node inputs (topology drives these)
+        output Ni_vld, input  Ni_rdy,
+        output Ni_qos, output Ni_type, output Ni_src, output Ni_tgt, output Ni_data,
+        output Wi_vld, input  Wi_rdy,
+        output Wi_qos, output Wi_type, output Wi_src, output Wi_tgt, output Wi_data,
+        output Si_vld, input  Si_rdy,
+        output Si_qos, output Si_type, output Si_src, output Si_tgt, output Si_data,
+        output Ei_vld, input  Ei_rdy,
+        output Ei_qos, output Ei_type, output Ei_src, output Ei_tgt, output Ei_data,
+        output Qi_vld, input  Qi_rdy,
+        output Qi_qos, output Qi_type, output Qi_src, output Qi_tgt, output Qi_data,
+        output Ri_vld, input  Ri_rdy,
+        output Ri_qos, output Ri_type, output Ri_src, output Ri_tgt, output Ri_data
     );
 
 endinterface : pkt_con_if
